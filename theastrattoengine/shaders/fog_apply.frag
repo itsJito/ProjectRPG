@@ -21,7 +21,10 @@ void main() {
     vec3 ray = P - uCam;
     float L = max(length(ray), 1e-3);
     vec3 dir = ray / L;
-    if (zc >= 1.0) col = mix(col, uWallCol, bankSkyK(dir));
+    // 0.4.7 (gamefixes: fog did not cover the sky) how much of the sky the bank takes in this direction - the clouds of the
+    // march included, which are laid over everything below
+    float skyK = zc >= 1.0 ? max(bankSkyK(dir), edgeSkyK(dir, uCam)) : 0.0;
+    if (zc >= 1.0) col = mix(col, uWallCol, skyK);
     else {
         // the air past the end of the march: thinner with height, lit by the open sky (aerial perspective)
         float rest = L - uMaxDist;
@@ -47,5 +50,5 @@ void main() {
         sum += texture(uFog, uv) * k; w += k;
     }
     vec4 fog = sum / w;
-    oColor = vec4(col * fog.a + fog.rgb, 1.0);
+    oColor = vec4(mix(col * fog.a + fog.rgb, uWallCol, skyK), 1.0);
 }

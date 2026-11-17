@@ -1,0 +1,129 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava
+> Task :classes
+
+> Task :shadowveil
+[floating] 127,40,793 block 13 (top 38, -)
+[floating] 127,41,793 block 13 (top 38, -)
+[floating] 127,42,793 block 13 (top 38, -)
+[floating] 127,42,794 block 13 (top 38, -)
+[floating] 127,40,795 block 13 (top 38, -)
+[floating] 127,41,795 block 13 (top 38, -)
+[floating] 127,42,795 block 13 (top 38, -)
+[floating] 184,61,774 block 66 (top 42, harlette_chapel)
+[floating] 263,68,962 block -128 (top 38, loxford_church)
+[floating] 392,58,462 block 6 (top 54, -)
+[floating] 448,40,223 block 6 (top 36, -)
+[floating] 486,53,951 block 51 (top 47, tollgate)
+[floating] 486,53,953 block 51 (top 47, tollgate)
+[floating] 489,53,952 block 51 (top 47, tollgate)
+[floating] 513,39,142 block 6 (top 35, -)
+[floating] 520,39,162 block 6 (top 35, -)
+[floating] 547,40,200 block 6 (top 36, -)
+[floating] 599,57,135 block 69 (top 36, severian_palace)
+[floating] 661,50,666 block 13 (top 45, -)
+[floating] 662,48,666 block 13 (top 45, -)
+[floating] 662,49,666 block 13 (top 45, -)
+[floating] 662,50,666 block 13 (top 45, -)
+[floating] 668,39,165 block 6 (top 35, -)
+[floating] 698,40,160 block 6 (top 36, -)
+[floating] 725,40,122 block 6 (top 36, -)
+[floating] 741,37,96 block 6 (top 33, -)
+[floating] 804,37,989 block 11 (top 31, -)
+[floating] 813,44,1037 block 11 (top 35, -)
+[floating] 827,81,435 block 69 (top 60, camelot_chapel)
+[floating] 833,42,933 block 11 (top 36, -)
+[floating] 868,65,464 block 126 (top 61, service_court)
+[floating] 868,65,466 block 126 (top 61, service_court)
+[floating] 869,66,465 block 126 (top 61, service_court)
+[floating] 869,65,466 block 126 (top 61, service_court)
+[floating] 870,65,464 block 126 (top 61, service_court)
+[floating] 870,65,466 block 126 (top 61, service_court)
+[floating] 870,40,915 block 6 (top 36, -)
+[floating] 888,63,735 block 78 (top 55, -)
+[floating] 888,40,893 block 6 (top 36, -)
+[floating] 921,50,84 block 69 (top 33, severian_church)
+[floating] 922,61,99 block 69 (top 33, severian_church)
+[floating] 952,56,935 block 69 (top 36, azharad_palace)
+[floating] 955,49,934 block -37 (top 36, azharad_palace)
+[floating] 955,49,936 block -37 (top 36, azharad_palace)
+[floating] 956,40,897 block 59 (top 36, azharad_temple)
+[floating] 956,40,899 block 59 (top 36, azharad_temple)
+[floating] 957,41,898 block 59 (top 36, azharad_temple)
+[floating] 958,40,897 block 59 (top 36, azharad_temple)
+[floating] 958,40,898 block 59 (top 36, azharad_temple)
+[floating] 958,40,899 block 59 (top 36, azharad_temple)
+[floating] 964,48,898 block 69 (top 36, azharad_temple)
+[floating] 970,44,864 block 11 (top 36, -)
+[floating] 977,40,877 block 6 (top 36, -)
+[floating] 988,40,934 block 59 (top 36, workers_khan)
+[floating] 988,40,936 block 59 (top 36, workers_khan)
+[floating] 989,41,935 block 59 (top 36, workers_khan)
+[floating] 990,40,934 block 59 (top 36, workers_khan)
+[floating] 990,40,935 block 59 (top 36, workers_khan)
+[floating] 990,40,936 block 59 (top 36, workers_khan)
+ShadowVeil grown and surveyed in 23.4s -> C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\shadowveil
+  highest ground Y97
+  5122 trees, 60 ore rocks, 62 roads
+  loxford median Y39 (target 36-42)
+  harlette median Y40 (target 37-44)
+  harlette_manor median Y47 (target 45-48)
+  valgard median Y53 (target 48-58)
+  gorrick median Y55 (target 54-58)
+  azharad median Y36 (target 34-39)
+  camelot median Y61 (target 58-64)
+  severia median Y36 (target 32-40)
+  severia_east median Y38 (target 34-42)
+  ashmaw top Y97 (design 92)
+  gallows_tor top Y92 (design 89)
+  hollow_crags_north top Y84 (design 84)
+  crag_pass_shoulder top Y81 (design 74)
+  lantern_isle top Y51 (design 55)
+  gorge_overlook top Y53 (design 56)
+  bone_orchard_rise top Y54 (design 52)
+  shore belt reached: 100%
+  district loxford_houses: 13 houses
+  district loxford_cottages: 22 houses
+  district harlette_cottages: 7 houses
+  district valgard_homes: 39 houses
+  district azharad_homes: 90 houses
+  district azharad_south_quarter: 8 houses
+  district severia_homes: 170 houses
+  district severia_east_housing: 50 houses
+  mere_shack: no lane to a road within reach
+  hesta_farmhouse: no lane to a road within reach
+  terrace_garden: no lane to a road within reach
+  resin_camp: no lane to a road within reach
+  valgard_homes_32: no lane to a road within reach
+  azharad_homes_58: no lane to a road within reach
+  gorrick_graveyard: no lane to a road within reach
+  azharad_graveyard: no lane to a road within reach
+  550 lanes laid from doors to the roads
+  374 cells of bridge parapet
+  186 street lamps
+  597 structures, 573 doorways, 945 reserved volumes
+  unlit_lantern lantern_cellars: 146 water samples inside its reserved volume (its roof must hold them out)
+  orrins_leanto: no room at home for a craft table (its user works at the nearest)
+  1461 rooms fitted out in 516 buildings: 7162 pieces, 478 staircases
+  605 exterior pieces dressed (99 of them furniture); cells refused: {no ground=9, occupied=48, road=14}
+  476 door steps laid where doorways stood above their ground
+  528 structures ready for their interiors
+  597 structures planned
+PASSED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 50s
+8 actionable tasks: 2 executed, 6 up-to-date

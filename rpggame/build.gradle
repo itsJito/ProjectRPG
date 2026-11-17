@@ -91,7 +91,7 @@ tasks.register('probe', Test) {
     if (project.hasProperty('probeClass')) filter { includeTestsMatching project.property('probeClass') }
     for (String k : ['rpg.probeWho', 'rpg.probeFrames', 'rpg.probeLeg', 'rpg.probeTrace']) if (project.hasProperty(k)) systemProperty k, project.property(k)
     testLogging { showStandardStreams = true }
-    testLimits(it, '9 m', java.time.Duration.ofMinutes(15))
+    testLimits(it, '30 m', java.time.Duration.ofMinutes(35))  // (0.4.8) the whole-world life probe runs ~16 min
     outputs.upToDateWhen { false }
 }
 

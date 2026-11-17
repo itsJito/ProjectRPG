@@ -31,7 +31,9 @@ public final class Brain {
         /** (0.3.2) a meal or an evening at the town's inn; an errand to the market; time at home (chores, rest). */
         INN, ERRAND, HOME,
         /** (0.3.9) a guard working a murder case: the scene, the body, the neighbours (Detective). */
-        CASE }
+        CASE,
+        /** (0.4.7) someone of an encounter, about its business (rpg.encounter.Encounters). */
+        ENCOUNTER }
 
     private final Rpg g;
     private final AiSystem ai;
@@ -103,6 +105,17 @@ public final class Brain {
             n.goalReason = target == null ? "bound to follow " + (owner == null ? "the caster" : owner.name) : "defending the caster against " + target.name;
             n.scores.clear(); n.scores.add("1.00 " + next + " - " + n.goalReason);
             return;
+        }
+        // (0.4.7) someone of an encounter: its stage rules (a fight, a flight, or its own business), until it lets them go
+        if (n.encounter != null && g.encounters != null) {
+            Goal want = g.encounters.think(n);
+            if (want != null) {
+                if (want != n.goal) { n.hasGoalPos = false; n.legs = null; n.tactic = null; n.goalSince = g.time; g.interact.cancel(n, "encounter"); }
+                n.goal = want; n.hunt = null; n.investigation = null;
+                n.goalReason = "encounter: " + n.encounter.behavior + (n.encounter.arg.isEmpty() ? "" : " " + n.encounter.arg);
+                n.scores.clear(); n.scores.add("1.00 " + want + " - " + n.goalReason);
+                return;
+            }
         }
         n.observedFire=rpg.world.FireSafety.observe(g,n,n.combatant()?7:11);
         if(n.observedFire!=null) {
@@ -477,7 +490,7 @@ public final class Brain {
         if(n.profession!=null)return n.profession.title+" duties";
         return switch (n.role) {
             case HUNTER -> "hunt permitted small game, butcher it and sell the actual yield"; case HEALER -> "gather herbs and tend the wounded"; case BEGGAR -> "seek a meal and shelter"; case PRIEST -> "tend the graveyard"; case SCHOLAR -> "compare accounts with the townspeople";
-            case WORKER -> "cut logs, sell them to Store A"; case VILLAGER -> "pick berries, sell them to Store A"; case CARTER -> "carry Store A's surplus to Store B";
+            case WORKER -> "cut logs, sell them to " + g.econ.localShop(n).name; case VILLAGER -> "pick berries, sell them to " + g.econ.localShop(n).name; case CARTER -> "carry " + g.econ.shopA.name + "'s surplus to " + g.econ.shopB.name;
             case MERCHANT -> "mind the shop"; case LAWMAN -> "keep the chancery"; case UNDERTAKER -> "keep the graveyard"; case FENCE -> "wait for a seller"; case FARMER -> "tend the stock: feed in the trough, eggs to the chest";
             default -> "keep to their post";
         };
@@ -549,6 +562,7 @@ public final class Brain {
             case EAT -> eat(n);
             case INN -> { if (!livelihoods.patron(n)) { n.nextThink = 0; n.innUntil = 0; } }
             case CASE -> detective.work(n);
+            case ENCOUNTER -> { if (g.encounters != null) g.encounters.act(n, dt); else ai.desire(n, AiSystem.A_IDLE); }
             case ERRAND -> errand(n);
             case HOME -> home(n);
             case SLEEP -> { if (goTo(n, n.homeX, n.homeY, n.homeZ, false, 1.2f)) ai.desire(n, AiSystem.A_IDLE); }
@@ -944,12 +958,17 @@ public final class Brain {
         // belfry for the rest of the day, his next errand not allowed the ladder down) anyone up above the ground a storey
         // or more, where a ladder may be the only way down, may take it
         if(n.y>rpg.world.Ground.at(n.x,n.z)+LADDER_ALOFT)return true;
+        // (0.4.8, gamefixes: NPCs could not complete their daily tasks - the undertakers stood all morning down in their
+        // bunker, their walk home not allowed the ladder up out of it) and so may anyone a storey or more below it
+        if(n.y<rpg.world.Ground.at(n.x,n.z)-LADDER_ALOFT)return true;
         return n.watch() || n.goal==Goal.FIGHT || n.goal==Goal.WORK && (n.profession==Profession.CARPENTER || n.role==Npc.Role.WORKER) || DevMap.WILDS.equals(DevMap.jurisdiction(n.x,n.z));
     }
     boolean goTo(Npc n,float x,float z,boolean run,float within){
         // (0.4.4) their post on its own floor (upstairs posts were sought on the ground below them)
         return goTo(n,x,Float.isFinite(n.postY) && x==n.postX && z==n.postZ?n.postY:Float.NaN,z,run,within);
     }
+    /** (0.4.7) A walk (or a run) to a point, for systems outside the brain (the encounters): true once within reach. */
+    public boolean travel(Npc n, float x, float y, float z, boolean run, float within) { return goTo(n, x, y, z, run, within); }
     boolean goTo(Npc n, float x, float targetY, float z, boolean run, float within) {
         // (0.3.9, gamefixes: people ride, and fight from the saddle) in the saddle every errand is ridden: the mount is
         // reined toward the place (Riding.npcControls) and the rider is there when the mount is
@@ -969,14 +988,14 @@ public final class Brain {
             ai.desire(n, AiSystem.A_HOLD); n.legs = null; n.hasGoalPos = false; return true;
         }
         final float askedX = x, askedZ = z;
-        if (n.summonOwner == 0 && !n.errand && !ZonePolicy.routineAllowed(n, x, z) && n.goal != Goal.COLLECT && n.goal != Goal.REPORT_CRIME && n.goal != Goal.REPORT_DAMAGE && n.goal != Goal.FLEE && n.goal != Goal.HIDE) { x = n.spawnX; z = n.spawnZ; }
+        if (n.summonOwner == 0 && !n.errand && n.encounter == null && !ZonePolicy.routineAllowed(n, x, z) && n.goal != Goal.COLLECT && n.goal != Goal.REPORT_CRIME && n.goal != Goal.REPORT_DAMAGE && n.goal != Goal.FLEE && n.goal != Goal.HIDE) { x = n.spawnX; z = n.spawnZ; }
         if(!Float.isFinite(targetY) && Math.hypot(n.x-x,n.z-z)<=within){ai.desire(n,AiSystem.A_HOLD);n.legs=null;n.hasGoalPos=false;if(n.lastOutcome!=null && (n.lastOutcome.contains("blocked") || n.lastOutcome.contains("no traversable")))n.lastOutcome="arrived";return true;}
         // An interaction targets the near ground beside a solid object, not its roof.
-        if(!Float.isFinite(targetY) && !g.vox.navigation.validPoint(x,n.y,z,d->!d.locked || d.owner==n.id)){
+        if(!Float.isFinite(targetY) && !g.vox.navigation.validPoint(x,n.y,z,d->!d.locked || d.keeps(n.id))){
             float best=Float.MAX_VALUE,bx=x,bz=z;
             for(int dx=-2;dx<=2;dx++)for(int dz=-2;dz<=2;dz++){
                 float px=(float)Math.floor(x)+dx+.5f,pz=(float)Math.floor(z)+dz+.5f;
-                if(Math.hypot(px-x,pz-z)>within+.15f || !g.vox.navigation.validPoint(px,n.y,pz,d->!d.locked || d.owner==n.id))continue;
+                if(Math.hypot(px-x,pz-z)>within+.15f || !g.vox.navigation.validPoint(px,n.y,pz,d->!d.locked || d.keeps(n.id)))continue;
                 float distance=(float)Math.hypot(px-n.x,pz-n.z);if(distance<best){best=distance;bx=px;bz=pz;}
             }within=Math.max(.15f,within-(float)Math.hypot(bx-x,bz-z));x=bx;z=bz;
         }
@@ -1007,7 +1026,7 @@ public final class Brain {
         if (Math.hypot(n.x - x, n.z - z) <= within && (!Float.isFinite(targetY) || Math.abs(n.y-targetY)<1.2f)) { n.routeBook.success(g.vox,g.time,x,n.y,z);if(n.lastOutcome!=null && n.lastOutcome.contains("blocked"))n.lastOutcome="arrived";ai.desire(n, AiSystem.A_HOLD); n.legs = null; n.hasGoalPos = false; return true; }
         if(n.navRevision!=g.vox.navigationRevision) {
             n.navRevision=g.vox.navigationRevision;
-            if(n.legs!=null && n.hasGoalPos && !g.vox.navigation.validPoint(n.gx,n.goalY,n.gz,d->!d.locked || d.owner==n.id || d.key!=null && n.has(d.key,1))) {n.legs=null;n.hasGoalPos=false;}
+            if(n.legs!=null && n.hasGoalPos && !g.vox.navigation.validPoint(n.gx,n.goalY,n.gz,d->!d.locked || d.keeps(n.id) || d.key!=null && n.has(d.key,1))) {n.legs=null;n.hasGoalPos=false;}
         }
         n.routeBook.seed(n,g);n.routeBook.readBlocked(n,g.state.minutes,g.time);
         if(g.time<n.navPauseUntil && Math.hypot(n.legsX-x,n.legsZ-z)<1 && Math.abs(n.legsY-surface)<1){ai.desire(n,AiSystem.A_HOLD);
@@ -1018,7 +1037,7 @@ public final class Brain {
         // (0.3.3) the pause is over: on the way again (the word of it lingered on someone walking their route for minutes)
         if(n.lastOutcome!=null && n.lastOutcome.startsWith("paused"))n.lastOutcome="on the way";
         if (n.legs == null || Math.hypot(n.legsX-x,n.legsZ-z)>.5 || Math.abs(n.legsY-surface)>.5f) {
-            java.util.function.Predicate<rpg.objects.Door> permission=d->n instanceof rpg.monster.Monster mo && mo.kind.form!=rpg.monster.MonsterKind.Form.HUMANOID ? d.open&&!d.locked : !d.locked||d.owner==n.id||d.key!=null&&n.has(d.key,1);
+            java.util.function.Predicate<rpg.objects.Door> permission=d->n instanceof rpg.monster.Monster mo && mo.kind.form!=rpg.monster.MonsterKind.Form.HUMANOID ? d.open&&!d.locked : !d.locked||d.keeps(n.id)||d.key!=null&&n.has(d.key,1);
             // (0.4.6) stalled twice on this place: the way worked out cell by cell, in short legs, not handed over whole
             boolean fine = n.stuckGoalCount >= 2 && Math.hypot(n.stuckGoalX - x, n.stuckGoalZ - z) < 1.0f;
             n.legs=fine?null:n.routeBook.recall(n,x,surface,z,g.vox,g.time,permission);
@@ -1045,6 +1064,20 @@ public final class Brain {
             float[] p = Waypoints.point(n.legs[n.legAt]);
             if (Math.hypot(n.x - p[0], n.z - p[1]) < 1.8 && (p.length<3 || Math.abs(n.y-p[2])<.65)) { n.legAt++; continue; }
             tx = p[0]; tz = p[1];routeY=p.length>2?p[2]:surface;
+            // (0.4.7, gamefixes: monsters could not climb to high ground) a run of rungs straight up or down a ladder is one
+            // leg: the body's own steering climbs it; a rung in mid-air as a goal is no place to stand
+            int rungs = n.legAt;
+            for (int k = n.legAt + 1; k < n.legs.length; k++) {
+                float[] q = Waypoints.point(n.legs[k]);
+                if (q.length < 3 || Math.abs(q[0] - tx) > 0.1f || Math.abs(q[1] - tz) > 0.1f) break;
+                rungs = k;
+            }
+            // and through to the landing it comes out on: the rungs are climbed on the way there, not stopped on
+            if (rungs > n.legAt) {
+                int to = Math.min(rungs + 1, n.legs.length - 1);
+                float[] q = Waypoints.point(n.legs[to]);
+                n.legAt = to; tx = q[0]; tz = q[1]; routeY = q.length > 2 ? q[2] : surface;
+            }
             break;
         }
         float ty=routeY;
@@ -1062,8 +1095,10 @@ public final class Brain {
         // and over (2,766 times in a six-hour morning). A body that has covered ground along its legs is on its way;
         // one pacing on the spot or pressed into a wall (moving less than a metre and a quarter) is not.
         float left = (float) Math.hypot(n.x - x, n.z - z);
-        if (Math.hypot(n.stallX - x, n.stallZ - z) > 0.6f) { n.stallX = x; n.stallZ = z; n.stallBest = left; n.stallSince = g.time; n.stallPX = n.x; n.stallPZ = n.z; }
-        else if (left < n.stallBest - 0.25f || Math.hypot(n.x - n.stallPX, n.z - n.stallPZ) > 1.25f) { n.stallBest = Math.min(n.stallBest, left); n.stallSince = g.time; n.stallPX = n.x; n.stallPZ = n.z; }
+        if (Math.hypot(n.stallX - x, n.stallZ - z) > 0.6f) { n.stallX = x; n.stallZ = z; n.stallBest = left; n.stallSince = g.time; n.stallPX = n.x; n.stallPZ = n.z; n.stallPY = n.y; }
+        // (0.4.7, gamefixes: monsters could not climb to high ground) a climb up or down a ladder is headway: the rungs
+        // carry the body no closer across the ground, and a climber was called stalled halfway up and turned back down
+        else if (left < n.stallBest - 0.25f || Math.hypot(n.x - n.stallPX, n.z - n.stallPZ) > 1.25f || Math.abs(n.y - n.stallPY) > 0.6f) { n.stallBest = Math.min(n.stallBest, left); n.stallSince = g.time; n.stallPX = n.x; n.stallPZ = n.z; n.stallPY = n.y; }
         // (0.4.6) held up a moment where the next waypoint is a step away (a drop, a tread, a door's sill): the step is
         // taken at once, not after the long wait for a new way
         else if (g.time - n.stallSince > NUDGE_AFTER && g.time > n.nudgeAt && Float.isFinite(ty) && stepToward(n, tx, ty, tz) != null) {
@@ -1075,8 +1110,9 @@ public final class Brain {
         // (0.3.3) at arm's length of a spot that cannot quite be reached (a grave plot, a counter, a spot in furniture) two
         // seconds of no headway is enough to call it there; far off, six before a new way is looked for
         else if (g.time - n.stallSince > (left <= Math.max(within + 2.2f, 3.2f) ? 2.0 : STALL)) {
-            n.stallSince = g.time; n.stallPX = n.x; n.stallPZ = n.z;
-            if (left <= Math.max(within + 2.2f, 3.2f) && (!Float.isFinite(targetY) || Math.abs(n.y - targetY) < 1.2f)) {
+            n.stallSince = g.time; n.stallPX = n.x; n.stallPZ = n.z; n.stallPY = n.y;
+            // (0.4.7) never on a ladder: a climber within reach of the landing is not there until off the rungs
+            if (left <= Math.max(within + 2.2f, 3.2f) && (!Float.isFinite(targetY) || Math.abs(n.y - targetY) < 1.2f) && !n.onLadder) {
                 ai.desire(n, AiSystem.A_HOLD); n.legs = null; n.hasGoalPos = false;
                 n.nearTX = askedX; n.nearTZ = askedZ; n.nearPX = n.x; n.nearPZ = n.z;
                 n.lastOutcome = "as close as I can get"; return true;
@@ -1085,7 +1121,7 @@ public final class Brain {
             // the floor below the route dropped them onto) the next waypoint is in reach - beside, a step up or a drop of a
             // storey down - and free: the body takes the step there (as a person would hop down or scramble up), once in a while
             if (g.time > n.nudgeAt && Float.isFinite(ty) && Math.hypot(tx - n.x, tz - n.z) < NUDGE_REACH && Math.abs(ty - n.y) <= 3.5f
-                    && g.vox.navigation.validPoint(tx, ty, tz, d -> !d.locked || d.owner == n.id) && !crowded(n, tx, ty, tz)) {
+                    && g.vox.navigation.validPoint(tx, ty, tz, d -> !d.locked || d.keeps(n.id)) && !crowded(n, tx, ty, tz)) {
                 n.nudgeAt = g.time + NUDGE_REST; n.nudges++;
                 g.teleport(n, tx, ty, tz);
                 n.lastOutcome = "on the way"; return false;
@@ -1093,8 +1129,10 @@ public final class Brain {
             // (0.4.6) the same near place stalled on again and again (a way the body's own steering will not take): out of
             // the player's sight, the body is set there - as it would have got there by the way it could not find
             if (Math.hypot(n.stuckGoalX - x, n.stuckGoalZ - z) < 1.0f) n.stuckGoalCount++; else { n.stuckGoalX = x; n.stuckGoalZ = z; n.stuckGoalCount = 1; }
-            if (n.stuckGoalCount >= 3 && left < 14 && Float.isFinite(surface) && !seenByPlayer(n) && !crowded(n, x, surface, z)
-                    && g.vox.navigation.validPoint(x, surface, z, d -> !d.locked || d.owner == n.id)) {
+            // (0.4.8, gamefixes: NPCs still could not complete their daily tasks) however far off, a way stalled on five times over
+            // (a ledge it dropped from, a cut it cannot climb out of) is given up for the place itself, unseen
+            if ((n.stuckGoalCount >= 3 && left < 14 || n.stuckGoalCount >= rpg.Tuning.i("ai.stuckFarTries", 5)) && Float.isFinite(surface) && !seenByPlayer(n) && !crowded(n, x, surface, z)
+                    && g.vox.navigation.validPoint(x, surface, z, d -> !d.locked || d.keeps(n.id))) {
                 n.stuckGoalCount = 0; n.nudges++;
                 g.teleport(n, x, surface, z);
                 n.lastOutcome = "on the way"; return false;
@@ -1106,6 +1144,8 @@ public final class Brain {
     }
     /** (0.4.6) How near (m) a stalled body's next waypoint must be for it to take the step there, and how often (s) it may. */
     static final float NUDGE_REACH = rpg.Tuning.f("ai.nudgeReach", 1.9f);
+    /** (0.4.7) How near a door (m) a stalled body counts as in its doorway (a level step through is taken). */
+    static final float DOORWAY_REACH = rpg.Tuning.f("ai.doorwayReach", 1.6f);
     static final double NUDGE_REST = rpg.Tuning.f("ai.nudgeRest", 3f), NUDGE_AFTER = rpg.Tuning.f("ai.nudgeAfter", 0.8f);
     /** (0.4.6) Whether the player could see a person now (near, in front, a clear line). */
     private boolean seenByPlayer(Npc n) {
@@ -1122,7 +1162,7 @@ public final class Brain {
      * tread, a sill), else the floor one cell on toward it when that is a level up or down (out of a hole, onto a kerb).
      */
     private float[] stepToward(Npc n, float tx, float ty, float tz) {
-        java.util.function.Predicate<rpg.objects.Door> may = d -> !d.locked || d.owner == n.id;
+        java.util.function.Predicate<rpg.objects.Door> may = d -> !d.locked || d.keeps(n.id);
         if (Math.hypot(tx - n.x, tz - n.z) < NUDGE_REACH && Math.abs(ty - n.y) >= 0.5f && Math.abs(ty - n.y) <= 3.5f && g.vox.navigation.validPoint(tx, ty, tz, may) && !crowded(n, tx, ty, tz))
             return new float[]{tx, ty, tz};
         float dx = tx - n.x, dz = tz - n.z, l = (float) Math.hypot(dx, dz);
@@ -1130,7 +1170,13 @@ public final class Brain {
         float ax = (float) Math.floor(n.x + dx / l * 1.0f) + 0.5f, az = (float) Math.floor(n.z + dz / l * 1.0f) + 0.5f;
         if ((int) Math.floor(ax) == (int) Math.floor(n.x) && (int) Math.floor(az) == (int) Math.floor(n.z)) return null;
         float ay = g.vox.navigation.standY(ax, n.y, az);
-        if (!Float.isFinite(ay) || Math.abs(ay - n.y) < 0.5f || Math.abs(ay - n.y) > 1.2f || !g.vox.navigation.validPoint(ax, ay, az, may) || crowded(n, ax, ay, az)) return null;
+        // (0.4.7: a scholar stood pinned all morning in a monastery's doorway by its open leaf) in a doorway the step on is
+        // taken on the level too - through the frame, to the floor one cell on - where nothing stands between
+        boolean doorway = false;
+        for (var o : g.objects.near(n.x, n.z, DOORWAY_REACH)) if (o instanceof rpg.objects.Door) { doorway = true; break; }
+        boolean level = Float.isFinite(ay) && Math.abs(ay - n.y) < 0.5f;
+        if (level && !(doorway && g.vox.sight(n.x, n.y + 1.2f, n.z, ax, ay + 1.2f, az))) return null;
+        if (!Float.isFinite(ay) || Math.abs(ay - n.y) > 1.2f || !g.vox.navigation.validPoint(ax, ay, az, may) || crowded(n, ax, ay, az)) return null;
         // the head clear over the step taken (never through a ceiling)
         if (g.vox.solid((int) Math.floor(ax), (int) Math.floor(Math.max(ay, n.y)) + 2, (int) Math.floor(az)) && ay > n.y) return null;
         return new float[]{ax, ay, az};
@@ -1213,7 +1259,7 @@ public final class Brain {
                 double a = k * Math.PI * 2 / (r * 3);
                 float x = (float) Math.floor(n.x + Math.cos(a) * r) + 0.5f, z = (float) Math.floor(n.z + Math.sin(a) * r) + 0.5f;
                 if (g.vox.skyLight((int) Math.floor(x), rpg.world.Ground.cell((int) Math.floor(x), (int) Math.floor(z)) + 1, (int) Math.floor(z)) > 0.35f) continue;
-                if (!standable(x, z) || !g.vox.navigation.validPoint(x, n.y, z, d -> !d.locked || d.owner == n.id)) continue;
+                if (!standable(x, z) || !g.vox.navigation.validPoint(x, n.y, z, d -> !d.locked || d.keeps(n.id))) continue;
                 if (r < best) { best = r; bx = x; bz = z; }
                 break;
             }
@@ -1222,14 +1268,39 @@ public final class Brain {
     }
 
     /** Home: to their bed's room, and the chores or the rest there (a little about the room, not stock still). */
+    /**
+     * (0.4.7, gamefixes: people pull out a chair and sit at home, sit on a bench) a free seat near a point on the same
+     * floor - a chair at a table first, then a bench, a stool, an armchair, a settee - within reach, or null.
+     */
+    rpg.objects.Furniture seatNear(Npc n, float x, float y, float z, float reach, boolean chairsFirst) {
+        rpg.objects.Furniture best = null; float bd = Float.MAX_VALUE;
+        for (var o : g.objects.near(x, z, reach)) {
+            if (!(o instanceof rpg.objects.Furniture f) || !f.seat() || !f.exists() || f.sitter != 0 && f.sitter != n.id || Math.abs(f.floor - y) > 1.2f) continue;
+            float d = (float) Math.hypot(f.x - x, f.z - z);
+            if (d > reach) continue;
+            if (chairsFirst && f.kind == rpg.objects.Furniture.Kind.CHAIR) d -= 3;
+            if (d < bd && g.vox.sight(x, y + 1, z, f.x, f.floor + 0.8f, f.z)) { bd = d; best = f; }
+        }
+        return best;
+    }
+
     private void home(Npc n) {
+        // (0.4.7) a meal or a rest at home is taken sitting: a chair drawn out at the table, else whatever seat is to hand
+        Schedule.Activity sitPlan = Schedule.now(n, g.state.weekday(), g.state.hourOfDay());
+        if ((sitPlan == Schedule.Activity.MEAL || sitPlan == Schedule.Activity.REST) && (n.id + (long) (g.state.minutes / 20)) % 3 != 0) {
+            rpg.objects.Furniture seat = n.seatFurniture != 0 && g.objects.get(n.seatFurniture) instanceof rpg.objects.Furniture held ? held : seatNear(n, n.homeX, n.y, n.homeZ, HOME_SEAT_REACH, true);
+            if (seat != null && seating.sitOn(n, seat)) { n.lastOutcome = sitPlan == Schedule.Activity.MEAL ? "a meal at the table" : "sitting a while at home"; return; }
+        }
         // a little about the room (a step one way and another between chores), but only to a spot of floor it can stand on
         // from its bed's side - never the far side of a counter or a wall that happens to lie within the step
         float ox = (float) Math.sin(g.state.minutes / 11.0 + n.id) * 1.2f, oz = (float) Math.cos(g.state.minutes / 13.0 + n.id) * 0.8f;
         float hx = n.homeX + ox, hz = n.homeZ + oz;
-        if (!g.vox.navigation.validPoint(hx, n.y, hz, d -> !d.locked || d.owner == n.id) || !g.vox.sight(n.homeX, n.y + 1, n.homeZ, hx, n.y + 1, hz)) { hx = n.homeX; hz = n.homeZ; }
-        if (goTo(n, hx, hz, false, 1.4f)) ai.desire(n, AiSystem.A_IDLE);
+        if (!g.vox.navigation.validPoint(hx, n.y, hz, d -> !d.locked || d.keeps(n.id)) || !g.vox.sight(n.homeX, n.y + 1, n.homeZ, hx, n.y + 1, hz)) { hx = n.homeX; hz = n.homeZ; }
+        boolean there = goTo(n, hx, hz, false, 1.4f);
+        if (there) ai.desire(n, AiSystem.A_IDLE);
         Schedule.Activity plan = Schedule.now(n, g.state.weekday(), g.state.hourOfDay());
+        // (0.4.8) a walk home that is held up says so (a stalled route read "chores at home" forty metres from home)
+        if (!there && n.lastOutcome != null && (n.lastOutcome.startsWith("paused") || n.lastOutcome.contains("blocked") || n.lastOutcome.startsWith("looking"))) return;
         n.lastOutcome = plan == Schedule.Activity.MORNING ? "getting up and dressed" : plan == Schedule.Activity.REST ? "resting at home" : plan == Schedule.Activity.MEAL ? "a meal at home" : "chores at home";
         // (0.3.3) one meal at mealtime, not one every frame of it (a grower ate a whole basket of apples at the table)
         if (plan == Schedule.Activity.MEAL && n.hunger > 0.15f || n.hunger > 0.5f) {
@@ -1607,7 +1678,7 @@ public final class Brain {
                 {offset, offset}, {-offset, offset}, {offset, -offset}, {-offset, -offset}, {offset * 1.3f, 0}, {-offset * 1.3f, 0}, {0, offset * 1.3f}, {0, -offset * 1.3f}};
         for (float[] o : spots) {
             float x = other.x + o[0], z = other.z + o[1];
-            if (g.vox.navigation.validPoint(x, other.y, z, d -> !d.locked || d.owner == n.id) && Math.abs(g.vox.navigation.standY(x, other.y, z) - other.y) < 0.8f)
+            if (g.vox.navigation.validPoint(x, other.y, z, d -> !d.locked || d.keeps(n.id)) && Math.abs(g.vox.navigation.standY(x, other.y, z) - other.y) < 0.8f)
                 return goTo(n, x, other.y, z, true, within);
         }
         return goTo(n, other.x, Float.NaN, other.z, true, within + 0.8f);
@@ -2006,8 +2077,9 @@ public final class Brain {
                 else if (goTo(n, n.postX, n.postZ, false, 1)) ai.desire(n, AiSystem.A_IDLE);
             }
             case SCHOLAR -> { Npc neighbor = ai.partnerFor(n); if (neighbor != null && goTo(n, neighbor.x, neighbor.y, neighbor.z, false, 2)) { ai.share(n, neighbor); ai.desire(n, AiSystem.A_IDLE); } }
-            case PRIEST -> { if (goTo(n, n.postX, n.postZ, false, 1)) ai.desire(n, AiSystem.A_IDLE); }
-            default -> { if (goTo(n, n.postX, n.postZ, false, 0.8f)) holdFacingPlayer(n); }
+            case PRIEST -> { if (goTo(n, n.postX, n.postZ, false, 1)) { ai.desire(n, AiSystem.A_IDLE); n.lastOutcome = "at their post"; } }
+            // (0.4.8) there: at their post (the word "on the way" lingered on someone long since arrived)
+            default -> { if (goTo(n, n.postX, n.postZ, false, 0.8f)) { holdFacingPlayer(n); n.lastOutcome = "at their post"; } }
         }
     }
 
@@ -2052,7 +2124,7 @@ public final class Brain {
             float[] c = g.econ.counterSpot(shop);
             if (goTo(n, c[0], c[1], false, 1.2f)) {
                 int sold = g.econ.sellToShop(n, shop, Items.EGG, n.count(Items.EGG));
-                n.lastOutcome = "sold " + sold + " eggs at Store A";
+                n.lastOutcome = "sold " + sold + " eggs at " + shop.name;
                 if (sold == 0) { for (ItemStack s : n.takeItems(Items.EGG, n.count(Items.EGG))) if (!chest.contents.add(s)) n.store(s); }
             }
             return;
@@ -2065,7 +2137,7 @@ public final class Brain {
             if (goTo(n, c[0], c[1], false, 1.2f)) {
                 int k = Math.max(1, Math.min(3, n.count(Items.COINS) / Math.max(1, price)));
                 Result r = g.econ.buy(n, shop, Items.ANIMAL_FEED, k, g.state.newRequestId());
-                n.lastOutcome = "bought " + k + " feed at Store A -> " + r.status() + (r.reason() == null ? "" : " (" + r.reason() + ")");
+                n.lastOutcome = "bought " + k + " feed at " + shop.name + " -> " + r.status() + (r.reason() == null ? "" : " (" + r.reason() + ")");
             }
             return;
         }
@@ -2250,11 +2322,25 @@ public final class Brain {
         n.hunger = 0;
     }
 
+    /** (0.4.7) How far from home a seat is looked for (m), and from a talk a bench (m). */
+    static final float HOME_SEAT_REACH = rpg.Tuning.f("ai.homeSeatReach", 9f), BENCH_REACH = rpg.Tuning.f("ai.benchReach", 7f);
+
     private void socialize(Npc n) {
         Npc p = ai.partnerFor(n);
         if (p == null) { n.lastOutcome = "no one to talk to"; n.social = 0.3f; return; }
         if (n.socialPartner != p.id || n.socialSide == 0) n.socialSide = n.x > p.x ? 1.4f : -1.4f;
         n.socialPartner = p.id;
+        // (0.4.7) a bench close by the two of them: they sit on it to talk
+        rpg.objects.Furniture bench = n.seatFurniture != 0 && g.objects.get(n.seatFurniture) instanceof rpg.objects.Furniture held ? held : null;
+        if (bench == null && n.distTo(p) < BENCH_REACH * 1.5f) {
+            var near = seatNear(n, (n.x + p.x) / 2, n.y, (n.z + p.z) / 2, BENCH_REACH, false);
+            if (near != null && near.kind != rpg.objects.Furniture.Kind.CHAIR) bench = near;
+        }
+        if (bench != null && seating.sitOn(n, bench)) {
+            if (n.chatUntil < g.time - 1) { n.chatUntil = g.time + 6; g.ai.say(n, ai.smallTalk(n, p)); }
+            if (g.time >= n.chatUntil) { int told = ai.share(n, p) + ai.share(p, n); n.social = 0; p.social = 0; n.lastOutcome = "talked with " + p.name + " on a bench" + (told > 0 ? "; exchanged " + told + " pieces of news" : ""); n.chatUntil = -9; }
+            return;
+        }
         if (!goTo(n, p.x + n.socialSide, p.y, p.z, false, 0.9f)) {
             if (g.time < n.navPauseUntil) {
                 n.social = 0.3f;

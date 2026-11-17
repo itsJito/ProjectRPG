@@ -19,6 +19,10 @@ public final class Style {
     /** (0.4.0, gamefixes: allies green on the minimap) a companion, a summoned ally, an animal tamed to the player or ridden. */
     public static final int ALLY = 0xFF46D46A;
     public static final float BODY = 13, SMALL = 11, TITLE = 15;
+    /** (0.4.8) Level tags against the player's combat level: 3 or more below green, within 2 either way yellow, 3 or more above red. */
+    public static final int LEVEL_LOW = 0xFF5ED35E, LEVEL_EVEN = 0xFFF2D34A, LEVEL_HIGH = 0xFFF04A3C;
+    public static int levelColor(int level, int mine) { int d = level - mine; return d <= -3 ? LEVEL_LOW : d >= 3 ? LEVEL_HIGH : LEVEL_EVEN; }
+    public static String levelTag(int level) { return "(Level " + level + ")"; }
 
     /** A panel: parchment darkened to leather, a gold trim inside a dark rim, a stud at each corner. */
     public static void card(Ui2D ui, float x, float y, float w, float h) {

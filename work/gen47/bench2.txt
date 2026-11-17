@@ -1,0 +1,668 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :bench
+Astratto Engine 2.0 - SHADOWVEIL (Java fallbacks disabled)
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 15 2026 21:30:16 (MSVC)
+[Load] native services 0.33s
+[Load] ShadowVeil grown in 19.18s ({regions=840, overlays=539, variants=368, scarp=63, coast=381, erosion=350, peaks=92, lakes=62, isles=1, rivers=541, wadis=14, ground=23, roads=496, causeways=3, architecture=1152, pitsFilled=1396, pits=482, banks=71, clamp=15, cliffs=67, columns=1080, falls=18, raise=10899, trees=270, outcrops=0, ways=640, lava=0, dungeons=97, postsSunk=4, floatingRemoved=59, floating=576}), made and lit in 2.18s
+[Load] ShadowVeil 21.43s
+[Load] renderer and UI 2.17s
+[water] flow field grown in 1110 ms: 39016 columns moving
+[gathering] 757 wild herb patches, flax and berry bushes
+[monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+[addons] loaded [low_health.lua, session_gold.lua]
+bench: 1920 x 1080, 200 frames a stop, 24.0.1+9-30
+[Load] growth about the spawn: 49 chunks made, 39 meshes, 1.04s
+[Load] 243 furniture models made in 0.10s
+[Load] first rendered frame 2.20s
+[Load] the world about the spawn made ready in 12.38s
+[Load] growth about the spawn: 0 chunks made, 39 meshes, 0.00s
+  hitch at frame 0: 35.3 ms = sim 17.7 + draw 17.5 (renderer cpu 7.0) + swap 0.1; gpu 15.0
+    java: engine.frame (native) 6.5 afterFrame 2.8 animals 2.6 ai 2.5
+      3 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      1 x render.Gfx.scene:623 < Bench.frame:209 < Bench.run:163 < Main.session:108 < 
+  hitch at frame 1: 44.4 ms = sim 34.1 + draw 10.2 (renderer cpu 3.6) + swap 0.1; gpu 17.4
+    native: frame 5.8 ms (step 5.7), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: ai 22.3 engine.frame (native) 5.8 afterFrame 2.2 animals 1.0
+      4 x law.Graveyards.ensureSlots:18 < law.Graveyards.vacant:26 < law.Graveyards.nearest:36 < ai.Brain.graveFor:793 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x ai.Household.update:99 < ai.AiSystem.update:787 < Rpg.update:434 < astratto.game.Game.tick:95 < 
+  hitch at frame 2: 33.0 ms = sim 18.9 + draw 14.0 (renderer cpu 6.6) + swap 0.1; gpu 14.8
+    native: frame 7.1 ms (step 7.0), paths 1 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 7.2 ai 5.0 afterFrame 2.7 animals 1.2
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x Rpg.afterFrame:477 < astratto.game.Game.tick:100 < Bench.frame:205 < Bench.run:163 < 
+  hitch at frame 3: 26.7 ms = sim 15.8 + draw 10.8 (renderer cpu 3.8) + swap 0.1; gpu 16.5
+    native: frame 5.8 ms (step 5.8), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 5.9 ai 3.6 afterFrame 2.6 animals 0.9
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x ai.Household.update:99 < ai.AiSystem.update:787 < Rpg.update:434 < astratto.game.Game.tick:95 < 
+  hitch at frame 4: 32.8 ms = sim 21.3 + draw 11.5 (renderer cpu 6.1) + swap 0.1; gpu 15.8
+    native: frame 5.7 ms (step 5.6), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: ai 10.1 engine.frame (native) 5.7 afterFrame 2.3 animals 0.9
+  hitch at frame 5: 25.7 ms = sim 16.0 + draw 9.6 (renderer cpu 3.5) + swap 0.1; gpu 17.0
+    native: frame 6.2 ms (step 6.1), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 6.3 ai 2.9 afterFrame 2.5 animals 1.3
+      1 x ai.Household.update:99 < ai.AiSystem.update:787 < Rpg.update:434 < astratto.game.Game.tick:95 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      1 x ui.Ui2D.text:252 < ui.Ui2D.flatCentered:313 < ui.HudFragments$Minimap.draw:1145 < ui.Hud.paint:445 < 
+  hitch at frame 6: 29.5 ms = sim 15.7 + draw 13.7 (renderer cpu 7.7) + swap 0.1; gpu 15.6
+    native: frame 5.8 ms (step 5.7), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 5.9 ai 3.1 afterFrame 2.0 animals 1.2
+  hitch at frame 7: 26.3 ms = sim 15.8 + draw 10.4 (renderer cpu 3.4) + swap 0.1; gpu 16.8
+    native: frame 6.3 ms (step 6.3), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 6.4 ai 3.0 afterFrame 2.1 animals 1.2
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x world.Voxels.block:70 < ai.RuntimeNavigation.solid:14 < ai.RuntimeNavigation.pass:63 < ai.RuntimeNavigation.surface:67 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+  hitch at frame 8: 28.4 ms = sim 15.1 + draw 13.3 (renderer cpu 7.6) + swap 0.1; gpu 15.7
+    native: frame 5.9 ms (step 5.9), paths 1 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 6.0 ai 3.2 afterFrame 2.3 animals 1.2
+  hitch at frame 9: 28.7 ms = sim 17.0 + draw 11.6 (renderer cpu 4.7) + swap 0.1; gpu 17.9
+    native: frame 6.8 ms (step 6.7), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 6.8 ai 3.3 afterFrame 2.8 animals 1.5
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x ai.Household.update:99 < ai.AiSystem.update:787 < Rpg.update:434 < astratto.game.Game.tick:95 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+  hitch at frame 10: 32.4 ms = sim 15.9 + draw 16.4 (renderer cpu 9.0) + swap 0.1; gpu 15.6
+    native: frame 6.4 ms (step 6.3), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 6.5 afterFrame 3.2 ai 2.0 animals 1.3
+  hitch at frame 11: 28.9 ms = sim 17.3 + draw 11.5 (renderer cpu 3.8) + swap 0.1; gpu 16.9
+    native: frame 6.0 ms (step 5.9), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 6.1 ai 4.7 afterFrame 2.7 dungeons.update 1.0
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      1 x objects.Door.ray:219 < world.Voxels.ray:127 < world.Voxels.clear:139 < world.Voxels.clear:134 < 
+  hitch at frame 12: 31.7 ms = sim 14.8 + draw 16.5 (renderer cpu 9.9) + swap 0.4; gpu 15.6
+    native: frame 6.1 ms (step 6.1), paths 5 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 6.2 ai 2.4 afterFrame 2.1 animals 1.3
+  hitch at frame 13: 37.9 ms = sim 28.2 + draw 9.5 (renderer cpu 3.8) + swap 0.1; gpu 16.8
+    native: frame 13.4 ms (step 13.4), paths 2 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 13.5 ai 3.8 animals 3.2 dungeons.update 2.9
+      4 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x render.Gfx.fences:1242 < render.Gfx.scene:743 < Bench.frame:209 < Bench.run:163 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+  hitch at frame 14: 35.3 ms = sim 20.7 + draw 14.5 (renderer cpu 8.2) + swap 0.1; gpu 15.4
+    native: frame 6.5 ms (step 6.0), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 6.6 foliage.update 4.5 ai 2.8 afterFrame 2.2
+  hitch at frame 15: 25.9 ms = sim 15.3 + draw 10.5 (renderer cpu 4.0) + swap 0.1; gpu 17.0
+    native: frame 6.2 ms (step 6.2), paths 5 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 6.3 ai 2.9 afterFrame 2.2 animals 1.1
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x actor.PlayerController.bodyOnRay:664 < actor.PlayerController.placeCamera:651 < actor.PlayerController.placeCamera:616 < actor.PlayerController.update:84 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+  hitch at frame 16: 33.1 ms = sim 19.0 + draw 14.0 (renderer cpu 7.6) + swap 0.1; gpu 15.8
+    native: frame 9.0 ms (step 8.9), paths 2 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 9.1 ai 3.4 afterFrame 2.7 objects.update 1.0
+  hitch at frame 18: 27.0 ms = sim 14.3 + draw 12.7 (renderer cpu 6.1) + swap 0.1; gpu 15.6
+    native: frame 5.7 ms (step 5.7), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 5.8 ai 3.6 afterFrame 1.9 dungeons.update 0.7
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x dungeon.Dungeons.update:411 < Rpg.update:442 < astratto.game.Game.tick:95 < Bench.frame:205 < 
+  hitch at frame 19: 25.1 ms = sim 14.3 + draw 10.8 (renderer cpu 4.0) + swap 0.1; gpu 16.9
+    native: frame 5.8 ms (step 5.7), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 5.9 ai 2.9 afterFrame 2.1 dungeons.update 0.8
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      1 x render.Rig.pose:1194 < render.Gfx.humanModel:2766 < render.Gfx.human:2759 < render.Gfx.scene:756 < 
+      1 x combat.Falling.afterFrame:28 < Rpg.afterFrame:489 < astratto.game.Game.tick:100 < Bench.frame:205 < 
+  hitch at frame 20: 30.8 ms = sim 16.0 + draw 14.7 (renderer cpu 7.5) + swap 0.1; gpu 15.9
+    native: frame 6.5 ms (step 6.4), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 6.5 ai 3.7 afterFrame 2.2 objects.update 1.0
+  hitch at frame 21: 25.6 ms = sim 15.0 + draw 10.5 (renderer cpu 4.0) + swap 0.1; gpu 16.6
+    native: frame 6.6 ms (step 6.5), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 6.7 ai 2.9 afterFrame 2.2 dungeons.update 0.9
+      3 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      1 x render.Gfx.scene:623 < Bench.frame:209 < Bench.run:163 < Main.session:108 < 
+  hitch at frame 22: 28.3 ms = sim 13.0 + draw 15.3 (renderer cpu 8.4) + swap 0.1; gpu 15.1
+    native: frame 5.6 ms (step 5.6), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 5.7 afterFrame 2.3 ai 1.8 dungeons.update 0.9
+  hitch at frame 23: 25.8 ms = sim 15.5 + draw 10.2 (renderer cpu 3.8) + swap 0.1; gpu 16.3
+    native: frame 5.9 ms (step 5.8), paths 1 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 6.0 ai 3.4 afterFrame 2.5 dungeons.update 0.8
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x render.Gfx.hangBox:3595 < render.Gfx.garments:3298 < render.Gfx.humanModel:2846 < render.Gfx.human:2759 < 
+  hitch at frame 24: 30.5 ms = sim 15.4 + draw 15.1 (renderer cpu 7.3) + swap 0.1; gpu 15.1
+    native: frame 5.9 ms (step 5.8), paths 2 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 5.9 ai 2.9 afterFrame 2.2 animals 1.3
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x Rpg.liveCount:583 < Rpg.actors:566 < dungeon.Dungeons.update:410 < Rpg.update:442 < 
+  hitch at frame 25: 25.7 ms = sim 15.7 + draw 10.0 (renderer cpu 3.6) + swap 0.1; gpu 17.2
+    native: frame 6.1 ms (step 6.0), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 6.2 ai 3.8 afterFrame 2.0 controller.update 0.9
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x render.Gfx.object:3718 < render.Gfx.scene:793 < Bench.frame:209 < Bench.run:163 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+  hitch at frame 26: 32.2 ms = sim 17.2 + draw 14.9 (renderer cpu 7.7) + swap 0.1; gpu 15.2
+    native: frame 7.6 ms (step 7.5), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 7.7 ai 3.9 afterFrame 2.6 objects.update 0.8
+  hitch at frame 27: 29.7 ms = sim 14.5 + draw 13.1 (renderer cpu 6.3) + swap 2.1; gpu 16.2
+    native: frame 5.5 ms (step 5.4), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 5.6 ai 3.1 afterFrame 2.2 dungeons.update 1.1
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      1 x render.Rig.pose:303 < render.Gfx.humanModel:2766 < render.Gfx.human:2759 < render.Gfx.scene:777 < 
+      1 x Rpg.afterFrame:477 < astratto.game.Game.tick:100 < Bench.frame:205 < Bench.run:163 < 
+  hitch at frame 28: 27.6 ms = sim 14.4 + draw 13.1 (renderer cpu 7.3) + swap 0.1; gpu 14.8
+    native: frame 5.5 ms (step 5.4), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 5.6 ai 2.8 afterFrame 2.2 dungeons.update 0.7
+  hitch at frame 29: 33.7 ms = sim 23.3 + draw 10.4 (renderer cpu 3.8) + swap 0.1; gpu 16.1
+    native: frame 5.8 ms (step 5.2), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 5.8 foliage.update 4.8 ai 3.1 afterFrame 2.5
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x ai.Household.update:99 < ai.AiSystem.update:787 < Rpg.update:434 < astratto.game.Game.tick:95 < 
+  hitch at frame 30: 28.7 ms = sim 13.8 + draw 14.8 (renderer cpu 8.9) + swap 0.1; gpu 15.0
+    native: frame 5.1 ms (step 5.0), paths 2 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 5.1 ai 2.6 afterFrame 2.1 animals 0.9
+  hitch at frame 31: 27.0 ms = sim 15.9 + draw 11.0 (renderer cpu 4.1) + swap 0.1; gpu 16.0
+    native: frame 6.0 ms (step 5.9), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 6.1 ai 3.5 afterFrame 2.3 objects.update 0.9
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x ai.AiSystem.carriage:940 < ai.AiSystem.update:840 < Rpg.update:434 < astratto.game.Game.tick:95 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+  hitch at frame 32: 26.7 ms = sim 13.7 + draw 12.9 (renderer cpu 6.7) + swap 0.1; gpu 14.8
+    native: frame 5.8 ms (step 5.8), paths 0 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 5.9 ai 2.5 afterFrame 2.4 dungeons.update 0.7
+  hitch at frame 34: 26.1 ms = sim 12.8 + draw 13.2 (renderer cpu 7.0) + swap 0.1; gpu 15.7
+    native: frame 5.7 ms (step 5.6), paths 1 (0 expanded), sights 0, nav v683 doors 34
+    java: engine.frame (native) 5.7 afterFrame 2.0 ai 2.0 dungeons.update 0.8
+  hitch at frame 36: 31.0 ms = sim 17.0 + draw 13.9 (renderer cpu 7.2) + swap 0.1; gpu 15.8
+    native: frame 6.2 ms (step 6.1), paths 13 (0 expanded), sights 0, nav v689 doors 34
+    java: engine.frame (native) 6.3 ai 3.6 afterFrame 2.4 animals 1.9
+  hitch at frame 37: 27.2 ms = sim 16.8 + draw 10.3 (renderer cpu 3.7) + swap 0.1; gpu 16.7
+    native: frame 6.0 ms (step 6.0), paths 0 (0 expanded), sights 0, nav v689 doors 34
+    java: engine.frame (native) 6.1 ai 5.7 afterFrame 2.2 dungeons.update 0.7
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x objects.Objects.doorsNearMovers:732 < objects.Objects.doorsForNpcs:741 < objects.Objects.update:683 < Rpg.update:448 < 
+  hitch at frame 38: 26.4 ms = sim 13.0 + draw 13.2 (renderer cpu 7.8) + swap 0.1; gpu 15.7
+    native: frame 5.4 ms (step 5.4), paths 0 (0 expanded), sights 0, nav v689 doors 34
+    java: engine.frame (native) 5.5 ai 2.9 afterFrame 2.1 dungeons.update 0.7
+  hitch at frame 40: 26.2 ms = sim 14.3 + draw 11.8 (renderer cpu 6.1) + swap 0.1; gpu 15.6
+    native: frame 5.6 ms (step 5.5), paths 1 (0 expanded), sights 0, nav v689 doors 34
+    java: engine.frame (native) 5.6 ai 3.8 afterFrame 2.2 dungeons.update 0.7
+  hitch at frame 41: 25.0 ms = sim 15.4 + draw 9.5 (renderer cpu 4.1) + swap 0.1; gpu 17.7
+    native: frame 7.5 ms (step 7.4), paths 1 (0 expanded), sights 0, nav v689 doors 34
+    java: engine.frame (native) 7.6 ai 2.8 afterFrame 2.1 dungeons.update 0.8
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x ai.Household.update:99 < ai.AiSystem.update:787 < Rpg.update:434 < astratto.game.Game.tick:95 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+  hitch at frame 42: 27.0 ms = sim 13.9 + draw 13.1 (renderer cpu 6.6) + swap 0.1; gpu 15.5
+    native: frame 5.8 ms (step 5.8), paths 0 (0 expanded), sights 0, nav v689 doors 34
+    java: engine.frame (native) 5.9 ai 2.7 afterFrame 2.3 dungeons.update 0.7
+  hitch at frame 43: 27.1 ms = sim 16.7 + draw 10.2 (renderer cpu 3.9) + swap 0.1; gpu 16.6
+    native: frame 7.2 ms (step 7.1), paths 2 (0 expanded), sights 0, nav v693 doors 34
+    java: engine.frame (native) 7.3 ai 4.2 afterFrame 2.3 dungeons.update 0.7
+      3 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      1 x render.Rig.pose:615 < render.Gfx.humanModel:2766 < render.Gfx.human:2759 < render.Gfx.scene:777 < 
+  hitch at frame 44: 34.3 ms = sim 21.7 + draw 12.4 (renderer cpu 6.2) + swap 0.1; gpu 15.6
+    native: frame 6.4 ms (step 5.8), paths 0 (0 expanded), sights 0, nav v693 doors 34
+    java: engine.frame (native) 6.5 ai 4.3 foliage.update 3.7 afterFrame 2.5
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x Rpg.update:469 < astratto.game.Game.tick:95 < Bench.frame:205 < Bench.run:163 < 
+  hitch at frame 45: 31.9 ms = sim 19.8 + draw 11.6 (renderer cpu 4.3) + swap 0.5; gpu 16.9
+    native: frame 6.8 ms (step 6.7), paths 2 (0 expanded), sights 0, nav v693 doors 34
+    java: engine.frame (native) 7.0 ai 3.9 afterFrame 2.8 animals 2.6
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x Rpg.afterFrame:487 < astratto.game.Game.tick:100 < Bench.frame:205 < Bench.run:163 < 
+  hitch at frame 46: 30.9 ms = sim 16.1 + draw 14.7 (renderer cpu 8.7) + swap 0.1; gpu 15.7
+    native: frame 5.8 ms (step 5.8), paths 0 (0 expanded), sights 0, nav v693 doors 34
+    java: engine.frame (native) 5.9 ai 3.9 afterFrame 2.7 dungeons.update 0.9
+  hitch at frame 47: 26.4 ms = sim 16.1 + draw 10.3 (renderer cpu 3.9) + swap 0.1; gpu 17.0
+    native: frame 5.9 ms (step 5.8), paths 1 (0 expanded), sights 0, nav v693 doors 34
+    java: engine.frame (native) 5.9 ai 3.9 afterFrame 2.4 animals 1.0
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x Rpg.afterFrame:477 < astratto.game.Game.tick:100 < Bench.frame:205 < Bench.run:163 < 
+  hitch at frame 48: 40.2 ms = sim 28.5 + draw 11.6 (renderer cpu 5.9) + swap 0.1; gpu 15.6
+    native: frame 20.0 ms (step 19.9), paths 2 (0 expanded), sights 0, nav v693 doors 34
+    java: engine.frame (native) 20.1 ai 3.0 afterFrame 2.2 dungeons.update 0.8
+  hitch at frame 49: 29.0 ms = sim 20.1 + draw 8.9 (renderer cpu 3.1) + swap 0.1; gpu 17.9
+    native: frame 5.7 ms (step 5.6), paths 1 (0 expanded), sights 0, nav v693 doors 34
+    java: ai 9.6 engine.frame (native) 5.7 afterFrame 2.1 dungeons.update 0.7
+      2 x law.Graveyards.vacant:27 < law.Graveyards.nearest:36 < ai.Brain.graveFor:793 < ai.Brain.think:365 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x ai.Household.update:99 < ai.AiSystem.update:787 < Rpg.update:434 < astratto.game.Game.tick:95 < 
+  hitch at frame 50: 25.6 ms = sim 13.0 + draw 12.5 (renderer cpu 6.7) + swap 0.1; gpu 15.6
+    native: frame 5.7 ms (step 5.6), paths 0 (0 expanded), sights 0, nav v693 doors 34
+    java: engine.frame (native) 5.8 ai 2.6 afterFrame 2.1 dungeons.update 0.7
+  hitch at frame 52: 32.2 ms = sim 19.2 + draw 12.9 (renderer cpu 6.5) + swap 0.1; gpu 15.7
+    native: frame 5.6 ms (step 5.5), paths 0 (0 expanded), sights 0, nav v693 doors 34
+    java: ai 8.8 engine.frame (native) 5.6 afterFrame 2.0 dungeons.update 0.7
+  hitch at frame 53: 31.2 ms = sim 14.6 + draw 16.5 (renderer cpu 10.7) + swap 0.1; gpu 16.8
+    native: frame 6.4 ms (step 6.3), paths 0 (0 expanded), sights 0, nav v693 doors 34
+    java: engine.frame (native) 6.5 ai 2.6 afterFrame 2.1 objects.update 0.8
+  hitch at frame 54: 33.2 ms = sim 19.3 + draw 13.8 (renderer cpu 7.1) + swap 0.1; gpu 15.7
+    native: frame 7.5 ms (step 7.4), paths 6 (0 expanded), sights 0, nav v693 doors 34
+    java: engine.frame (native) 7.6 ai 3.8 afterFrame 2.2 animals 1.5
+  hitch at frame 55: 25.8 ms = sim 14.9 + draw 10.8 (renderer cpu 3.8) + swap 0.1; gpu 17.0
+    native: frame 5.8 ms (step 5.7), paths 0 (0 expanded), sights 0, nav v693 doors 34
+    java: engine.frame (native) 5.9 ai 3.7 afterFrame 2.0 objects.update 0.8
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x render.VoxMesh.build:27 < render.Gfx.partMesh:1515 < render.Gfx.part:1652 < render.Gfx.limb:1558 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+  hitch at frame 56: 25.7 ms = sim 13.3 + draw 12.3 (renderer cpu 6.6) + swap 0.1; gpu 15.6
+    native: frame 5.7 ms (step 5.6), paths 1 (0 expanded), sights 0, nav v693 doors 34
+    java: engine.frame (native) 5.8 ai 2.5 afterFrame 2.1 dungeons.update 0.7
+  hitch at frame 58: 27.6 ms = sim 12.6 + draw 14.9 (renderer cpu 7.1) + swap 0.1; gpu 15.7
+    native: frame 5.4 ms (step 5.4), paths 0 (0 expanded), sights 0, nav v693 doors 34
+    java: engine.frame (native) 5.5 ai 1.9 afterFrame 1.9 objects.update 1.2
+      3 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x world.Voxels.block:70 < render.Gfx.fenceChunk:1259 < render.Gfx.fences:1243 < render.Gfx.scene:743 < 
+  hitch at frame 59: 36.7 ms = sim 25.9 + draw 10.7 (renderer cpu 3.6) + swap 0.1; gpu 17.3
+    native: frame 6.6 ms (step 5.9), paths 0 (0 expanded), sights 0, nav v695 doors 34
+    java: engine.frame (native) 6.7 foliage.update 3.9 ai 3.7 animals 2.6
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x render.Rig.pose:760 < render.Gfx.humanModel:2766 < render.Gfx.human:2759 < render.Gfx.scene:777 < 
+  hitch at frame 60: 37.5 ms = sim 15.4 + draw 22.0 (renderer cpu 6.6) + swap 0.1; gpu 15.7
+    native: frame 5.7 ms (step 5.7), paths 4 (0 expanded), sights 0, nav v695 doors 34
+    java: engine.frame (native) 5.8 afterFrame 2.4 animals 2.3 ai 2.1
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x ui.HudFragments$Minimap.markers:1044 < ui.HudFragments$Minimap.draw:1077 < ui.Hud.paint:445 < ui.Hud.draw:368 < 
+  hitch at frame 62: 35.1 ms = sim 17.2 + draw 17.8 (renderer cpu 9.7) + swap 0.1; gpu 15.5
+    native: frame 6.1 ms (step 6.1), paths 0 (0 expanded), sights 0, nav v695 doors 34
+    java: engine.frame (native) 6.2 ai 3.6 afterFrame 3.3 animals 1.3
+  hitch at frame 63: 27.1 ms = sim 14.7 + draw 12.3 (renderer cpu 4.3) + swap 0.1; gpu 16.8
+    native: frame 5.8 ms (step 5.7), paths 0 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 5.8 ai 2.8 afterFrame 2.5 animals 0.9
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x Rpg.afterFrame:477 < astratto.game.Game.tick:100 < Bench.frame:205 < Bench.run:163 < 
+  hitch at frame 64: 30.0 ms = sim 16.2 + draw 13.8 (renderer cpu 6.9) + swap 0.1; gpu 15.4
+    native: frame 5.4 ms (step 5.3), paths 0 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 5.5 ai 4.6 afterFrame 2.3 animals 1.0
+  hitch at frame 65: 25.9 ms = sim 15.0 + draw 10.9 (renderer cpu 3.8) + swap 0.1; gpu 17.6
+    native: frame 5.7 ms (step 5.6), paths 0 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 5.7 ai 2.7 afterFrame 2.0 animals 1.0
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      1 x render.Gfx.part:1651 < render.Gfx.limb:1558 < render.Gfx.animalModel:1848 < render.Gfx.animal:1666 < 
+      1 x render.Gfx.inFog:243 < render.Gfx.scene:793 < Bench.frame:209 < Bench.run:163 < 
+  hitch at frame 66: 28.6 ms = sim 15.2 + draw 13.3 (renderer cpu 7.1) + swap 0.1; gpu 15.0
+    native: frame 5.6 ms (step 5.5), paths 0 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 5.7 ai 3.3 afterFrame 1.9 dungeons.update 1.0
+  hitch at frame 67: 25.8 ms = sim 15.3 + draw 10.4 (renderer cpu 4.1) + swap 0.1; gpu 16.5
+    native: frame 5.7 ms (step 5.6), paths 0 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 5.8 ai 3.7 afterFrame 1.9 animals 1.0
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x skill.XpTable.levelFor:39 < skill.Skills.level:32 < animal.Animal.maxStamina:190 < combat.CombatSystem.tick:599 < 
+  hitch at frame 68: 28.6 ms = sim 15.5 + draw 13.0 (renderer cpu 7.0) + swap 0.1; gpu 15.1
+    native: frame 6.2 ms (step 6.1), paths 0 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 6.3 ai 3.1 afterFrame 2.4 animals 1.0
+  hitch at frame 70: 29.1 ms = sim 13.7 + draw 15.4 (renderer cpu 8.9) + swap 0.1; gpu 15.4
+    native: frame 6.6 ms (step 6.6), paths 2 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 6.7 afterFrame 2.1 ai 1.9 animals 0.8
+  hitch at frame 72: 26.7 ms = sim 13.4 + draw 13.2 (renderer cpu 6.8) + swap 0.1; gpu 15.4
+    native: frame 5.6 ms (step 5.6), paths 8 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 5.7 afterFrame 2.0 ai 1.8 animals 1.0
+  hitch at frame 74: 36.7 ms = sim 22.7 + draw 13.9 (renderer cpu 6.1) + swap 0.1; gpu 15.3
+    native: frame 6.5 ms (step 5.9), paths 0 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 6.6 foliage.update 4.3 ai 3.5 afterFrame 2.4
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x item.Inventory.count:190 < ai.Jobs.supplier:513 < ai.Jobs.lambda$network$18:218 < ai.Jobs.lambda$step$2:189 < 
+  hitch at frame 76: 25.5 ms = sim 13.3 + draw 12.2 (renderer cpu 6.1) + swap 0.1; gpu 15.0
+    native: frame 5.6 ms (step 5.5), paths 0 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 5.6 ai 2.6 afterFrame 2.3 dungeons.update 0.7
+  hitch at frame 78: 31.9 ms = sim 15.4 + draw 16.4 (renderer cpu 9.6) + swap 0.1; gpu 15.1
+    native: frame 6.0 ms (step 6.0), paths 0 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 6.1 ai 3.7 afterFrame 2.4 dungeons.update 0.7
+  hitch at frame 79: 29.3 ms = sim 16.8 + draw 12.3 (renderer cpu 4.4) + swap 0.1; gpu 17.1
+    native: frame 7.5 ms (step 7.4), paths 0 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 7.6 ai 3.5 afterFrame 2.6 dungeons.update 0.9
+      3 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      1 x objects.Door.ray:219 < world.Voxels.ray:120 < world.Voxels.ray:91 < world.Voxels.ray:88 < 
+  hitch at frame 80: 28.6 ms = sim 13.8 + draw 14.8 (renderer cpu 7.9) + swap 0.1; gpu 15.7
+    native: frame 5.7 ms (step 5.7), paths 1 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 5.9 ai 2.8 afterFrame 2.3 dungeons.update 0.8
+  hitch at frame 81: 26.5 ms = sim 15.9 + draw 10.5 (renderer cpu 4.1) + swap 0.1; gpu 18.1
+    native: frame 6.3 ms (step 6.3), paths 1 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 6.4 ai 3.7 afterFrame 2.9 dungeons.update 0.7
+      1 x render.Gfx.object:3718 < render.Gfx.scene:793 < Bench.frame:209 < Bench.run:163 < 
+      1 x Rpg.afterFrame:477 < astratto.game.Game.tick:100 < Bench.frame:205 < Bench.run:163 < 
+      1 x objects.Objects.doorsNearMovers:732 < objects.Objects.doorsForNpcs:741 < objects.Objects.update:683 < Rpg.update:448 < 
+  hitch at frame 82: 26.9 ms = sim 13.4 + draw 13.5 (renderer cpu 7.2) + swap 0.1; gpu 15.5
+    native: frame 5.6 ms (step 5.6), paths 0 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 5.7 ai 2.5 afterFrame 1.9 dungeons.update 0.8
+  hitch at frame 84: 27.7 ms = sim 12.9 + draw 14.8 (renderer cpu 7.7) + swap 0.1; gpu 15.3
+    native: frame 5.6 ms (step 5.6), paths 0 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 5.7 afterFrame 2.7 ai 1.7 objects.update 0.8
+  hitch at frame 85: 25.1 ms = sim 15.4 + draw 9.6 (renderer cpu 3.7) + swap 0.1; gpu 16.6
+    native: frame 6.1 ms (step 6.0), paths 0 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 6.2 ai 3.2 afterFrame 2.4 dungeons.update 0.8
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x Rpg.afterFrame:477 < astratto.game.Game.tick:100 < Bench.frame:205 < Bench.run:163 < 
+      1 x world.Voxels.solid:71 < animal.Flight.topOf:134 < animal.Flight.skyline:139 < animal.Flight.fly:178 < 
+  hitch at frame 86: 32.0 ms = sim 16.9 + draw 15.1 (renderer cpu 8.2) + swap 0.1; gpu 15.0
+    native: frame 7.4 ms (step 7.4), paths 2 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 7.5 ai 3.9 afterFrame 2.1 objects.update 1.0
+  hitch at frame 88: 28.3 ms = sim 14.9 + draw 13.3 (renderer cpu 7.1) + swap 0.1; gpu 14.8
+    native: frame 6.4 ms (step 6.3), paths 1 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 6.4 ai 3.8 afterFrame 2.0 dungeons.update 0.7
+  hitch at frame 89: 35.7 ms = sim 25.0 + draw 10.6 (renderer cpu 3.8) + swap 0.1; gpu 17.9
+    native: frame 7.3 ms (step 6.7), paths 1 (0 expanded), sights 0, nav v697 doors 34
+    java: engine.frame (native) 7.4 foliage.update 4.5 ai 3.8 afterFrame 2.5
+      2 x world.Voxels.block:70 < world.Foliage.suitable:81 < world.Foliage.update:208 < Rpg.update:444 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x world.Foliage.pushers:322 < render.Gfx.scene:614 < Bench.frame:209 < Bench.run:163 < 
+  hitch at frame 90: 30.0 ms = sim 16.3 + draw 13.6 (renderer cpu 7.4) + swap 0.1; gpu 14.8
+    native: frame 5.5 ms (step 5.4), paths 4 (0 expanded), sights 0, nav v701 doors 34
+    java: engine.frame (native) 5.6 ai 3.6 animals 2.4 afterFrame 2.0
+  hitch at frame 91: 30.4 ms = sim 20.8 + draw 9.5 (renderer cpu 3.2) + swap 0.1; gpu 16.7
+    native: frame 5.4 ms (step 5.4), paths 0 (0 expanded), sights 0, nav v701 doors 34
+    java: ai 10.4 engine.frame (native) 5.5 afterFrame 2.1 dungeons.update 0.7
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      1 x actor.Actor.distTo:318 < render.Gfx.scene:745 < Bench.frame:209 < Bench.run:163 < 
+      1 x dungeon.Dungeons.update:411 < Rpg.update:442 < astratto.game.Game.tick:95 < Bench.frame:205 < 
+  hitch at frame 92: 27.1 ms = sim 14.5 + draw 12.5 (renderer cpu 6.6) + swap 0.1; gpu 15.4
+    native: frame 6.2 ms (step 6.2), paths 0 (0 expanded), sights 0, nav v701 doors 34
+    java: engine.frame (native) 6.3 ai 3.4 afterFrame 2.0 dungeons.update 0.7
+  hitch at frame 93: 31.6 ms = sim 21.9 + draw 9.7 (renderer cpu 3.5) + swap 0.1; gpu 16.7
+    native: frame 12.3 ms (step 12.3), paths 4 (0 expanded), sights 0, nav v701 doors 34
+    java: engine.frame (native) 12.4 ai 3.7 afterFrame 2.1 animals 1.3
+      4 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x Rpg.liveCount:582 < Rpg.actors:566 < render.Gfx.scene:640 < Bench.frame:209 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+  hitch at frame 94: 34.2 ms = sim 19.6 + draw 14.5 (renderer cpu 8.1) + swap 0.1; gpu 15.5
+    native: frame 5.9 ms (step 5.9), paths 0 (0 expanded), sights 0, nav v701 doors 34
+    java: ai 7.8 engine.frame (native) 6.0 afterFrame 2.0 dungeons.update 1.3
+  hitch at frame 97: 26.0 ms = sim 16.3 + draw 9.6 (renderer cpu 3.2) + swap 0.1; gpu 17.9
+    native: frame 7.2 ms (step 7.1), paths 2 (0 expanded), sights 0, nav v701 doors 34
+    java: engine.frame (native) 7.3 ai 3.2 afterFrame 2.0 objects.update 0.9
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x Rpg.afterFrame:477 < astratto.game.Game.tick:100 < Bench.frame:205 < Bench.run:163 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+  hitch at frame 98: 29.7 ms = sim 14.8 + draw 14.7 (renderer cpu 7.4) + swap 0.1; gpu 15.9
+    native: frame 6.2 ms (step 6.1), paths 0 (0 expanded), sights 0, nav v701 doors 34
+    java: engine.frame (native) 6.3 ai 3.1 afterFrame 2.5 dungeons.update 0.8
+  hitch at frame 102: 26.1 ms = sim 12.9 + draw 13.1 (renderer cpu 7.7) + swap 0.1; gpu 16.9
+    native: frame 5.4 ms (step 5.4), paths 1 (0 expanded), sights 0, nav v703 doors 34
+    java: engine.frame (native) 5.5 ai 2.6 afterFrame 1.9 dungeons.update 0.7
+  hitch at frame 104: 34.5 ms = sim 21.8 + draw 12.7 (renderer cpu 6.3) + swap 0.1; gpu 15.5
+    native: frame 6.7 ms (step 5.9), paths 1 (0 expanded), sights 0, nav v707 doors 34
+    java: engine.frame (native) 6.8 foliage.update 4.6 ai 3.1 afterFrame 2.3
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x world.Voxels.block:70 < world.Foliage.suitable:81 < world.Foliage.update:208 < Rpg.update:444 < 
+  hitch at frame 106: 28.3 ms = sim 14.8 + draw 13.4 (renderer cpu 7.0) + swap 0.1; gpu 15.7
+    native: frame 6.3 ms (step 6.2), paths 0 (0 expanded), sights 0, nav v707 doors 34
+    java: engine.frame (native) 6.4 ai 3.2 afterFrame 2.4 dungeons.update 0.8
+  hitch at frame 108: 25.8 ms = sim 13.4 + draw 12.4 (renderer cpu 6.9) + swap 0.1; gpu 15.6
+    native: frame 5.8 ms (step 5.7), paths 11 (0 expanded), sights 0, nav v707 doors 34
+    java: engine.frame (native) 5.9 ai 2.0 afterFrame 1.9 animals 1.4
+  hitch at frame 110: 27.4 ms = sim 13.9 + draw 13.4 (renderer cpu 7.8) + swap 0.1; gpu 15.5
+    native: frame 5.6 ms (step 5.5), paths 0 (0 expanded), sights 0, nav v707 doors 34
+    java: engine.frame (native) 5.7 ai 2.8 afterFrame 1.9 dungeons.update 0.8
+  hitch at frame 112: 26.4 ms = sim 13.7 + draw 12.6 (renderer cpu 6.5) + swap 0.1; gpu 15.6
+    native: frame 5.8 ms (step 5.8), paths 1 (0 expanded), sights 0, nav v707 doors 34
+    java: engine.frame (native) 5.9 ai 3.2 afterFrame 1.9 dungeons.update 0.7
+  hitch at frame 114: 28.7 ms = sim 14.4 + draw 14.3 (renderer cpu 7.0) + swap 0.1; gpu 15.8
+    native: frame 5.9 ms (step 5.8), paths 2 (0 expanded), sights 0, nav v707 doors 34
+    java: engine.frame (native) 6.0 ai 2.9 afterFrame 2.0 animals 0.9
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      1 x Rpg.afterFrame:477 < astratto.game.Game.tick:100 < Bench.frame:205 < Bench.run:163 < 
+      1 x dungeon.Dungeons.update:411 < Rpg.update:442 < astratto.game.Game.tick:95 < Bench.frame:205 < 
+  hitch at frame 116: 25.5 ms = sim 13.9 + draw 11.5 (renderer cpu 6.3) + swap 0.1; gpu 15.3
+    native: frame 6.1 ms (step 6.1), paths 0 (0 expanded), sights 0, nav v707 doors 34
+    java: engine.frame (native) 6.2 ai 2.9 afterFrame 1.9 dungeons.update 0.7
+  hitch at frame 118: 29.6 ms = sim 13.6 + draw 15.9 (renderer cpu 8.3) + swap 0.1; gpu 15.1
+    native: frame 5.2 ms (step 5.2), paths 0 (0 expanded), sights 0, nav v709 doors 34
+    java: engine.frame (native) 5.3 ai 2.9 afterFrame 2.2 objects.update 1.1
+  hitch at frame 119: 34.6 ms = sim 26.1 + draw 8.5 (renderer cpu 3.1) + swap 0.1; gpu 16.9
+    native: frame 6.1 ms (step 5.6), paths 0 (0 expanded), sights 0, nav v709 doors 34
+    java: engine.frame (native) 6.1 ai 5.1 foliage.update 3.7 controller.update 2.3
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x render.Rig.pose:688 < render.Gfx.humanModel:2766 < render.Gfx.human:2759 < render.Gfx.scene:777 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+  hitch at frame 120: 27.9 ms = sim 12.4 + draw 15.5 (renderer cpu 8.4) + swap 0.1; gpu 15.6
+    native: frame 5.5 ms (step 5.4), paths 0 (0 expanded), sights 0, nav v709 doors 34
+    java: engine.frame (native) 5.5 afterFrame 2.0 ai 1.6 animals 1.0
+  hitch at frame 122: 25.5 ms = sim 13.7 + draw 11.8 (renderer cpu 6.0) + swap 0.1; gpu 15.7
+    native: frame 5.2 ms (step 5.1), paths 0 (0 expanded), sights 0, nav v709 doors 34
+    java: engine.frame (native) 5.3 ai 3.0 afterFrame 1.8 animals 1.1
+  hitch at frame 124: 26.9 ms = sim 15.2 + draw 11.6 (renderer cpu 5.9) + swap 0.1; gpu 15.4
+    native: frame 6.9 ms (step 6.8), paths 2 (0 expanded), sights 0, nav v709 doors 34
+    java: engine.frame (native) 6.9 ai 2.5 afterFrame 2.1 animals 1.1
+  hitch at frame 126: 29.3 ms = sim 15.8 + draw 13.4 (renderer cpu 7.7) + swap 0.1; gpu 15.3
+    native: frame 5.5 ms (step 5.4), paths 2 (0 expanded), sights 0, nav v709 doors 34
+    java: engine.frame (native) 5.6 ai 3.7 afterFrame 2.3 animals 1.8
+  hitch at frame 128: 27.7 ms = sim 14.6 + draw 13.0 (renderer cpu 6.7) + swap 0.1; gpu 15.2
+    native: frame 5.5 ms (step 5.5), paths 1 (0 expanded), sights 0, nav v709 doors 34
+    java: engine.frame (native) 5.6 ai 3.0 afterFrame 2.2 animals 1.1
+  hitch at frame 130: 26.0 ms = sim 14.1 + draw 11.8 (renderer cpu 5.8) + swap 0.1; gpu 15.5
+    native: frame 5.5 ms (step 5.5), paths 0 (0 expanded), sights 0, nav v709 doors 34
+    java: engine.frame (native) 5.6 ai 2.3 afterFrame 1.8 animals 0.9
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x render.Gfx.smoke:428 < render.Gfx.scene:630 < Bench.frame:209 < Bench.run:163 < 
+  hitch at frame 131: 26.3 ms = sim 16.5 + draw 9.8 (renderer cpu 3.3) + swap 0.1; gpu 17.1
+    native: frame 8.1 ms (step 8.1), paths 1 (0 expanded), sights 0, nav v709 doors 34
+    java: engine.frame (native) 8.2 ai 3.0 afterFrame 2.1 dungeons.update 0.9
+      3 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      1 x combat.CombatSystem.mastery:821 < render.Rig.strikeS:1527 < render.Rig.pose:469 < render.Gfx.humanModel:2766 < 
+  hitch at frame 132: 31.1 ms = sim 19.1 + draw 12.0 (renderer cpu 6.2) + swap 0.1; gpu 15.3
+    native: frame 5.9 ms (step 5.9), paths 5 (0 expanded), sights 0, nav v709 doors 34
+    java: ai 7.6 engine.frame (native) 6.1 afterFrame 1.9 dungeons.update 1.0
+  hitch at frame 134: 34.8 ms = sim 21.9 + draw 12.8 (renderer cpu 7.5) + swap 0.1; gpu 14.6
+    native: frame 6.6 ms (step 6.0), paths 0 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 6.6 ai 5.3 foliage.update 3.6 afterFrame 2.0
+  hitch at frame 135: 29.5 ms = sim 20.3 + draw 9.1 (renderer cpu 3.4) + swap 0.1; gpu 16.3
+    native: frame 6.0 ms (step 5.9), paths 1 (0 expanded), sights 0, nav v711 doors 34
+    java: ai 9.1 engine.frame (native) 6.0 afterFrame 1.9 animals 0.8
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      1 x render.Gfx.scene:623 < Bench.frame:209 < Bench.run:163 < Main.session:108 < 
+  hitch at frame 136: 26.6 ms = sim 13.4 + draw 13.1 (renderer cpu 6.7) + swap 0.1; gpu 14.5
+    native: frame 5.4 ms (step 5.4), paths 1 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 5.5 ai 2.7 afterFrame 2.2 objects.update 0.7
+  hitch at frame 137: 26.5 ms = sim 15.8 + draw 10.7 (renderer cpu 4.3) + swap 0.1; gpu 16.9
+    native: frame 5.9 ms (step 5.8), paths 0 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 5.9 ai 4.5 afterFrame 2.0 dungeons.update 0.9
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      1 x actor.Actor.carried:269 < ui.Addons.player:177 < ui.Addons.lambda$sandbox$17:133 < ui.Addons$1.invoke:272 < 
+  hitch at frame 138: 25.2 ms = sim 13.1 + draw 12.1 (renderer cpu 6.5) + swap 0.1; gpu 14.6
+    native: frame 5.3 ms (step 5.3), paths 0 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 5.4 ai 3.2 afterFrame 1.9 dungeons.update 0.7
+  hitch at frame 140: 26.0 ms = sim 14.0 + draw 11.9 (renderer cpu 6.5) + swap 0.1; gpu 14.5
+    native: frame 5.6 ms (step 5.4), paths 0 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 5.6 ai 2.9 afterFrame 1.9 objects.update 1.3
+  hitch at frame 142: 28.3 ms = sim 13.7 + draw 14.5 (renderer cpu 7.5) + swap 0.1; gpu 14.6
+    native: frame 5.5 ms (step 5.4), paths 0 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 5.6 ai 3.0 afterFrame 2.1 dungeons.update 0.9
+  hitch at frame 146: 25.4 ms = sim 13.8 + draw 11.5 (renderer cpu 6.0) + swap 0.1; gpu 15.5
+    native: frame 5.5 ms (step 5.4), paths 0 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 5.6 ai 3.0 afterFrame 2.1 dungeons.update 0.7
+  hitch at frame 148: 26.6 ms = sim 15.5 + draw 11.1 (renderer cpu 6.0) + swap 0.1; gpu 15.9
+    native: frame 5.4 ms (step 5.4), paths 0 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 5.5 ai 5.5 afterFrame 2.0 dungeons.update 0.8
+  hitch at frame 149: 30.0 ms = sim 20.5 + draw 9.4 (renderer cpu 3.9) + swap 0.1; gpu 17.3
+    native: frame 5.8 ms (step 5.3), paths 1 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 5.9 foliage.update 3.8 ai 2.8 afterFrame 2.1
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x world.Voxels.block:70 < world.Foliage.suitable:81 < world.Foliage.update:208 < Rpg.update:444 < 
+  hitch at frame 150: 28.6 ms = sim 14.9 + draw 13.7 (renderer cpu 7.7) + swap 0.1; gpu 15.9
+    native: frame 6.0 ms (step 5.9), paths 3 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 6.1 afterFrame 3.2 ai 2.8 dungeons.update 0.8
+  hitch at frame 151: 27.7 ms = sim 16.6 + draw 11.0 (renderer cpu 4.2) + swap 0.1; gpu 17.1
+    native: frame 6.4 ms (step 6.3), paths 3 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 6.4 ai 4.0 afterFrame 3.5 dungeons.update 0.7
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x ai.Household.update:99 < ai.AiSystem.update:787 < Rpg.update:434 < astratto.game.Game.tick:95 < 
+  hitch at frame 152: 31.7 ms = sim 17.2 + draw 14.5 (renderer cpu 7.0) + swap 0.1; gpu 15.9
+    native: frame 5.8 ms (step 5.8), paths 1 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 5.9 afterFrame 4.3 ai 3.7 dungeons.update 0.9
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      1 x render.Rig.pose:1208 < render.Gfx.humanModel:2766 < render.Gfx.human:2759 < render.Gfx.scene:777 < 
+      1 x render.Gfx.scene:791 < Bench.frame:209 < Bench.run:163 < Main.session:108 < 
+  hitch at frame 153: 29.2 ms = sim 18.2 + draw 11.0 (renderer cpu 3.8) + swap 0.1; gpu 17.8
+    native: frame 6.7 ms (step 6.6), paths 0 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 6.8 afterFrame 3.5 ai 3.1 combat.update 1.3
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x Rpg.afterFrame:477 < astratto.game.Game.tick:100 < Bench.frame:205 < Bench.run:163 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+  hitch at frame 154: 29.1 ms = sim 15.1 + draw 14.0 (renderer cpu 6.9) + swap 0.1; gpu 15.4
+    native: frame 5.8 ms (step 5.7), paths 0 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 5.8 ai 3.6 afterFrame 2.5 dungeons.update 0.9
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x dungeon.Dungeons.update:411 < Rpg.update:442 < astratto.game.Game.tick:95 < Bench.frame:205 < 
+  hitch at frame 156: 27.7 ms = sim 15.5 + draw 12.0 (renderer cpu 6.1) + swap 0.1; gpu 15.5
+    native: frame 6.1 ms (step 6.1), paths 4 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 6.2 ai 3.1 afterFrame 2.3 animals 1.2
+  hitch at frame 158: 25.6 ms = sim 13.1 + draw 12.4 (renderer cpu 7.4) + swap 0.1; gpu 15.1
+    native: frame 5.4 ms (step 5.3), paths 1 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 5.4 ai 3.3 afterFrame 2.0 dungeons.update 0.7
+  hitch at frame 160: 25.0 ms = sim 13.3 + draw 11.5 (renderer cpu 6.2) + swap 0.3; gpu 14.9
+    native: frame 5.7 ms (step 5.7), paths 1 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 5.8 ai 2.4 afterFrame 2.2 dungeons.update 0.9
+  hitch at frame 162: 25.8 ms = sim 12.9 + draw 12.8 (renderer cpu 7.3) + swap 0.1; gpu 15.1
+    native: frame 5.5 ms (step 5.4), paths 0 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 5.5 ai 2.7 afterFrame 2.0 dungeons.update 0.7
+  hitch at frame 164: 34.6 ms = sim 20.8 + draw 13.8 (renderer cpu 6.6) + swap 0.1; gpu 15.4
+    native: frame 6.4 ms (step 5.8), paths 1 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 6.4 foliage.update 4.5 afterFrame 2.5 ai 2.4
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x render.Rig.pose:257 < render.Gfx.humanModel:2766 < render.Gfx.human:2759 < render.Gfx.scene:756 < 
+  hitch at frame 166: 27.1 ms = sim 12.3 + draw 14.7 (renderer cpu 9.1) + swap 0.1; gpu 15.6
+    native: frame 5.6 ms (step 5.5), paths 1 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 5.7 afterFrame 2.0 ai 1.9 dungeons.update 0.7
+  hitch at frame 167: 27.0 ms = sim 16.9 + draw 10.1 (renderer cpu 3.6) + swap 0.1; gpu 16.8
+    native: frame 5.6 ms (step 5.6), paths 0 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 5.7 ai 5.2 afterFrame 2.8 dungeons.update 0.9
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x world.Voxels.solid:71 < animal.Flight.topOf:134 < animal.Flight.skyline:139 < animal.Flight.fly:178 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+  hitch at frame 168: 27.7 ms = sim 14.1 + draw 13.5 (renderer cpu 7.1) + swap 0.1; gpu 15.2
+    native: frame 5.5 ms (step 5.5), paths 1 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 5.6 ai 2.9 afterFrame 2.5 dungeons.update 0.7
+  hitch at frame 170: 27.4 ms = sim 14.3 + draw 13.0 (renderer cpu 7.1) + swap 0.1; gpu 15.3
+    native: frame 5.3 ms (step 5.2), paths 0 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 5.3 ai 3.1 afterFrame 2.4 dungeons.update 1.0
+  hitch at frame 172: 41.3 ms = sim 26.7 + draw 14.6 (renderer cpu 7.6) + swap 0.1; gpu 15.4
+    native: frame 19.2 ms (step 19.1), paths 1 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 19.3 afterFrame 2.7 ai 2.2 dungeons.update 0.8
+  hitch at frame 174: 25.8 ms = sim 12.8 + draw 12.9 (renderer cpu 7.6) + swap 0.1; gpu 15.5
+    native: frame 5.3 ms (step 5.2), paths 2 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 5.4 ai 2.9 afterFrame 1.9 objects.update 0.7
+  hitch at frame 178: 30.5 ms = sim 18.0 + draw 12.5 (renderer cpu 5.9) + swap 0.1; gpu 15.6
+    native: frame 10.4 ms (step 10.4), paths 3 (0 expanded), sights 0, nav v711 doors 34
+    java: engine.frame (native) 10.5 ai 2.3 afterFrame 1.9 objects.update 1.0
+      3 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      1 x render.Gfx.furnitureLight:3854 < render.Gfx.objectModel:3955 < render.Gfx.object:3718 < render.Gfx.scene:793 < 
+  hitch at frame 179: 75.4 ms = sim 64.5 + draw 10.8 (renderer cpu 4.5) + swap 0.1; gpu 17.2
+    native: frame 6.3 ms (step 5.6), paths 0 (0 expanded), sights 0, nav v711 doors 34
+    java: ai 42.9 engine.frame (native) 6.4 foliage.update 5.2 controller.update 2.2
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x ai.RuntimeNavigation.corridor:182 < ai.RuntimeNavigation.corridor:165 < ai.RuntimeNavigation.route:246 < ai.Brain.goTo:1044 < 
+      2 x ai.RuntimeNavigation.exits:142 < ai.RuntimeNavigation.corridor:182 < ai.RuntimeNavigation.corridor:165 < ai.RuntimeNavigation.route:246 < 
+  hitch at frame 180: 33.4 ms = sim 14.7 + draw 18.6 (renderer cpu 6.8) + swap 0.1; gpu 15.9
+    native: frame 6.6 ms (step 6.6), paths 6 (0 expanded), sights 0, nav v715 doors 34
+    java: engine.frame (native) 6.7 afterFrame 2.4 animals 1.7 ai 1.5
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x Rpg.afterFrame:477 < astratto.game.Game.tick:100 < Bench.frame:205 < Bench.run:163 < 
+  hitch at frame 182: 27.4 ms = sim 13.7 + draw 13.7 (renderer cpu 7.7) + swap 0.1; gpu 15.9
+    native: frame 5.1 ms (step 5.1), paths 0 (0 expanded), sights 0, nav v715 doors 34
+    java: engine.frame (native) 5.2 afterFrame 2.7 ai 2.7 animals 0.9
+  hitch at frame 183: 31.7 ms = sim 19.9 + draw 11.7 (renderer cpu 4.9) + swap 0.1; gpu 17.3
+    native: frame 6.0 ms (step 5.9), paths 0 (0 expanded), sights 0, nav v715 doors 34
+    java: ai 8.3 engine.frame (native) 6.0 afterFrame 2.1 animals 0.9
+      2 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x dungeon.Dungeons.update:411 < Rpg.update:442 < astratto.game.Game.tick:95 < Bench.frame:205 < 
+  hitch at frame 186: 26.3 ms = sim 15.3 + draw 11.0 (renderer cpu 5.8) + swap 0.1; gpu 15.0
+    native: frame 5.7 ms (step 5.7), paths 0 (0 expanded), sights 0, nav v715 doors 34
+    java: engine.frame (native) 5.8 ai 3.3 afterFrame 2.4 animals 1.3
+  hitch at frame 187: 26.5 ms = sim 16.1 + draw 10.4 (renderer cpu 3.9) + swap 0.1; gpu 16.4
+    native: frame 6.0 ms (step 6.0), paths 0 (0 expanded), sights 0, nav v717 doors 34
+    java: engine.frame (native) 6.1 ai 3.5 afterFrame 2.8 animals 1.2
+      2 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x render.Gfx.frame:862 < Bench.frame:213 < Bench.run:163 < Main.session:108 < 
+      1 x dungeon.Dungeons.update:411 < Rpg.update:442 < astratto.game.Game.tick:95 < Bench.frame:205 < 
+  hitch at frame 188: 28.9 ms = sim 16.1 + draw 12.7 (renderer cpu 6.7) + swap 0.1; gpu 15.0
+    native: frame 5.3 ms (step 5.3), paths 0 (0 expanded), sights 0, nav v717 doors 34
+    java: engine.frame (native) 5.4 ai 4.7 afterFrame 2.6 animals 1.1
+  hitch at frame 190: 27.3 ms = sim 12.6 + draw 14.7 (renderer cpu 8.4) + swap 0.1; gpu 15.9
+    native: frame 5.4 ms (step 5.3), paths 0 (0 expanded), sights 0, nav v721 doors 34
+    java: engine.frame (native) 5.5 afterFrame 2.1 ai 1.8 animals 0.8
+  hitch at frame 194: 29.9 ms = sim 18.2 + draw 11.6 (renderer cpu 6.3) + swap 0.1; gpu 15.7
+    native: frame 5.6 ms (step 5.1), paths 0 (0 expanded), sights 0, nav v721 doors 34
+    java: engine.frame (native) 5.7 foliage.update 3.8 ai 2.7 afterFrame 2.2
+  hitch at frame 196: 54.8 ms = sim 41.2 + draw 13.5 (renderer cpu 7.0) + swap 0.1; gpu 15.6
+    native: frame 34.3 ms (step 34.3), paths 1 (0 expanded), sights 0, nav v721 doors 34
+    java: engine.frame (native) 34.4 ai 2.3 afterFrame 2.1 dungeons.update 0.7
+  hitch at frame 197: 40.4 ms = sim 29.6 + draw 10.7 (renderer cpu 3.5) + swap 0.1; gpu 16.8
+    native: frame 19.0 ms (step 18.9), paths 0 (0 expanded), sights 0, nav v721 doors 34
+    java: engine.frame (native) 19.0 ai 2.6 afterFrame 2.1 dungeons.update 2.1
+      3 x Bench.frame:205 < Bench.run:163 < Main.session:108 < Main.run:70 < 
+      1 x ai.Household.update:99 < ai.AiSystem.update:787 < Rpg.update:434 < astratto.game.Game.tick:95 < 
+      1 x render.Gfx.object:3718 < render.Gfx.scene:793 < Bench.frame:209 < Bench.run:163 < 
+  hitch at frame 198: 29.3 ms = sim 14.0 + draw 15.2 (renderer cpu 9.1) + swap 0.1; gpu 15.9
+    native: frame 5.7 ms (step 5.7), paths 5 (0 expanded), sights 0, nav v721 doors 34
+    java: engine.frame (native) 5.8 ai 2.6 afterFrame 2.0 animals 1.1
+
+== Severia market, morning (crowds) [scale 1.00, aiming 60 fps]
+  frame  mean  27.81 ms (   36 fps)   p50  26.67   p99  54.78   worst  75.38   over 16.7 ms: 200/200   over 6.9 ms: 200/200
+  sim  16.02   draw  11.70 (renderer cpu   5.44)   swap   0.09   gpu  16.21 ms   quads 176885  models 347
+  gpu by pass: uploads 3.00 shadows 2.00 gbuffer 2.17 ao 1.53 ssr 0.41 lighting 3.63 fog 1.56 forward 0.11 resolve 1.70 2d 0.10
+  gpu worst:   uploads 3.72 shadows 3.63 gbuffer 2.20 ao 1.55 ssr 0.42 lighting 3.65 fog 1.58 forward 0.12 resolve 1.76 2d 1.43  (frame 19.41)
+  sim by system (whole stop):
+    engine.frame (native)     1279.22 ms
+    ai                         717.00 ms
+    afterFrame                 443.25 ms
+    dungeons.update            158.68 ms
+    animals                    138.90 ms
+    objects.update             133.66 ms
+    controller.update          101.64 ms
+    foliage.update              77.45 ms
+
+== ALL
+  frame  mean  27.81 ms (   36 fps)   p50  26.67   p99  54.78   worst  75.38   over 16.7 ms: 200/200   over 6.9 ms: 200/200
+  sim  16.02   draw  11.70 (renderer cpu   5.44)   swap   0.09   gpu  16.21 ms   quads 176885  models 347
+  gpu by pass: uploads 3.00 shadows 2.00 gbuffer 2.17 ao 1.53 ssr 0.41 lighting 3.63 fog 1.56 forward 0.11 resolve 1.70 2d 0.10
+  gpu worst:   uploads 3.72 shadows 3.63 gbuffer 2.20 ao 1.55 ssr 0.42 lighting 3.65 fog 1.58 forward 0.12 resolve 1.76 2d 1.43  (frame 19.41)
+java heap: 1382 MB used of 2048 MB; gc: ZGC Minor Cycles 18x/1564ms ZGC Minor Pauses 55x/0ms ZGC Major Cycles 4x/1495ms ZGC Major Pauses 19x/0ms
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 3s
+8 actionable tasks: 1 executed, 7 up-to-date

@@ -157,7 +157,7 @@ public final class Objects {
         storeDoor = add(new Door(fid(), "Store-room door", DevMap.STORE_DOOR, true, Items.CHANCERY_KEY, 10, Ids.MERCHANT_A));
         shedDoor.spawn(g);
         storeDoor.spawn(g);
-        shedChest = add(new Container(fid(), "chest", "Ada's chest", "chest", DevMap.SHED_CHEST[0] + 0.5f, f + 0.4f, DevMap.SHED_CHEST[1] + 0.5f, 20, Ids.MERCHANT_A));
+        shedChest = add(new Container(fid(), "chest", g.possessive(Ids.MERCHANT_A, "Ada") + " chest", "chest", DevMap.SHED_CHEST[0] + 0.5f, f + 0.4f, DevMap.SHED_CHEST[1] + 0.5f, 20, Ids.MERCHANT_A));
         storeChest = add(new Container(fid(), "chest", "Store chest", "chest", DevMap.STORE_CHEST[0] + 0.5f, f + 0.4f, DevMap.STORE_CHEST[1] + 0.5f, 20, Ids.MERCHANT_A));
         storeChest.locked = true; storeChest.lockLevel = 20;
         float tx = DevMap.SHED_TABLE[0] + 1f, ty = f + Furniture.TABLE_TOP, tz = DevMap.SHED_TABLE[1] + 1f;
@@ -216,7 +216,7 @@ public final class Objects {
         farmGate.spawn(g);
         trough = add(new Container(fid(), "trough", "Feed trough", "trough", DevMap.TROUGH[0], f + 0.35f, DevMap.TROUGH[1], 40, Ids.FARMER));
         for (float[] nb : DevMap.NEST_BOXES) nestBoxes.add(add(new Container(fid(), "nest_box", "Nest box", "nest", nb[0], f + 0.3f, nb[1], 10, Ids.FARMER)));
-        farmChest = add(new Container(fid(), "chest", "Mara's chest", "chest", DevMap.FARM_CHEST[0], f + 0.4f, DevMap.FARM_CHEST[1], 20, Ids.FARMER));
+        farmChest = add(new Container(fid(), "chest", g.possessive(Ids.FARMER, "Mara") + " chest", "chest", DevMap.FARM_CHEST[0], f + 0.4f, DevMap.FARM_CHEST[1], 20, Ids.FARMER));
         for (int i = 0; i < 10; i++) put(farmChest, new ItemStack(Items.ANIMAL_FEED, 1, Ids.FARMER, false, farmChest.id));
         for (int i = 0; i < 3; i++) put(trough, new ItemStack(Items.ANIMAL_FEED, 1, Ids.FARMER, false, trough.id));
         // a crab spot at the pond's far shallows (after every older fixture, so their ids hold): the cage's own
@@ -760,7 +760,7 @@ public final class Objects {
             // again behind them once it is shut (gamefixes: people open their own doors)
             if (!d.open && d.locked) for (var n : nearDoor) {
                 if (n instanceof rpg.monster.Monster || n.asleep() || n.reacting || g.law.inCustody(n) || Math.hypot(n.x - d.x, n.z - d.z) > 2.4) continue;
-                boolean keyHolder = d.owner == n.id || d.key != null && n.has(d.key, 1);
+                boolean keyHolder = d.keeps(n.id) || d.key != null && n.has(d.key, 1);
                 // where they are bound (the trip's end, not the leg to the door's front) lies through it
                 float bx = n.legs != null ? n.legsX : n.gx, bz = n.legs != null ? n.legsZ : n.gz;
                 if (!keyHolder || !n.hasGoalPos || d.side(n.x, n.z) == d.side(bx, bz)) continue;

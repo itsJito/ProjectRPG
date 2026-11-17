@@ -1,0 +1,3019 @@
+{
+ "_about": "(0.4.7, gamefixes: the Encounter System) the world's encounters. The Encounter Director (rpg.encounter.Encounters) looks every 'interval' seconds at where the player is - the region and its biome, a road near, whose law, the hour, the weather, the player's level, bounties and honour, what has happened before - and draws one encounter from those eligible, by weight x rarity x the region's density, with cooldowns and a history so nothing repeats too soon. Each encounter is data: when it may happen, who is in it (people, animals, monsters, a carcass, each made from the game's own kinds and kits), where they come in (ahead on the road, hidden in cover, behind, around, far off), and its stages - what each party does, what is said, the choices offered and their effects, and what moves it on. People left over when it ends drift: they keep a routine of their own about a camp, or go on to a town. (0.4.8) Its people come in out of the player's sight ('spawnMin' metres off at least, unseen unless past 'spawnSeen'), lurkers come out after 'patience' seconds with the player near, a herd migrates a 'migrateStride' at a time, and an encounter the player has left 'despawnDistance' behind for 'leftBehind' seconds ends.",
+ "director": {
+  "interval": 4.0,
+  "chance": 0.12,
+  "maxActive": 3,
+  "minApart": 120,
+  "spawnDistance": [
+   40,
+   70
+  ],
+  "spawnMin": 32,
+  "spawnSeen": 95,
+  "despawnDistance": 170,
+  "leftBehind": 30,
+  "patience": 40,
+  "patienceReach": 130,
+  "migrateStride": 18,
+  "quietMinutes": 20,
+  "rarity": {
+   "common": 1.0,
+   "uncommon": 0.4,
+   "rare": 0.12
+  },
+  "density": {
+   "_default": 1.0,
+   "gallows_heath": 1.8,
+   "southern_marches": 1.5,
+   "dead_wood": 1.4,
+   "dimwater_basin": 1.3,
+   "western_crags": 1.2,
+   "ashmaw_coast": 0.8,
+   "severian_north": 0.9
+  },
+  "realmDensity": 0.7,
+  "seed": 7471
+ },
+ "drifters": {
+  "most": 10,
+  "campReach": 40,
+  "forgetAfter": 2880
+ },
+ "encounters": [
+  {
+   "id": "highwaymen_toll",
+   "title": "Highwaymen's toll",
+   "type": "human",
+   "rarity": "common",
+   "weight": 3.0,
+   "cooldown": 300,
+   "repeatable": true,
+   "when": {
+    "wilds": true,
+    "road": 18,
+    "playerLevel": [
+     3,
+     99
+    ],
+    "hours": [
+     5,
+     23
+    ]
+   },
+   "spawn": "ahead_hidden",
+   "cast": [
+    {
+     "tag": "robber",
+     "kind": "person",
+     "count": [
+      2,
+      4
+     ],
+     "role": "BANDIT",
+     "title": "Highwayman",
+     "level": [
+      10,
+      24
+     ],
+     "wear": [
+      "iron_sword",
+      "stone_body"
+     ],
+     "give": {
+      "coins": 12
+     },
+     "drift": "camp"
+    }
+   ],
+   "start": "lurk",
+   "stages": {
+    "lurk": {
+     "do": {
+      "robber": "hide"
+     },
+     "next": [
+      {
+       "when": "near:robber:16",
+       "to": "spring"
+      },
+      {
+       "when": "timer:240",
+       "to": "gone"
+      }
+     ]
+    },
+    "spring": {
+     "do": {
+      "robber": "block"
+     },
+     "say": {
+      "robber": [
+       "Hold there, traveller. This stretch of the King's Road has a toll.",
+       "That's far enough. The road's ours, and so's the toll."
+      ]
+     },
+     "next": [
+      {
+       "when": "near:robber:6",
+       "to": "demand"
+      },
+      {
+       "when": "player_far:40",
+       "to": "chase"
+      },
+      {
+       "when": "hurt:robber",
+       "to": "fight"
+      },
+      {
+       "when": "timer:30",
+       "to": "demand"
+      }
+     ]
+    },
+    "demand": {
+     "do": {
+      "robber": "surround"
+     },
+     "dialog": {
+      "speaker": "robber",
+      "text": "Your purse, or we take it off your body. A tenth of what you carry and you walk on with your teeth.",
+      "choices": [
+       {
+        "text": "Pay the toll ({toll} coins).",
+        "to": "paid",
+        "effects": [
+         "pay:robber:percent:10:min:15"
+        ],
+        "requires": {
+         "coins": 1
+        }
+       },
+       {
+        "text": "Refuse.",
+        "to": "fight"
+       },
+       {
+        "text": "Walk away from me while you still can.",
+        "to": "cowed",
+        "test": {
+         "combatOver": [
+          "robber",
+          12
+         ]
+        },
+        "else": "fight"
+       },
+       {
+        "text": "I have nothing worth taking.",
+        "to": "searched",
+        "test": {
+         "coinsUnder": 15
+        },
+        "else": "fight"
+       }
+      ]
+     },
+     "next": [
+      {
+       "when": "player_far:24",
+       "to": "chase"
+      },
+      {
+       "when": "hurt:robber",
+       "to": "fight"
+      },
+      {
+       "when": "timer:45",
+       "to": "fight"
+      }
+     ]
+    },
+    "paid": {
+     "do": {
+      "robber": "leave"
+     },
+     "say": {
+      "robber": [
+       "A pleasure. Mind the road, it's full of thieves.",
+       "Off with you, then."
+      ]
+     },
+     "effects": [
+      "rumor:paid a highwayman's toll on the King's Road"
+     ],
+     "end": "paid"
+    },
+    "searched": {
+     "do": {
+      "robber": "leave"
+     },
+     "say": {
+      "robber": [
+       "Not worth the knife. Get gone."
+      ]
+     },
+     "end": "let_go"
+    },
+    "cowed": {
+     "do": {
+      "robber": "flee"
+     },
+     "say": {
+      "robber": [
+       "Easy - easy. We'll find softer purses."
+      ]
+     },
+     "effects": [
+      "honor:3:faced down highwaymen"
+     ],
+     "end": "cowed"
+    },
+    "chase": {
+     "do": {
+      "robber": "attack_player"
+     },
+     "say": {
+      "robber": [
+       "Running? After them!"
+      ]
+     },
+     "next": [
+      {
+       "when": "player_far:70",
+       "to": "gone"
+      },
+      {
+       "when": "dead:robber:all",
+       "to": "won"
+      },
+      {
+       "when": "hurt_half:robber",
+       "to": "rout"
+      }
+     ]
+    },
+    "fight": {
+     "do": {
+      "robber": "attack_player"
+     },
+     "say": {
+      "robber": [
+       "Your mistake.",
+       "Take it off them, then!"
+      ]
+     },
+     "next": [
+      {
+       "when": "dead:robber:all",
+       "to": "won"
+      },
+      {
+       "when": "hurt_half:robber",
+       "to": "rout"
+      },
+      {
+       "when": "player_far:70",
+       "to": "gone"
+      }
+     ]
+    },
+    "rout": {
+     "do": {
+      "robber": "flee"
+     },
+     "say": {
+      "robber": [
+       "Enough! Run!"
+      ]
+     },
+     "effects": [
+      "honor:2:put highwaymen to flight"
+     ],
+     "end": "routed"
+    },
+    "won": {
+     "effects": [
+      "honor:4:cleared highwaymen from the road",
+      "rumor:cut down the highwaymen of the King's Road",
+      "flag:highwaymen_beaten"
+     ],
+     "end": "won"
+    },
+    "gone": {
+     "do": {
+      "robber": "leave"
+     },
+     "end": "lost_interest"
+    }
+   }
+  },
+  {
+   "id": "night_ambush",
+   "title": "Ambush",
+   "type": "human",
+   "rarity": "uncommon",
+   "weight": 1.5,
+   "cooldown": 600,
+   "repeatable": true,
+   "when": {
+    "wilds": true,
+    "road": 30,
+    "playerLevel": [
+     8,
+     99
+    ],
+    "hours": [
+     20,
+     5
+    ]
+   },
+   "spawn": "around_hidden",
+   "cast": [
+    {
+     "tag": "ambusher",
+     "kind": "person",
+     "count": [
+      3,
+      4
+     ],
+     "role": "BANDIT",
+     "title": "Cutthroat",
+     "level": [
+      16,
+      30
+     ],
+     "wear": [
+      "steel_sword",
+      "stone_body"
+     ],
+     "give": {
+      "coins": 20
+     },
+     "drift": "camp"
+    }
+   ],
+   "start": "wait",
+   "stages": {
+    "wait": {
+     "do": {
+      "ambusher": "hide"
+     },
+     "next": [
+      {
+       "when": "near:ambusher:12",
+       "to": "strike"
+      },
+      {
+       "when": "timer:300",
+       "to": "gone"
+      }
+     ]
+    },
+    "strike": {
+     "do": {
+      "ambusher": "attack_player"
+     },
+     "say": {
+      "ambusher": [
+       "Now!",
+       "Cut them down!"
+      ]
+     },
+     "next": [
+      {
+       "when": "dead:ambusher:all",
+       "to": "won"
+      },
+      {
+       "when": "hurt_half:ambusher",
+       "to": "rout"
+      },
+      {
+       "when": "player_far:60",
+       "to": "gone"
+      }
+     ]
+    },
+    "rout": {
+     "do": {
+      "ambusher": "flee"
+     },
+     "end": "routed"
+    },
+    "won": {
+     "effects": [
+      "honor:5:survived an ambush in the dark",
+      "rumor:beat off an ambush on the night road"
+     ],
+     "end": "won"
+    },
+    "gone": {
+     "do": {
+      "ambusher": "leave"
+     },
+     "end": "lost_interest"
+    }
+   }
+  },
+  {
+   "id": "false_guide",
+   "title": "The obliging stranger",
+   "type": "human",
+   "rarity": "rare",
+   "weight": 1.0,
+   "cooldown": 1440,
+   "repeatable": true,
+   "when": {
+    "wilds": true,
+    "road": 40,
+    "playerLevel": [
+     5,
+     99
+    ],
+    "hours": [
+     7,
+     19
+    ]
+   },
+   "spawn": "ahead",
+   "cast": [
+    {
+     "tag": "guide",
+     "kind": "person",
+     "count": [
+      1,
+      1
+     ],
+     "role": "BANDIT",
+     "title": "Traveller",
+     "level": [
+      12,
+      18
+     ],
+     "wear": [
+      "iron_dagger"
+     ],
+     "hostile": false,
+     "drift": "camp"
+    },
+    {
+     "tag": "waiting",
+     "kind": "person",
+     "count": [
+      2,
+      3
+     ],
+     "role": "BANDIT",
+     "title": "Cutthroat",
+     "level": [
+      12,
+      22
+     ],
+     "wear": [
+      "iron_sword"
+     ],
+     "spawn": "hidden_far",
+     "drift": "camp"
+    }
+   ],
+   "start": "meet",
+   "stages": {
+    "meet": {
+     "do": {
+      "guide": "approach",
+      "waiting": "hide"
+     },
+     "next": [
+      {
+       "when": "near:guide:4",
+       "to": "offer"
+      },
+      {
+       "when": "timer:120",
+       "to": "gone"
+      }
+     ]
+    },
+    "offer": {
+     "do": {
+      "guide": "hold",
+      "waiting": "hide"
+     },
+     "dialog": {
+      "speaker": "guide",
+      "text": "Well met. The road bends wide here - I know a shorter way through the scrub, if you'd walk with me. Safer than the open road, these days.",
+      "choices": [
+       {
+        "text": "Lead on.",
+        "to": "lead"
+       },
+       {
+        "text": "I'll keep to the road.",
+        "to": "insist"
+       },
+       {
+        "text": "You've the look of a cutpurse. Who's waiting in the scrub?",
+        "to": "unmasked",
+        "test": {
+         "skillOver": [
+          "THIEVING",
+          20
+         ]
+        },
+        "else": "insist"
+       }
+      ]
+     },
+     "next": [
+      {
+       "when": "player_far:20",
+       "to": "gone"
+      },
+      {
+       "when": "timer:40",
+       "to": "gone"
+      }
+     ]
+    },
+    "lead": {
+     "do": {
+      "guide": "lead:waiting",
+      "waiting": "hide"
+     },
+     "next": [
+      {
+       "when": "near:waiting:9",
+       "to": "trap"
+      },
+      {
+       "when": "player_far:30",
+       "to": "gone"
+      },
+      {
+       "when": "timer:150",
+       "to": "gone"
+      }
+     ]
+    },
+    "insist": {
+     "do": {
+      "guide": "attack_player",
+      "waiting": "attack_player"
+     },
+     "say": {
+      "guide": [
+       "Then we'll do it the hard way. Now, lads!"
+      ]
+     },
+     "next": [
+      {
+       "when": "dead:waiting:all",
+       "to": "won"
+      },
+      {
+       "when": "player_far:70",
+       "to": "gone"
+      }
+     ]
+    },
+    "unmasked": {
+     "do": {
+      "guide": "flee",
+      "waiting": "leave"
+     },
+     "say": {
+      "guide": [
+       "...Sharp eyes. Another day, then."
+      ]
+     },
+     "effects": [
+      "honor:2:saw through a false guide"
+     ],
+     "end": "unmasked"
+    },
+    "trap": {
+     "do": {
+      "guide": "attack_player",
+      "waiting": "attack_player"
+     },
+     "say": {
+      "waiting": [
+       "Here they are. Take everything."
+      ]
+     },
+     "next": [
+      {
+       "when": "dead:waiting:all",
+       "to": "won"
+      },
+      {
+       "when": "player_far:70",
+       "to": "gone"
+      }
+     ]
+    },
+    "won": {
+     "effects": [
+      "honor:4:turned a trap on its setters",
+      "rumor:turned the tables on a false guide and his friends"
+     ],
+     "end": "won"
+    },
+    "gone": {
+     "do": {
+      "guide": "leave",
+      "waiting": "leave"
+     },
+     "end": "lost_interest"
+    }
+   }
+  },
+  {
+   "id": "traveller_news",
+   "title": "A traveller with news",
+   "type": "human",
+   "rarity": "common",
+   "weight": 4.0,
+   "cooldown": 60,
+   "repeatable": true,
+   "when": {
+    "road": 20,
+    "hours": [
+     6,
+     21
+    ]
+   },
+   "spawn": "ahead",
+   "cast": [
+    {
+     "tag": "traveller",
+     "kind": "person",
+     "count": [
+      1,
+      2
+     ],
+     "role": "VILLAGER",
+     "title": "Traveller",
+     "level": [
+      1,
+      6
+     ],
+     "give": {
+      "bread": 1,
+      "coins": 8
+     },
+     "travel": "settlement"
+    }
+   ],
+   "start": "walk",
+   "stages": {
+    "walk": {
+     "do": {
+      "traveller": "approach"
+     },
+     "next": [
+      {
+       "when": "near:traveller:4",
+       "to": "greet"
+      },
+      {
+       "when": "timer:150",
+       "to": "onward"
+      }
+     ]
+    },
+    "greet": {
+     "do": {
+      "traveller": "hold"
+     },
+     "dialog": {
+      "speaker": "traveller",
+      "text": "Good day to you. Mind how you go - {rumor}",
+      "choices": [
+       {
+        "text": "Safe travels.",
+        "to": "onward"
+       },
+       {
+        "text": "Where are you bound?",
+        "to": "where"
+       }
+      ]
+     },
+     "next": [
+      {
+       "when": "player_far:10",
+       "to": "onward"
+      },
+      {
+       "when": "timer:30",
+       "to": "onward"
+      }
+     ]
+    },
+    "where": {
+     "do": {
+      "traveller": "hold"
+     },
+     "say": {
+      "traveller": [
+       "To {destination}, and with luck before dark."
+      ]
+     },
+     "next": [
+      {
+       "when": "timer:4",
+       "to": "onward"
+      }
+     ]
+    },
+    "onward": {
+     "do": {
+      "traveller": "travel"
+     },
+     "next": [
+      {
+       "when": "arrived:traveller",
+       "to": "done"
+      },
+      {
+       "when": "player_far:120",
+       "to": "done"
+      }
+     ]
+    },
+    "done": {
+     "end": "passed"
+    }
+   }
+  },
+  {
+   "id": "pedlar",
+   "title": "A pedlar on the road",
+   "type": "human",
+   "rarity": "common",
+   "weight": 2.0,
+   "cooldown": 240,
+   "repeatable": true,
+   "when": {
+    "road": 20,
+    "hours": [
+     7,
+     19
+    ]
+   },
+   "spawn": "ahead",
+   "cast": [
+    {
+     "tag": "pedlar",
+     "kind": "person",
+     "count": [
+      1,
+      1
+     ],
+     "role": "MERCHANT",
+     "title": "Pedlar",
+     "level": [
+      3,
+      8
+     ],
+     "give": {
+      "coins": 40
+     },
+     "stock": [
+      "bread:3",
+      "torch:2",
+      "fishing_bait:20",
+      "tinderbox:1"
+     ],
+     "travel": "settlement"
+    },
+    {
+     "tag": "mule",
+     "kind": "animal",
+     "count": [
+      1,
+      1
+     ],
+     "species": "HORSE",
+     "follow": "pedlar"
+    }
+   ],
+   "start": "walk",
+   "stages": {
+    "walk": {
+     "do": {
+      "pedlar": "approach",
+      "mule": "follow:pedlar"
+     },
+     "next": [
+      {
+       "when": "near:pedlar:4",
+       "to": "wares"
+      },
+      {
+       "when": "timer:150",
+       "to": "onward"
+      }
+     ]
+    },
+    "wares": {
+     "do": {
+      "pedlar": "hold",
+      "mule": "follow:pedlar"
+     },
+     "dialog": {
+      "speaker": "pedlar",
+      "text": "Bread, a torch for the dark stretches, bait for the rivers - all honest, all cheap. Take a look?",
+      "choices": [
+       {
+        "text": "Show me your wares.",
+        "to": "trading",
+        "effects": [
+         "trade:pedlar"
+        ]
+       },
+       {
+        "text": "Not today.",
+        "to": "onward"
+       }
+      ]
+     },
+     "next": [
+      {
+       "when": "player_far:10",
+       "to": "onward"
+      },
+      {
+       "when": "timer:40",
+       "to": "onward"
+      }
+     ]
+    },
+    "trading": {
+     "do": {
+      "pedlar": "hold",
+      "mule": "follow:pedlar"
+     },
+     "next": [
+      {
+       "when": "player_far:8",
+       "to": "onward"
+      },
+      {
+       "when": "timer:90",
+       "to": "onward"
+      }
+     ]
+    },
+    "onward": {
+     "do": {
+      "pedlar": "travel",
+      "mule": "follow:pedlar"
+     },
+     "next": [
+      {
+       "when": "arrived:pedlar",
+       "to": "done"
+      },
+      {
+       "when": "player_far:120",
+       "to": "done"
+      }
+     ]
+    },
+    "done": {
+     "end": "passed"
+    }
+   }
+  },
+  {
+   "id": "courier",
+   "title": "A courier in haste",
+   "type": "human",
+   "rarity": "common",
+   "weight": 1.5,
+   "cooldown": 180,
+   "repeatable": true,
+   "when": {
+    "road": 15,
+    "hours": [
+     5,
+     22
+    ]
+   },
+   "spawn": "behind",
+   "cast": [
+    {
+     "tag": "courier",
+     "kind": "person",
+     "count": [
+      1,
+      1
+     ],
+     "role": "CARTER",
+     "title": "Courier",
+     "level": [
+      4,
+      10
+     ],
+     "give": {
+      "coins": 15
+     },
+     "travel": "far_settlement",
+     "run": true
+    }
+   ],
+   "start": "ride",
+   "stages": {
+    "ride": {
+     "do": {
+      "courier": "travel"
+     },
+     "say": {
+      "courier": [
+       "Make way! Letters for the crown!",
+       "Pardon - road, please!"
+      ]
+     },
+     "next": [
+      {
+       "when": "hurt:courier",
+       "to": "robbed"
+      },
+      {
+       "when": "arrived:courier",
+       "to": "done"
+      },
+      {
+       "when": "player_far:150",
+       "to": "done"
+      }
+     ]
+    },
+    "robbed": {
+     "do": {
+      "courier": "flee"
+     },
+     "say": {
+      "courier": [
+       "Help! Thief on the road!"
+      ]
+     },
+     "effects": [
+      "crime:assault:courier"
+     ],
+     "end": "assaulted"
+    },
+    "done": {
+     "end": "passed"
+    }
+   }
+  },
+  {
+   "id": "pilgrims",
+   "title": "Pilgrims on the road",
+   "type": "human",
+   "rarity": "uncommon",
+   "weight": 1.5,
+   "cooldown": 480,
+   "repeatable": true,
+   "when": {
+    "road": 25,
+    "hours": [
+     6,
+     19
+    ],
+    "regions": [
+     "loxford_lowlands",
+     "gorrick_shoulder",
+     "southern_marches",
+     "camelot_shoulder",
+     "gallows_heath",
+     "severian_north",
+     "valgard_highlands"
+    ]
+   },
+   "spawn": "ahead",
+   "cast": [
+    {
+     "tag": "pilgrim",
+     "kind": "person",
+     "count": [
+      2,
+      3
+     ],
+     "role": "VILLAGER",
+     "title": "Pilgrim",
+     "level": [
+      1,
+      4
+     ],
+     "give": {
+      "bread": 1
+     },
+     "travel": "church"
+    }
+   ],
+   "start": "walk",
+   "stages": {
+    "walk": {
+     "do": {
+      "pilgrim": "approach"
+     },
+     "next": [
+      {
+       "when": "near:pilgrim:4",
+       "to": "alms"
+      },
+      {
+       "when": "timer:150",
+       "to": "onward"
+      }
+     ]
+    },
+    "alms": {
+     "do": {
+      "pilgrim": "hold"
+     },
+     "dialog": {
+      "speaker": "pilgrim",
+      "text": "Jaehaerys keep you, friend. We walk to the sanctuary to hear the names of our dead read out. A coin or a crust for the road would be a kindness.",
+      "choices": [
+       {
+        "text": "Give them 5 coins.",
+        "to": "blessed",
+        "effects": [
+         "give:coins:5:pilgrim",
+         "honor:3:gave alms to pilgrims",
+         "rumor:gave alms to pilgrims on the road"
+        ],
+        "requires": {
+         "coins": 5
+        }
+       },
+       {
+        "text": "Give them bread.",
+        "to": "blessed",
+        "effects": [
+         "give:bread:1:pilgrim",
+         "honor:2:fed pilgrims on the road"
+        ],
+        "requires": {
+         "item": "bread"
+        }
+       },
+       {
+        "text": "I've nothing to spare.",
+        "to": "onward"
+       }
+      ]
+     },
+     "next": [
+      {
+       "when": "player_far:10",
+       "to": "onward"
+      },
+      {
+       "when": "timer:40",
+       "to": "onward"
+      }
+     ]
+    },
+    "blessed": {
+     "do": {
+      "pilgrim": "hold"
+     },
+     "say": {
+      "pilgrim": [
+       "The Sun light your road. We'll speak your kindness at the altar."
+      ]
+     },
+     "next": [
+      {
+       "when": "timer:4",
+       "to": "onward"
+      }
+     ]
+    },
+    "onward": {
+     "do": {
+      "pilgrim": "travel"
+     },
+     "next": [
+      {
+       "when": "arrived:pilgrim",
+       "to": "done"
+      },
+      {
+       "when": "player_far:120",
+       "to": "done"
+      }
+     ]
+    },
+    "done": {
+     "end": "passed"
+    }
+   }
+  },
+  {
+   "id": "injured_traveller",
+   "title": "Someone hurt by the road",
+   "type": "human",
+   "rarity": "uncommon",
+   "weight": 1.2,
+   "cooldown": 600,
+   "repeatable": true,
+   "when": {
+    "road": 25,
+    "hours": [
+     6,
+     20
+    ]
+   },
+   "spawn": "ahead",
+   "cast": [
+    {
+     "tag": "hurt",
+     "kind": "person",
+     "count": [
+      1,
+      1
+     ],
+     "role": "VILLAGER",
+     "title": "Injured traveller",
+     "level": [
+      1,
+      5
+     ],
+     "wounded": 0.35,
+     "give": {
+      "coins": 30
+     },
+     "travel": "settlement"
+    }
+   ],
+   "start": "down",
+   "stages": {
+    "down": {
+     "do": {
+      "hurt": "plead"
+     },
+     "say": {
+      "hurt": [
+       "Over here... please. They took my purse and left me for the crows."
+      ]
+     },
+     "next": [
+      {
+       "when": "near:hurt:4",
+       "to": "ask"
+      },
+      {
+       "when": "timer:400",
+       "to": "gone"
+      }
+     ]
+    },
+    "ask": {
+     "do": {
+      "hurt": "plead"
+     },
+     "dialog": {
+      "speaker": "hurt",
+      "text": "Wolves, or worse - I didn't see. I can't walk on this leg. Have you a bandage, or a bite to eat?",
+      "choices": [
+       {
+        "text": "Bind the wound (a bandage).",
+        "to": "helped",
+        "effects": [
+         "give:bandage:1:hurt",
+         "heal:hurt",
+         "honor:4:tended a stranger by the road",
+         "reward:coins:20"
+        ],
+        "requires": {
+         "item": "bandage"
+        }
+       },
+       {
+        "text": "Here, eat something (bread).",
+        "to": "helped",
+        "effects": [
+         "give:bread:1:hurt",
+         "heal:hurt",
+         "honor:3:fed a hurt stranger",
+         "reward:coins:10"
+        ],
+        "requires": {
+         "item": "bread"
+        }
+       },
+       {
+        "text": "I can't help you.",
+        "to": "left"
+       }
+      ]
+     },
+     "next": [
+      {
+       "when": "player_far:10",
+       "to": "left"
+      },
+      {
+       "when": "timer:60",
+       "to": "left"
+      }
+     ]
+    },
+    "helped": {
+     "do": {
+      "hurt": "travel"
+     },
+     "say": {
+      "hurt": [
+       "Bless you. Take this - it's what they didn't find in my boot."
+      ]
+     },
+     "effects": [
+      "rumor:helped a hurt traveller on the road"
+     ],
+     "end": "helped"
+    },
+    "left": {
+     "do": {
+      "hurt": "plead"
+     },
+     "next": [
+      {
+       "when": "player_far:60",
+       "to": "gone"
+      }
+     ]
+    },
+    "gone": {
+     "do": {
+      "hurt": "travel"
+     },
+     "end": "ignored"
+    }
+   }
+  },
+  {
+   "id": "roadside_dispute",
+   "title": "A quarrel by the road",
+   "type": "human",
+   "rarity": "uncommon",
+   "weight": 1.2,
+   "cooldown": 480,
+   "repeatable": true,
+   "when": {
+    "road": 25,
+    "realm": true,
+    "hours": [
+     8,
+     20
+    ]
+   },
+   "spawn": "ahead",
+   "cast": [
+    {
+     "tag": "debtor",
+     "kind": "person",
+     "count": [
+      1,
+      1
+     ],
+     "role": "VILLAGER",
+     "title": "Carter",
+     "level": [
+      3,
+      8
+     ],
+     "give": {
+      "coins": 6
+     },
+     "travel": "settlement"
+    },
+    {
+     "tag": "creditor",
+     "kind": "person",
+     "count": [
+      1,
+      1
+     ],
+     "role": "MERCHANT",
+     "title": "Moneylender",
+     "level": [
+      3,
+      8
+     ],
+     "give": {
+      "coins": 60
+     },
+     "travel": "settlement"
+    }
+   ],
+   "start": "argue",
+   "stages": {
+    "argue": {
+     "do": {
+      "debtor": "hold",
+      "creditor": "hold"
+     },
+     "say": {
+      "creditor": [
+       "Twelve coins at Midsummer, you swore it before witnesses!"
+      ],
+      "debtor": [
+       "And the harvest failed! I'll pay at the next fair!"
+      ]
+     },
+     "next": [
+      {
+       "when": "near:creditor:6",
+       "to": "judge"
+      },
+      {
+       "when": "timer:300",
+       "to": "settled"
+      }
+     ]
+    },
+    "judge": {
+     "do": {
+      "debtor": "hold",
+      "creditor": "hold"
+     },
+     "dialog": {
+      "speaker": "creditor",
+      "text": "You there - you've an honest face. This man owes me twelve coins and won't pay. A witnessed promise is a promise, is it not?",
+      "choices": [
+       {
+        "text": "Pay his debt yourself (12 coins).",
+        "to": "paid",
+        "effects": [
+         "pay:creditor:flat:12",
+         "honor:4:paid a stranger's debt",
+         "rumor:settled a carter's debt out of their own purse"
+        ],
+        "requires": {
+         "coins": 12
+        }
+       },
+       {
+        "text": "A failed harvest is no crime. Give him till the fair.",
+        "to": "mercy",
+        "effects": [
+         "honor:2:spoke for mercy in a debt"
+        ]
+       },
+       {
+        "text": "A promise is a promise. Pay him.",
+        "to": "strict",
+        "effects": [
+         "honor:1:upheld a witnessed promise"
+        ]
+       },
+       {
+        "text": "Not my affair.",
+        "to": "settled"
+       }
+      ]
+     },
+     "next": [
+      {
+       "when": "player_far:12",
+       "to": "settled"
+      },
+      {
+       "when": "timer:60",
+       "to": "settled"
+      }
+     ]
+    },
+    "paid": {
+     "do": {
+      "debtor": "travel",
+      "creditor": "travel"
+     },
+     "say": {
+      "debtor": [
+       "I... thank you. I won't forget it."
+      ]
+     },
+     "end": "paid_debt"
+    },
+    "mercy": {
+     "do": {
+      "debtor": "travel",
+      "creditor": "travel"
+     },
+     "say": {
+      "creditor": [
+       "...Till the fair, then. Not a day after."
+      ]
+     },
+     "end": "mercy"
+    },
+    "strict": {
+     "do": {
+      "debtor": "travel",
+      "creditor": "travel"
+     },
+     "say": {
+      "debtor": [
+       "Fine! Fine. Here. Take it and choke on it."
+      ]
+     },
+     "end": "strict"
+    },
+    "settled": {
+     "do": {
+      "debtor": "travel",
+      "creditor": "travel"
+     },
+     "end": "walked_on"
+    }
+   }
+  },
+  {
+   "id": "realm_patrol",
+   "title": "A patrol of the watch",
+   "type": "human",
+   "rarity": "common",
+   "weight": 2.0,
+   "cooldown": 180,
+   "repeatable": true,
+   "when": {
+    "road": 20,
+    "realm": true
+   },
+   "spawn": "ahead",
+   "cast": [
+    {
+     "tag": "patrol",
+     "kind": "person",
+     "count": [
+      2,
+      3
+     ],
+     "role": "GUARD",
+     "title": "Patrol of the watch",
+     "level": [
+      30,
+      40
+     ],
+     "wear": [
+      "steel_sword",
+      "steel_shield",
+      "steel_body"
+     ],
+     "travel": "settlement",
+     "realmGuard": true
+    }
+   ],
+   "start": "approach",
+   "stages": {
+    "approach": {
+     "do": {
+      "patrol": "approach"
+     },
+     "next": [
+      {
+       "when": "near:patrol:6",
+       "to": "check"
+      },
+      {
+       "when": "timer:150",
+       "to": "onward"
+      }
+     ]
+    },
+    "check": {
+     "do": {
+      "patrol": "hold"
+     },
+     "next": [
+      {
+       "when": "wanted",
+       "to": "arrest"
+      },
+      {
+       "when": "timer:1",
+       "to": "greet"
+      }
+     ]
+    },
+    "greet": {
+     "do": {
+      "patrol": "hold"
+     },
+     "say": {
+      "patrol": [
+       "Roads are quiet today. Keep them so.",
+       "Move along, citizen. And report any outlaws you see."
+      ]
+     },
+     "next": [
+      {
+       "when": "timer:5",
+       "to": "onward"
+      }
+     ]
+    },
+    "arrest": {
+     "do": {
+      "patrol": "arrest"
+     },
+     "say": {
+      "patrol": [
+       "You're wanted in these parts. Come quietly."
+      ]
+     },
+     "next": [
+      {
+       "when": "timer:60",
+       "to": "onward"
+      }
+     ]
+    },
+    "onward": {
+     "do": {
+      "patrol": "travel"
+     },
+     "next": [
+      {
+       "when": "arrived:patrol",
+       "to": "done"
+      },
+      {
+       "when": "player_far:140",
+       "to": "done"
+      }
+     ]
+    },
+    "done": {
+     "end": "passed"
+    }
+   }
+  },
+  {
+   "id": "prisoner_transport",
+   "title": "A prisoner under guard",
+   "type": "human",
+   "rarity": "uncommon",
+   "weight": 1.0,
+   "cooldown": 600,
+   "repeatable": true,
+   "when": {
+    "road": 25,
+    "realm": true,
+    "hours": [
+     7,
+     19
+    ]
+   },
+   "spawn": "ahead",
+   "cast": [
+    {
+     "tag": "escort",
+     "kind": "person",
+     "count": [
+      2,
+      2
+     ],
+     "role": "GUARD",
+     "title": "Gaoler's escort",
+     "level": [
+      28,
+      36
+     ],
+     "wear": [
+      "steel_sword",
+      "steel_body"
+     ],
+     "travel": "settlement",
+     "realmGuard": true
+    },
+    {
+     "tag": "prisoner",
+     "kind": "person",
+     "count": [
+      1,
+      1
+     ],
+     "role": "VILLAGER",
+     "title": "Prisoner",
+     "level": [
+      5,
+      10
+     ],
+     "bound": true
+    }
+   ],
+   "start": "march",
+   "stages": {
+    "march": {
+     "do": {
+      "escort": "approach",
+      "prisoner": "follow:escort"
+     },
+     "next": [
+      {
+       "when": "near:prisoner:5",
+       "to": "plea"
+      },
+      {
+       "when": "timer:150",
+       "to": "onward"
+      }
+     ]
+    },
+    "plea": {
+     "do": {
+      "escort": "hold",
+      "prisoner": "hold"
+     },
+     "dialog": {
+      "speaker": "prisoner",
+      "text": "Please - I took a loaf, that's all, and they'll hang me at the crossroads for it. Cut me loose and I'll vanish, I swear on the Sun.",
+      "choices": [
+       {
+        "text": "Cut the prisoner free.",
+        "to": "freed",
+        "effects": [
+         "crime:assault:escort",
+         "free:prisoner",
+         "hostile:escort"
+        ]
+       },
+       {
+        "text": "Speak to the escort for them.",
+        "to": "pleaded",
+        "test": {
+         "honorOver": 40
+        },
+        "else": "refused"
+       },
+       {
+        "text": "Walk on.",
+        "to": "onward"
+       }
+      ]
+     },
+     "next": [
+      {
+       "when": "player_far:12",
+       "to": "onward"
+      },
+      {
+       "when": "timer:40",
+       "to": "onward"
+      },
+      {
+       "when": "hurt:escort",
+       "to": "freed"
+      }
+     ]
+    },
+    "freed": {
+     "do": {
+      "escort": "attack_player",
+      "prisoner": "flee"
+     },
+     "say": {
+      "prisoner": [
+       "Free! Bless you!"
+      ],
+      "escort": [
+       "Stop! In the king's name!"
+      ]
+     },
+     "next": [
+      {
+       "when": "dead:escort:all",
+       "to": "rescued"
+      },
+      {
+       "when": "player_far:80",
+       "to": "rescued"
+      }
+     ]
+    },
+    "rescued": {
+     "effects": [
+      "rumor:freed a prisoner from the gaolers on the road",
+      "flag:freed_a_prisoner"
+     ],
+     "end": "freed"
+    },
+    "pleaded": {
+     "do": {
+      "escort": "travel",
+      "prisoner": "flee"
+     },
+     "say": {
+      "escort": [
+       "...On your word, then. Go, and don't let me see you again."
+      ]
+     },
+     "effects": [
+      "honor:3:won a prisoner's release"
+     ],
+     "end": "pardoned"
+    },
+    "refused": {
+     "do": {
+      "escort": "travel",
+      "prisoner": "follow:escort"
+     },
+     "say": {
+      "escort": [
+       "The magistrate decides, not you. Stand aside."
+      ]
+     },
+     "end": "refused"
+    },
+    "onward": {
+     "do": {
+      "escort": "travel",
+      "prisoner": "follow:escort"
+     },
+     "next": [
+      {
+       "when": "arrived:escort",
+       "to": "done"
+      },
+      {
+       "when": "player_far:140",
+       "to": "done"
+      }
+     ]
+    },
+    "done": {
+     "do": {
+      "prisoner": "despawn"
+     },
+     "end": "delivered"
+    }
+   }
+  },
+  {
+   "id": "fugitive",
+   "title": "A fugitive and the pursuit",
+   "type": "human",
+   "rarity": "uncommon",
+   "weight": 1.0,
+   "cooldown": 600,
+   "repeatable": true,
+   "when": {
+    "hours": [
+     6,
+     22
+    ]
+   },
+   "spawn": "around",
+   "cast": [
+    {
+     "tag": "runner",
+     "kind": "person",
+     "count": [
+      1,
+      1
+     ],
+     "role": "THIEF",
+     "title": "Fugitive",
+     "level": [
+      6,
+      12
+     ],
+     "give": {
+      "coins": 25
+     },
+     "run": true
+    },
+    {
+     "tag": "hunters",
+     "kind": "person",
+     "count": [
+      2,
+      3
+     ],
+     "role": "GUARD",
+     "title": "Pursuer",
+     "level": [
+      24,
+      32
+     ],
+     "wear": [
+      "iron_sword",
+      "stone_body"
+     ],
+     "spawn": "behind_runner",
+     "realmGuard": true,
+     "travel": "settlement"
+    }
+   ],
+   "start": "run",
+   "stages": {
+    "run": {
+     "do": {
+      "runner": "approach",
+      "hunters": "hold"
+     },
+     "next": [
+      {
+       "when": "near:runner:5",
+       "to": "beg"
+      },
+      {
+       "when": "timer:90",
+       "to": "chase"
+      }
+     ]
+    },
+    "beg": {
+     "do": {
+      "runner": "hold",
+      "hunters": "hold"
+     },
+     "dialog": {
+      "speaker": "runner",
+      "text": "They're after me - I owe a lord's reeve, nothing more! If they ask, you never saw me. Please!",
+      "choices": [
+       {
+        "text": "Go. I never saw you.",
+        "to": "hidden",
+        "effects": [
+         "flag:sheltered_fugitive"
+        ]
+       },
+       {
+        "text": "Stay here till they come.",
+        "to": "held"
+       },
+       {
+        "text": "Not my business.",
+        "to": "chase"
+       }
+      ]
+     },
+     "next": [
+      {
+       "when": "timer:25",
+       "to": "chase"
+      },
+      {
+       "when": "player_far:15",
+       "to": "chase"
+      }
+     ]
+    },
+    "hidden": {
+     "do": {
+      "runner": "flee",
+      "hunters": "approach"
+     },
+     "next": [
+      {
+       "when": "near:hunters:6",
+       "to": "asked"
+      },
+      {
+       "when": "timer:80",
+       "to": "lost"
+      }
+     ]
+    },
+    "asked": {
+     "do": {
+      "hunters": "hold"
+     },
+     "dialog": {
+      "speaker": "hunters",
+      "text": "A man ran this way - lean, grey cloak, owes the reeve. Which way did he go?",
+      "choices": [
+       {
+        "text": "He went toward the river. (lie)",
+        "to": "lost",
+        "effects": [
+         "honor:-1:lied to the pursuit"
+        ]
+       },
+       {
+        "text": "That way, after him.",
+        "to": "caught",
+        "effects": [
+         "reward:coins:15"
+        ]
+       },
+       {
+        "text": "I saw no one.",
+        "to": "lost"
+       }
+      ]
+     },
+     "next": [
+      {
+       "when": "timer:30",
+       "to": "lost"
+      }
+     ]
+    },
+    "held": {
+     "do": {
+      "runner": "hold",
+      "hunters": "approach"
+     },
+     "next": [
+      {
+       "when": "near:hunters:6",
+       "to": "caught"
+      }
+     ]
+    },
+    "chase": {
+     "do": {
+      "runner": "flee",
+      "hunters": "chase:runner"
+     },
+     "next": [
+      {
+       "when": "dead:runner:all",
+       "to": "caught"
+      },
+      {
+       "when": "timer:120",
+       "to": "lost"
+      }
+     ]
+    },
+    "caught": {
+     "do": {
+      "runner": "follow:hunters",
+      "hunters": "travel"
+     },
+     "say": {
+      "hunters": [
+       "That's him. Thank you, traveller."
+      ]
+     },
+     "end": "caught"
+    },
+    "lost": {
+     "do": {
+      "hunters": "travel",
+      "runner": "leave"
+     },
+     "end": "escaped"
+    }
+   }
+  },
+  {
+   "id": "bounty_hunter",
+   "title": "A bounty hunter",
+   "type": "human",
+   "rarity": "uncommon",
+   "weight": 2.5,
+   "cooldown": 720,
+   "repeatable": true,
+   "when": {
+    "bounty": true,
+    "playerLevel": [
+     5,
+     99
+    ]
+   },
+   "spawn": "behind",
+   "cast": [
+    {
+     "tag": "hunter",
+     "kind": "person",
+     "count": [
+      1,
+      2
+     ],
+     "role": "HUNTER",
+     "title": "Bounty hunter",
+     "level": [
+      25,
+      45
+     ],
+     "wear": [
+      "steel_sword",
+      "stone_body"
+     ],
+     "give": {
+      "coins": 30
+     }
+    }
+   ],
+   "start": "track",
+   "stages": {
+    "track": {
+     "do": {
+      "hunter": "approach"
+     },
+     "next": [
+      {
+       "when": "near:hunter:7",
+       "to": "confront"
+      },
+      {
+       "when": "timer:200",
+       "to": "gone"
+      }
+     ]
+    },
+    "confront": {
+     "do": {
+      "hunter": "hold"
+     },
+     "dialog": {
+      "speaker": "hunter",
+      "text": "Your face is on a board in town, friend, with a price under it. Come along and we'll both live to see the gaol.",
+      "choices": [
+       {
+        "text": "I'll come quietly.",
+        "to": "surrender",
+        "effects": [
+         "surrender"
+        ]
+       },
+       {
+        "text": "Make me.",
+        "to": "fight"
+       },
+       {
+        "text": "Here - take this and forget my face.",
+        "to": "bribed",
+        "effects": [
+         "pay:hunter:percent:25:min:40"
+        ],
+        "requires": {
+         "coins": 40
+        }
+       }
+      ]
+     },
+     "next": [
+      {
+       "when": "player_far:25",
+       "to": "fight"
+      },
+      {
+       "when": "timer:40",
+       "to": "fight"
+      },
+      {
+       "when": "hurt:hunter",
+       "to": "fight"
+      }
+     ]
+    },
+    "surrender": {
+     "do": {
+      "hunter": "leave"
+     },
+     "end": "surrendered"
+    },
+    "bribed": {
+     "do": {
+      "hunter": "leave"
+     },
+     "say": {
+      "hunter": [
+       "Never saw you. The next one might not be so reasonable."
+      ]
+     },
+     "end": "bribed"
+    },
+    "fight": {
+     "do": {
+      "hunter": "attack_player"
+     },
+     "next": [
+      {
+       "when": "dead:hunter:all",
+       "to": "won"
+      },
+      {
+       "when": "player_far:80",
+       "to": "gone"
+      }
+     ]
+    },
+    "won": {
+     "effects": [
+      "rumor:killed a bounty hunter who came for them"
+     ],
+     "end": "won"
+    },
+    "gone": {
+     "do": {
+      "hunter": "leave"
+     },
+     "end": "lost_interest"
+    }
+   }
+  },
+  {
+   "id": "assassin",
+   "title": "The assassin",
+   "type": "human",
+   "rarity": "rare",
+   "weight": 1.0,
+   "cooldown": 2880,
+   "repeatable": true,
+   "when": {
+    "playerLevel": [
+     20,
+     99
+    ],
+    "honorUnder": -20
+   },
+   "spawn": "ahead",
+   "cast": [
+    {
+     "tag": "killer",
+     "kind": "person",
+     "count": [
+      1,
+      1
+     ],
+     "role": "THIEF",
+     "title": "Traveller",
+     "level": [
+      35,
+      50
+     ],
+     "wear": [
+      "steel_dagger"
+     ],
+     "hostile": false,
+     "give": {
+      "coins": 80
+     }
+    }
+   ],
+   "start": "approach",
+   "stages": {
+    "approach": {
+     "do": {
+      "killer": "approach"
+     },
+     "next": [
+      {
+       "when": "near:killer:3",
+       "to": "strike"
+      },
+      {
+       "when": "timer:150",
+       "to": "gone"
+      }
+     ]
+    },
+    "strike": {
+     "do": {
+      "killer": "attack_player"
+     },
+     "say": {
+      "killer": [
+       "Someone paid well for this."
+      ]
+     },
+     "next": [
+      {
+       "when": "dead:killer:all",
+       "to": "won"
+      },
+      {
+       "when": "hurt_half:killer",
+       "to": "rout"
+      },
+      {
+       "when": "player_far:70",
+       "to": "gone"
+      }
+     ]
+    },
+    "rout": {
+     "do": {
+      "killer": "flee"
+     },
+     "end": "routed"
+    },
+    "won": {
+     "effects": [
+      "rumor:slew an assassin sent after them"
+     ],
+     "end": "won"
+    },
+    "gone": {
+     "do": {
+      "killer": "leave"
+     },
+     "end": "lost_interest"
+    }
+   }
+  },
+  {
+   "id": "kidnapping",
+   "title": "A kidnapping",
+   "type": "human",
+   "rarity": "rare",
+   "weight": 1.0,
+   "cooldown": 1440,
+   "repeatable": true,
+   "when": {
+    "wilds": true,
+    "hours": [
+     6,
+     21
+    ],
+    "playerLevel": [
+     6,
+     99
+    ]
+   },
+   "spawn": "ahead",
+   "cast": [
+    {
+     "tag": "taken",
+     "kind": "person",
+     "count": [
+      1,
+      1
+     ],
+     "role": "VILLAGER",
+     "title": "Captive",
+     "level": [
+      1,
+      4
+     ],
+     "bound": true,
+     "female": true,
+     "travel": "settlement"
+    },
+    {
+     "tag": "takers",
+     "kind": "person",
+     "count": [
+      2,
+      3
+     ],
+     "role": "BANDIT",
+     "title": "Slaver",
+     "level": [
+      14,
+      26
+     ],
+     "wear": [
+      "iron_sword",
+      "stone_body"
+     ],
+     "give": {
+      "coins": 25
+     },
+     "drift": "camp"
+    }
+   ],
+   "start": "drag",
+   "stages": {
+    "drag": {
+     "do": {
+      "takers": "leave",
+      "taken": "follow:takers"
+     },
+     "say": {
+      "taken": [
+       "Help! Somebody, please! They're taking me!"
+      ]
+     },
+     "next": [
+      {
+       "when": "near:taken:10",
+       "to": "confront"
+      },
+      {
+       "when": "hurt:takers",
+       "to": "fight"
+      },
+      {
+       "when": "timer:120",
+       "to": "gone"
+      }
+     ]
+    },
+    "confront": {
+     "do": {
+      "takers": "hold",
+      "taken": "plead"
+     },
+     "dialog": {
+      "speaker": "takers",
+      "text": "Keep walking. She's a debtor of the Count's, and none of yours.",
+      "choices": [
+       {
+        "text": "Let her go.",
+        "to": "fight"
+       },
+       {
+        "text": "Buy her freedom (50 coins).",
+        "to": "ransomed",
+        "effects": [
+         "pay:takers:flat:50"
+        ],
+        "requires": {
+         "coins": 50
+        }
+       },
+       {
+        "text": "Walk on.",
+        "to": "gone"
+       }
+      ]
+     },
+     "next": [
+      {
+       "when": "player_far:20",
+       "to": "gone"
+      },
+      {
+       "when": "timer:40",
+       "to": "fight"
+      },
+      {
+       "when": "hurt:takers",
+       "to": "fight"
+      }
+     ]
+    },
+    "fight": {
+     "do": {
+      "takers": "attack_player",
+      "taken": "plead"
+     },
+     "next": [
+      {
+       "when": "dead:takers:all",
+       "to": "rescued"
+      },
+      {
+       "when": "player_far:70",
+       "to": "gone"
+      }
+     ]
+    },
+    "ransomed": {
+     "do": {
+      "takers": "leave",
+      "taken": "travel"
+     },
+     "say": {
+      "taken": [
+       "Thank you... thank you."
+      ]
+     },
+     "effects": [
+      "free:taken",
+      "honor:4:ransomed a captive"
+     ],
+     "end": "ransomed"
+    },
+    "rescued": {
+     "do": {
+      "taken": "travel"
+     },
+     "say": {
+      "taken": [
+       "You came for me. I'll tell everyone in town."
+      ]
+     },
+     "effects": [
+      "free:taken",
+      "honor:6:freed a captive from slavers",
+      "rumor:freed a captive from slavers on the road",
+      "reward:coins:30"
+     ],
+     "end": "rescued"
+    },
+    "gone": {
+     "do": {
+      "takers": "leave",
+      "taken": "follow:takers"
+     },
+     "end": "ignored"
+    }
+   }
+  },
+  {
+   "id": "skirmish",
+   "title": "Outlaws and the watch at blows",
+   "type": "human",
+   "rarity": "uncommon",
+   "weight": 1.0,
+   "cooldown": 720,
+   "repeatable": true,
+   "when": {
+    "road": 40,
+    "hours": [
+     6,
+     21
+    ]
+   },
+   "spawn": "ahead",
+   "cast": [
+    {
+     "tag": "watch",
+     "kind": "person",
+     "count": [
+      2,
+      2
+     ],
+     "role": "GUARD",
+     "title": "Patrol of the watch",
+     "level": [
+      28,
+      36
+     ],
+     "wear": [
+      "steel_sword",
+      "steel_shield"
+     ],
+     "realmGuard": true,
+     "travel": "settlement"
+    },
+    {
+     "tag": "outlaws",
+     "kind": "person",
+     "count": [
+      2,
+      3
+     ],
+     "role": "BANDIT",
+     "title": "Outlaw",
+     "level": [
+      16,
+      26
+     ],
+     "wear": [
+      "iron_sword"
+     ],
+     "give": {
+      "coins": 15
+     },
+     "drift": "camp"
+    }
+   ],
+   "start": "brawl",
+   "stages": {
+    "brawl": {
+     "do": {
+      "watch": "attack:outlaws",
+      "outlaws": "attack:watch"
+     },
+     "next": [
+      {
+       "when": "dead:outlaws:all",
+       "to": "watch_won"
+      },
+      {
+       "when": "dead:watch:all",
+       "to": "outlaws_won"
+      },
+      {
+       "when": "timer:240",
+       "to": "over"
+      }
+     ]
+    },
+    "watch_won": {
+     "do": {
+      "watch": "travel"
+     },
+     "say": {
+      "watch": [
+       "That's the last of them. Our thanks if you lent a hand."
+      ]
+     },
+     "effects": [
+      "rumor:the watch beat off outlaws on the road"
+     ],
+     "end": "watch_won"
+    },
+    "outlaws_won": {
+     "do": {
+      "outlaws": "attack_player"
+     },
+     "next": [
+      {
+       "when": "dead:outlaws:all",
+       "to": "over"
+      },
+      {
+       "when": "player_far:70",
+       "to": "over"
+      }
+     ]
+    },
+    "over": {
+     "do": {
+      "outlaws": "leave",
+      "watch": "travel"
+     },
+     "end": "over"
+    }
+   }
+  },
+  {
+   "id": "migrating_herd",
+   "title": "A herd on the move",
+   "type": "animal",
+   "rarity": "common",
+   "weight": 2.0,
+   "cooldown": 240,
+   "repeatable": true,
+   "when": {
+    "wilds": true,
+    "biomes": [
+     "meadow",
+     "clearing",
+     "upland",
+     "heath",
+     "highland",
+     "marches",
+     "willowmeadow"
+    ],
+    "hours": [
+     5,
+     20
+    ]
+   },
+   "spawn": "far",
+   "cast": [
+    {
+     "tag": "herd",
+     "kind": "animal",
+     "count": [
+      4,
+      8
+     ],
+     "species": "DEER"
+    }
+   ],
+   "start": "cross",
+   "stages": {
+    "cross": {
+     "do": {
+      "herd": "migrate"
+     },
+     "next": [
+      {
+       "when": "timer:240",
+       "to": "done"
+      },
+      {
+       "when": "player_far:160",
+       "to": "done"
+      }
+     ]
+    },
+    "done": {
+     "end": "passed"
+    }
+   }
+  },
+  {
+   "id": "wolves_on_the_hunt",
+   "title": "Wolves on the hunt",
+   "type": "animal",
+   "rarity": "uncommon",
+   "weight": 1.5,
+   "cooldown": 360,
+   "repeatable": true,
+   "when": {
+    "wilds": true,
+    "biomes": [
+     "oakwood",
+     "pinewood",
+     "upland",
+     "highland",
+     "deadwood",
+     "crags"
+    ],
+    "settledFar": 120
+   },
+   "spawn": "far",
+   "cast": [
+    {
+     "tag": "prey",
+     "kind": "animal",
+     "count": [
+      2,
+      3
+     ],
+     "species": "DEER"
+    },
+    {
+     "tag": "pack",
+     "kind": "animal",
+     "count": [
+      2,
+      4
+     ],
+     "species": "WOLF",
+     "spawn": "behind_prey"
+    }
+   ],
+   "start": "chase",
+   "stages": {
+    "chase": {
+     "do": {
+      "pack": "hunt:prey",
+      "prey": "flee:pack"
+     },
+     "next": [
+      {
+       "when": "dead:prey:any",
+       "to": "feast"
+      },
+      {
+       "when": "timer:240",
+       "to": "done"
+      }
+     ]
+    },
+    "feast": {
+     "do": {
+      "pack": "graze"
+     },
+     "next": [
+      {
+       "when": "timer:300",
+       "to": "done"
+      },
+      {
+       "when": "player_far:160",
+       "to": "done"
+      }
+     ]
+    },
+    "done": {
+     "end": "passed"
+    }
+   }
+  },
+  {
+   "id": "carrion_feast",
+   "title": "Carrion birds at a carcass",
+   "type": "animal",
+   "rarity": "common",
+   "weight": 2.0,
+   "cooldown": 240,
+   "repeatable": true,
+   "when": {
+    "wilds": true
+   },
+   "spawn": "far",
+   "cast": [
+    {
+     "tag": "carcass",
+     "kind": "carcass",
+     "count": [
+      1,
+      1
+     ],
+     "species": "DEER"
+    },
+    {
+     "tag": "crows",
+     "kind": "animal",
+     "count": [
+      3,
+      6
+     ],
+     "species": "CROW",
+     "biomesNot": [
+      "desert",
+      "dunes",
+      "sandstone",
+      "volcanic",
+      "cinders"
+     ]
+    },
+    {
+     "tag": "vultures",
+     "kind": "animal",
+     "count": [
+      1,
+      3
+     ],
+     "species": "VULTURE",
+     "biomes": [
+      "desert",
+      "dunes",
+      "sandstone",
+      "volcanic",
+      "cinders",
+      "scorched",
+      "heath",
+      "crags",
+      "highland",
+      "marches"
+     ]
+    }
+   ],
+   "start": "feed",
+   "stages": {
+    "feed": {
+     "do": {
+      "crows": "scavenge:carcass",
+      "vultures": "scavenge:carcass"
+     },
+     "next": [
+      {
+       "when": "gone:carcass",
+       "to": "done"
+      },
+      {
+       "when": "timer:900",
+       "to": "done"
+      },
+      {
+       "when": "player_far:180",
+       "to": "done"
+      }
+     ]
+    },
+    "done": {
+     "end": "picked_clean"
+    }
+   }
+  },
+  {
+   "id": "bear_at_berries",
+   "title": "A bear foraging",
+   "type": "animal",
+   "rarity": "uncommon",
+   "weight": 1.0,
+   "cooldown": 600,
+   "repeatable": true,
+   "when": {
+    "wilds": true,
+    "biomes": [
+     "oakwood",
+     "pinewood",
+     "copse",
+     "upland"
+    ],
+    "settledFar": 120,
+    "hours": [
+     6,
+     20
+    ]
+   },
+   "spawn": "far",
+   "cast": [
+    {
+     "tag": "bear",
+     "kind": "animal",
+     "count": [
+      1,
+      1
+     ],
+     "species": "BROWN_BEAR"
+    }
+   ],
+   "start": "forage",
+   "stages": {
+    "forage": {
+     "do": {
+      "bear": "graze"
+     },
+     "next": [
+      {
+       "when": "timer:300",
+       "to": "done"
+      },
+      {
+       "when": "player_far:160",
+       "to": "done"
+      }
+     ]
+    },
+    "done": {
+     "end": "passed"
+    }
+   }
+  },
+  {
+   "id": "goblin_raiders",
+   "title": "Goblin raiders",
+   "type": "monster",
+   "rarity": "uncommon",
+   "weight": 1.5,
+   "cooldown": 600,
+   "repeatable": true,
+   "when": {
+    "wilds": true,
+    "hours": [
+     19,
+     6
+    ],
+    "regions": [
+     "loxford_lowlands",
+     "southern_marches",
+     "gallows_heath",
+     "western_crags",
+     "dead_wood",
+     "dimwater_basin"
+    ]
+   },
+   "spawn": "around_hidden",
+   "cast": [
+    {
+     "tag": "raiders",
+     "kind": "monster",
+     "count": [
+      3,
+      5
+     ],
+     "monster": "GOBLIN",
+     "level": [
+      4,
+      10
+     ]
+    }
+   ],
+   "start": "creep",
+   "stages": {
+    "creep": {
+     "do": {
+      "raiders": "hide"
+     },
+     "next": [
+      {
+       "when": "near:raiders:14",
+       "to": "rush"
+      },
+      {
+       "when": "timer:300",
+       "to": "gone"
+      }
+     ]
+    },
+    "rush": {
+     "do": {
+      "raiders": "attack_player"
+     },
+     "next": [
+      {
+       "when": "dead:raiders:all",
+       "to": "won"
+      },
+      {
+       "when": "player_far:70",
+       "to": "gone"
+      }
+     ]
+    },
+    "won": {
+     "effects": [
+      "honor:2:drove off goblin raiders",
+      "rumor:beat off a goblin raiding party"
+     ],
+     "end": "won"
+    },
+    "gone": {
+     "do": {
+      "raiders": "despawn"
+     },
+     "end": "lost_interest"
+    }
+   }
+  },
+  {
+   "id": "monster_hunters",
+   "title": "Monster hunters at work",
+   "type": "mixed",
+   "rarity": "rare",
+   "weight": 1.0,
+   "cooldown": 1440,
+   "repeatable": true,
+   "when": {
+    "wilds": true,
+    "hours": [
+     6,
+     20
+    ],
+    "playerLevel": [
+     10,
+     99
+    ]
+   },
+   "spawn": "ahead",
+   "cast": [
+    {
+     "tag": "hunters",
+     "kind": "person",
+     "count": [
+      2,
+      2
+     ],
+     "role": "HUNTER",
+     "title": "Monster hunter",
+     "level": [
+      30,
+      40
+     ],
+     "wear": [
+      "steel_sword",
+      "stone_body"
+     ],
+     "give": {
+      "coins": 20
+     },
+     "travel": "settlement"
+    },
+    {
+     "tag": "beast",
+     "kind": "monster",
+     "count": [
+      1,
+      1
+     ],
+     "monster": "ORC",
+     "level": [
+      18,
+      24
+     ],
+     "spawn": "near_hunters"
+    }
+   ],
+   "start": "battle",
+   "stages": {
+    "battle": {
+     "do": {
+      "hunters": "attack:beast",
+      "beast": "attack:hunters"
+     },
+     "next": [
+      {
+       "when": "dead:beast:all",
+       "to": "thanks"
+      },
+      {
+       "when": "dead:hunters:all",
+       "to": "loose"
+      },
+      {
+       "when": "timer:240",
+       "to": "over"
+      }
+     ]
+    },
+    "thanks": {
+     "do": {
+      "hunters": "approach"
+     },
+     "say": {
+      "hunters": [
+       "Good timing, if that was you. The Hollow's been spitting these out all season."
+      ]
+     },
+     "next": [
+      {
+       "when": "timer:8",
+       "to": "over"
+      }
+     ]
+    },
+    "loose": {
+     "do": {
+      "beast": "attack_player"
+     },
+     "next": [
+      {
+       "when": "dead:beast:all",
+       "to": "over"
+      },
+      {
+       "when": "player_far:70",
+       "to": "over"
+      }
+     ]
+    },
+    "over": {
+     "do": {
+      "hunters": "travel"
+     },
+     "end": "over"
+    }
+   }
+  }
+ ]
+}

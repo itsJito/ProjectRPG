@@ -91,10 +91,20 @@ public final class RenderCommands {
     public void env(float sunX, float sunY, float sunZ, float daylight, float time, float rain, float wet, float snow, float overcast, float lightning,
                     float fogR, float fogG, float fogB, float fogDensity, float wallStart, float wallEnd, float skyHorizon, float skyZenith,
                     float tintR, float tintG, float tintB, float ambientFloor, float fogOriginX, float fogOriginY, float fogOriginZ, float bloom) {
-        head(AstrattoNative.RCMD_ENV, 112);
+        env(sunX, sunY, sunZ, daylight, time, rain, wet, snow, overcast, lightning, fogR, fogG, fogB, fogDensity, wallStart, wallEnd, skyHorizon, skyZenith,
+                tintR, tintG, tintB, ambientFloor, fogOriginX, fogOriginY, fogOriginZ, bloom, 0, 0, 0, 0, 0);
+    }
+
+    /** (0.4.7) The same, with the world's edge {x0, z0, x1, z1}: the fog bank closes over the last edgeBand metres to it, and the sky past it (edgeBand 0: none). */
+    public void env(float sunX, float sunY, float sunZ, float daylight, float time, float rain, float wet, float snow, float overcast, float lightning,
+                    float fogR, float fogG, float fogB, float fogDensity, float wallStart, float wallEnd, float skyHorizon, float skyZenith,
+                    float tintR, float tintG, float tintB, float ambientFloor, float fogOriginX, float fogOriginY, float fogOriginZ, float bloom,
+                    float edgeX0, float edgeZ0, float edgeX1, float edgeZ1, float edgeBand) {
+        head(AstrattoNative.RCMD_ENV, 136);
         buf.putFloat(sunX).putFloat(sunY).putFloat(sunZ).putFloat(daylight).putFloat(time).putFloat(rain).putFloat(wet).putFloat(snow).putFloat(overcast).putFloat(lightning);
         buf.putFloat(fogR).putFloat(fogG).putFloat(fogB).putFloat(fogDensity).putFloat(wallStart).putFloat(wallEnd).putFloat(skyHorizon).putFloat(skyZenith);
         buf.putFloat(tintR).putFloat(tintG).putFloat(tintB).putFloat(ambientFloor).putFloat(fogOriginX).putFloat(fogOriginY).putFloat(fogOriginZ).putFloat(bloom);
+        buf.putFloat(edgeX0).putFloat(edgeZ0).putFloat(edgeX1).putFloat(edgeZ1).putFloat(edgeBand).putFloat(0);
     }
 
     /** A light: where, how far it reaches, its colour (radiance per unit albedo), flags ({@code LIGHT_*}) and for a spot its direction and cone. */

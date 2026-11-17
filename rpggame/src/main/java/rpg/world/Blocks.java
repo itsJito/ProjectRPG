@@ -23,8 +23,12 @@ public final class Blocks {
             OAK_LOG = 10, OAK_LEAVES = 11, WILLOW_LOG = 12, WILLOW_LEAVES = 13, COPPER_ROCK = 14, TIN_ROCK = 15, IRON_ROCK = 16,
             COAL_ROCK = 17, SPENT_ROCK = 18, WATER = 19, SAND = 20, COBBLE = 21, ROOF = 22, DOOR = 23, LOCKED_DOOR = 24,
             FURNACE = 25, ANVIL = 26, RANGE = 27, CRAFT_TABLE = 28, SAWBENCH = 29, TARGET = 30, FENCE = 31, STUMP = 32,
-            HERB_PATCH = 33, FLAX_PATCH = 34, BERRY_BUSH = 35, CRATE = 36, BOOKCASE = 37, MARK_RED = 38, MARK_BLUE = 39,
-            MARK_YELLOW = 40, DEBUG_FLOOR = 41, PLASTER = 42, BEAM = 43, BARE_PATCH = 44, MARK_GREEN = 45, TABLE = 46, BED = 47, HEADSTONE = 48, CHARRED = 49, ICE = 50,
+            HERB_PATCH = 33, FLAX_PATCH = 34, BERRY_BUSH = 35, CRATE = 36, BOOKCASE = 37,
+            // (0.4.7, gamefixes: make Ashmaw more impressive) the volcano's lava: a glowing crust over the melt, a hazard
+            // routes go round and that burns whoever stands on it (id 38, once the devmap's red marker)
+            LAVA = 38,
+            // (0.4.7) 39 and 40 (two unused marker colours) are now interior walls: see the auto-faced walls below
+            DEBUG_FLOOR = 41, PLASTER = 42, BEAM = 43, BARE_PATCH = 44, MARK_GREEN = 45, TABLE = 46, BED = 47, HEADSTONE = 48, CHARRED = 49, ICE = 50,
             // the building-block set (gamefixes): whole cubes, each with its own 64 x 64 texture and its material
             SPRUCE_LOG = 51, JUNGLE_LOG = 52, BIRCH_LOG = 53, GRANITE = 54, STONE_BRICKS = 55, MARBLE = 56, CLAY = 57, MUD = 58,
             SANDSTONE = 59, RED_SANDSTONE = 60, WHITE_GLASS = 61, LIGHT_BLUE_GLASS = 62, WHITE_CARPET = 63, BLACK_CARPET = 64,
@@ -50,8 +54,8 @@ public final class Blocks {
             // finishes (papered walls, panelling, parquet, a chequered marble floor, velvet), the builder's (slate and thatch
             // roofs, timber framing, flagstones, terracotta, mossy and dark stone, gravel), stained glass and brass
             WALLPAPER_GREEN = 119, WALLPAPER_RED = 120, WAINSCOT = 121, PARQUET = 122, DARK_PLANKS = 123, CHECKER_TILE = 124,
-            FLAGSTONE = 125, SLATE_ROOF = 126, TIMBER_FRAME = 127, MOSSY_BRICKS = 128, TERRACOTTA = 129, VELVET_CARPET = 130,
-            THATCH = 131, BASALT = 132, STAINED_GLASS = 133, GRAVEL = 134, BRASS_BLOCK = 135, WALLPAPER_BLUE = 136,
+            FLAGSTONE = 125, SLATE_ROOF = 126, TIMBER_FRAME = 127, MOSSY_BRICKS = 128, TERRACOTTA = 129,
+            THATCH = 131, BASALT = 132, STAINED_GLASS = 133, GRAVEL = 134, WALLPAPER_BLUE = 136,
             // 0.3.8: the second run of two-faced wall blocks (DUAL_PAIRS from its seventh pair on), four to a pair as the first
             DUAL1 = 137,
             // 0.3.9 (gamefixes: chairs, settees, stools and benches had no collision): a seat's cells - solid to every body
@@ -71,7 +75,28 @@ public final class Blocks {
             // 0.4.4 (gamefixes: every kingdom its own jail with proper cells; Severia built as Rome and Byzantium built) a
             // jail's iron bars (seen through, solid to bodies), the Romans' thin fired brick, a floor of mosaic tesserae,
             // and the Byzantine banded wall - courses of brick between courses of dressed stone
-            IRON_BARS = 250, ROMAN_BRICK = 251, MOSAIC = 252, BANDED_MASONRY = 253, COUNT = 254;
+            IRON_BARS = 250, ROMAN_BRICK = 251, MOSAIC = 252, BANDED_MASONRY = 253,
+            // 0.4.7 (gamefixes: interiors did not use the two-faced blocks fully; six new interior finishes) the territories'
+            // walls with an interior finish of their own, one id each: the mesher turns the finish toward whichever side is
+            // indoors (a roofed, enclosed cell), so a wall needs no id per facing and a partition shows it on both sides.
+            // Loxford's rubble limewashed, Harlette's daub painted, Valgard's ashlar panelled in linenfold oak, Gorrick's
+            // weatherboard clay-rendered, Azharad's adobe tiled in zellige, Severia's stucco frescoed. (Ids reclaimed from
+            // two unused marker colours, the unused velvet and brass blocks, and the last two of the byte.)
+            RUBBLE_LIMEWASH = 39, DAUB_PAINTED = 40, ASHLAR_LINENFOLD = 130, TARRED_CLAY = 135, ADOBE_ZELLIGE = 254, STUCCO_FRESCO = 255,
+            COUNT = 256;
+    /**
+     * (0.4.7) The auto-faced walls: {id, outside block, the block the inside behaves as (fire, repairs), the inside's
+     * texture layer}. Their inside finishes are texture layers only (L_LIMEWASH...), not blocks of their own.
+     */
+    public static final int[][] AUTO_PAIRS = {
+            {RUBBLE_LIMEWASH, RUBBLE_STONE, PLASTER, 135}, {DAUB_PAINTED, OCHRE_DAUB, PLASTER, 136}, {ASHLAR_LINENFOLD, GRANITE_ASHLAR, PLANKS, 137},
+            {TARRED_CLAY, TARRED_PLANKS, CLAY, 138}, {ADOBE_ZELLIGE, ADOBE, TERRACOTTA, 139}, {STUCCO_FRESCO, STUCCO, PLASTER, 140}};
+    /** (0.4.7) The auto-faced wall row of an id, or null. */
+    static int[] autoPair(int id) { for (int[] a : AUTO_PAIRS) if (a[0] == id) return a; return null; }
+    /** (0.4.7) Whether a block is an auto-faced wall: its finish shows on whichever side is indoors. */
+    public static boolean autoFaced(int id) { return autoPair(id) != null; }
+    /** (0.4.7) The auto-faced wall of an outside material (its territory's interior finish), else -1. */
+    public static int autoOf(int outer) { for (int[] a : AUTO_PAIRS) if (a[1] == outer) return a[0]; return -1; }
     /**
      * (0.2.9, gamefixes: ground textures should transition better) each ground's rank for the renderer's edge blend: a
      * higher rank creeps over a lower one's top at the seam, raggedly - grass over a bare patch, over dirt, over sand,
@@ -108,13 +133,15 @@ public final class Blocks {
     }
     /** Inner-face directions of a two-faced block: toward +x, -x, +z, -z. */
     public static final int IN_PX = 0, IN_NX = 1, IN_PZ = 2, IN_NZ = 3;
-    public static boolean dual(int id) { return pairOf(id) >= 0; }
+    public static boolean dual(int id) { return pairOf(id) >= 0 || autoFaced(id); }
     /** The outside half of a two-faced block (the block itself for any other). */
-    public static int outerOf(int id) { int p = pairOf(id); return p >= 0 ? DUAL_PAIRS[p][0] : id; }
-    /** The inside half of a two-faced block (the block itself for any other). */
-    public static int innerOf(int id) { int p = pairOf(id); return p >= 0 ? DUAL_PAIRS[p][1] : id; }
+    public static int outerOf(int id) { int p = pairOf(id); if (p >= 0) return DUAL_PAIRS[p][0]; int[] a = autoPair(id); return a != null ? a[1] : id; }
+    /** The inside half of a two-faced block (the block itself for any other; an auto-faced wall's: what its finish behaves as). */
+    public static int innerOf(int id) { int p = pairOf(id); if (p >= 0) return DUAL_PAIRS[p][1]; int[] a = autoPair(id); return a != null ? a[2] : id; }
     /** Which way a two-faced block's inside faces (IN_*), or -1. */
     public static int innerDir(int id) { int p = pairOf(id); return p >= 0 ? id - dualBase(p) : -1; }
+    /** (0.4.7) The mesher's inner-face code for an auto-faced wall: whichever side is indoors. */
+    public static final int INNER_AUTO = 5;
     /** The two-faced block of an outside and an inside material facing the given way; the outside alone if no such pair. */
     public static int dualOf(int outer, int inner, int dir) {
         for (int i = 0; i < DUAL_PAIRS.length; i++) if (DUAL_PAIRS[i][0] == outer && DUAL_PAIRS[i][1] == inner) return dualBase(i) + dir;
@@ -161,9 +188,8 @@ public final class Blocks {
             case SAND -> Material.SAND;
             case WAINSCOT, PARQUET, DARK_PLANKS, TARRED_PLANKS -> Material.WOOD;
             case OCHRE_DAUB, ADOBE -> Material.EARTH;
-            case VELVET_CARPET, WALLPAPER_GREEN, WALLPAPER_RED, WALLPAPER_BLUE -> Material.CLOTH;
+            case WALLPAPER_GREEN, WALLPAPER_RED, WALLPAPER_BLUE -> Material.CLOTH;
             case THATCH -> Material.STRAW;
-            case BRASS_BLOCK -> Material.METAL;
             case STAINED_GLASS -> Material.GLASS;
             case GRAVEL -> Material.SAND;
             case LADDER, PLANKS, LOG, OAK_LOG, WILLOW_LOG, SPRUCE_LOG, JUNGLE_LOG, BIRCH_LOG, BEAM, ROOF, FENCE, STUMP, CRATE, BOOKCASE, TABLE,
@@ -194,7 +220,7 @@ public final class Blocks {
                 SPRUCE_LOG, JUNGLE_LOG, BIRCH_LOG, GRANITE, STONE_BRICKS, MARBLE, CLAY, MUD, SANDSTONE, RED_SANDSTONE, WHITE_CARPET, BLACK_CARPET,
                 BROWN_CARPET, RED_CARPET, LIMESTONE_BRICKS, IRON_BLOCK, GOLD_BLOCK, COPPER_BLOCK, COAL_BLOCK, HAY_BALE,
                 WALLPAPER_GREEN, WALLPAPER_RED, WAINSCOT, PARQUET, DARK_PLANKS, CHECKER_TILE, FLAGSTONE, SLATE_ROOF, TIMBER_FRAME, MOSSY_BRICKS,
-                TERRACOTTA, VELVET_CARPET, THATCH, BASALT, GRAVEL, BRASS_BLOCK, WALLPAPER_BLUE, ASH, HEATH, PODZOL, DRY_GRASS,
+                TERRACOTTA, THATCH, BASALT, GRAVEL, WALLPAPER_BLUE, ASH, HEATH, PODZOL, DRY_GRASS,
                 RUBBLE_STONE, OCHRE_DAUB, GRANITE_ASHLAR, TARRED_PLANKS, ADOBE, STUCCO, WHITE_ASHLAR, ROMAN_BRICK, MOSAIC, BANDED_MASONRY,
                 CHARRED_PLANKS, CHARRED_LOG, CHARRED_OAK_LOG, CHARRED_WILLOW_LOG, CHARRED_SPRUCE_LOG, CHARRED_JUNGLE_LOG, CHARRED_BIRCH_LOG, CHARRED_BEAM, CHARRED_ROOF -> true; default -> false; };
     }
@@ -206,7 +232,7 @@ public final class Blocks {
             L_BARK = 8, L_RINGS = 9, L_LEAVES = 10, L_OAK_BARK = 11, L_OAK_LEAVES = 12, L_WILLOW_BARK = 13, L_WILLOW_LEAVES = 14,
             L_COPPER = 15, L_TIN = 16, L_IRON = 17, L_COAL = 18, L_SPENT = 19, L_WATER = 20, L_SAND = 21, L_COBBLE = 22, L_ROOF = 23,
             L_DOOR = 24, L_LOCKED = 25, L_FURNACE = 26, L_METAL = 27, L_RANGE = 28, L_TABLE_TOP = 29, L_SAW = 30, L_TARGET = 31,
-            L_FENCE = 32, L_HERB = 33, L_FLAX = 34, L_BERRY = 35, L_CRATE = 36, L_BOOKS = 37, L_RED = 38, L_BLUE = 39, L_YELLOW = 40,
+            L_FENCE = 32, L_HERB = 33, L_FLAX = 34, L_BERRY = 35, L_CRATE = 36, L_BOOKS = 37, L_RED = 38, L_LAVA = 39, L_YELLOW = 40,
             L_DEBUG = 41, L_PLASTER = 42, L_BEAM = 43, L_BARE = 44, L_GREEN = 45, L_TABLE_SIDE = 46,
             L_SPRUCE_BARK = 47, L_SPRUCE_TOP = 48, L_JUNGLE_BARK = 49, L_JUNGLE_TOP = 50, L_BIRCH_BARK = 51, L_BIRCH_TOP = 52,
             L_GRANITE = 53, L_STONE_BRICKS = 54, L_MARBLE = 55, L_CLAY = 56, L_MUD = 57, L_SANDSTONE_TOP = 58, L_SANDSTONE = 59,
@@ -220,9 +246,11 @@ public final class Blocks {
             L_ASH = 103, L_HEATH = 104, L_HEATH_SIDE = 105, L_PODZOL = 106, L_PODZOL_SIDE = 107, L_DRY_GRASS = 108, L_DRY_GRASS_SIDE = 109, L_PINE_LEAVES = 110,
             L_RUBBLE = 111, L_DAUB = 112, L_ASHLAR = 113, L_TARRED = 114, L_ADOBE = 115, L_STUCCO = 116, L_WHITE_ASHLAR = 117,
             // (0.4.4) after the charred twins' run
-            L_IRON_BARS = 131, L_ROMAN_BRICK = 132, L_MOSAIC = 133, L_BANDED = 134;
+            L_IRON_BARS = 131, L_ROMAN_BRICK = 132, L_MOSAIC = 133, L_BANDED = 134,
+            // (0.4.7) the six interior finishes (the auto-faced walls' insides)
+            L_LIMEWASH = 135, L_PAINTED = 136, L_LINENFOLD = 137, L_CLAY_RENDER = 138, L_ZELLIGE = 139, L_FRESCO = 140;
     /** Texture layers, each TEX x TEX texels: 64 to the metre; from CHAR_LAYER0 on, the charred twins of the wood layers. */
-    public static final int CHAR_LAYER0 = 118, CHAR_END = 131, LAYERS = 135, TEX = 64;
+    public static final int CHAR_LAYER0 = 118, CHAR_END = 131, LAYERS = 141, TEX = 64;
     /** Per charred layer, the layer it was charred from (filled with FACES). */
     private static final int[] CHAR_FROM = new int[CHAR_END - CHAR_LAYER0];
 
@@ -236,7 +264,7 @@ public final class Blocks {
         f(LOCKED_DOOR, L_LOCKED); f(FURNACE, L_STONE, L_FURNACE, L_STONE); f(ANVIL, L_METAL); f(RANGE, L_RANGE, L_BRICK, L_BRICK);
         f(CRAFT_TABLE, L_TABLE_TOP, L_TABLE_SIDE, L_PLANKS); f(SAWBENCH, L_SAW, L_TABLE_SIDE, L_PLANKS); f(TARGET, L_TARGET); f(FENCE, L_FENCE);
         f(STUMP, L_RINGS, L_BARK, L_RINGS); f(HERB_PATCH, L_HERB); f(FLAX_PATCH, L_FLAX); f(BERRY_BUSH, L_BERRY);
-        f(CRATE, L_CRATE); f(BOOKCASE, L_PLANKS, L_BOOKS, L_PLANKS); f(MARK_RED, L_RED); f(MARK_BLUE, L_BLUE); f(MARK_YELLOW, L_YELLOW);
+        f(CRATE, L_CRATE); f(BOOKCASE, L_PLANKS, L_BOOKS, L_PLANKS); f(LAVA, L_LAVA);
         f(DEBUG_FLOOR, L_DEBUG); f(PLASTER, L_PLASTER); f(BEAM, L_BEAM); f(BARE_PATCH, L_BARE, L_DIRT, L_DIRT); f(MARK_GREEN, L_GREEN);
         f(TABLE, L_TABLE_TOP, L_TABLE_SIDE, L_PLANKS); f(SEAT, L_PLANKS); f(BED, L_PLANKS); f(HEADSTONE, L_STONE); f(CHARRED, L_COAL); f(ICE,L_WATER);
         f(SPRUCE_LOG, L_SPRUCE_TOP, L_SPRUCE_BARK, L_SPRUCE_TOP); f(JUNGLE_LOG, L_JUNGLE_TOP, L_JUNGLE_BARK, L_JUNGLE_TOP); f(BIRCH_LOG, L_BIRCH_TOP, L_BIRCH_BARK, L_BIRCH_TOP);
@@ -252,8 +280,8 @@ public final class Blocks {
         f(WALLPAPER_GREEN, L_PAPER_GREEN); f(WALLPAPER_RED, L_PAPER_RED); f(WALLPAPER_BLUE, L_PAPER_BLUE); f(WAINSCOT, L_DARK_PLANKS, L_WAINSCOT, L_DARK_PLANKS);
         f(PARQUET, L_PARQUET, L_DARK_PLANKS, L_DARK_PLANKS); f(DARK_PLANKS, L_DARK_PLANKS); f(CHECKER_TILE, L_CHECKER, L_MARBLE, L_MARBLE);
         f(FLAGSTONE, L_FLAGSTONE, L_STONE, L_STONE); f(SLATE_ROOF, L_SLATE); f(TIMBER_FRAME, L_PLASTER, L_TIMBER, L_PLASTER); f(MOSSY_BRICKS, L_MOSSY);
-        f(TERRACOTTA, L_TERRACOTTA); f(VELVET_CARPET, L_VELVET); f(THATCH, L_THATCH_TOP, L_THATCH, L_THATCH_TOP); f(BASALT, L_BASALT_TOP, L_BASALT, L_BASALT_TOP);
-        f(STAINED_GLASS, L_STAINED); f(GRAVEL, L_GRAVEL); f(BRASS_BLOCK, L_BRASS);
+        f(TERRACOTTA, L_TERRACOTTA); f(THATCH, L_THATCH_TOP, L_THATCH, L_THATCH_TOP); f(BASALT, L_BASALT_TOP, L_BASALT, L_BASALT_TOP);
+        f(STAINED_GLASS, L_STAINED); f(GRAVEL, L_GRAVEL);
         f(ASH, L_ASH); f(HEATH, L_HEATH, L_HEATH_SIDE, L_DIRT); f(PODZOL, L_PODZOL, L_PODZOL_SIDE, L_DIRT); f(DRY_GRASS, L_DRY_GRASS, L_DRY_GRASS_SIDE, L_DIRT); f(PINE_LEAVES, L_PINE_LEAVES);
         f(RUBBLE_STONE, L_RUBBLE); f(OCHRE_DAUB, L_DAUB); f(GRANITE_ASHLAR, L_ASHLAR); f(TARRED_PLANKS, L_TARRED); f(ADOBE, L_ADOBE); f(STUCCO, L_STUCCO); f(WHITE_ASHLAR, L_WHITE_ASHLAR);
         f(IRON_BARS, L_IRON_BARS); f(ROMAN_BRICK, L_ROMAN_BRICK); f(MOSAIC, L_MOSAIC, L_ROMAN_BRICK, L_ROMAN_BRICK); f(BANDED_MASONRY, L_BANDED);
@@ -270,7 +298,8 @@ public final class Blocks {
             FACES[CHARRED_PLANKS + i] = twin;
         }
         // two-faced blocks: the outside's top and side, the inside's side as the inner face (the mesher's bottom layer)
-        for (int id = 0; id < COUNT; id++) if (dual(id)) FACES[id] = new int[]{FACES[outerOf(id)][0], FACES[outerOf(id)][1], FACES[innerOf(id)][1]};
+        for (int id = 0; id < COUNT; id++) if (pairOf(id) >= 0) FACES[id] = new int[]{FACES[outerOf(id)][0], FACES[outerOf(id)][1], FACES[innerOf(id)][1]};
+        for (int[] a : AUTO_PAIRS) FACES[a[0]] = new int[]{FACES[a[1]][0], FACES[a[1]][1], a[3]};
         if (next != CHAR_END) throw new IllegalStateException("charred layers: " + (next - CHAR_LAYER0) + ", CHAR_END expects " + (CHAR_END - CHAR_LAYER0));
     }
     private static void f(int id, int top, int side, int bottom) { FACES[id] = new int[]{top, side, bottom}; }
@@ -319,6 +348,7 @@ public final class Blocks {
             d[leaves].material = AstrattoNative.MATERIAL_FOLIAGE;
         }
         d[EMBERS] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_HAZARD | AstrattoNative.BLOCK_LIGHT_PASS);
+        d[LAVA] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_SOLID | AstrattoNative.BLOCK_HAZARD);
         d[WATER] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_LIQUID | AstrattoNative.BLOCK_SKY_DIM | AstrattoNative.BLOCK_LIGHT_PASS | AstrattoNative.BLOCK_HAZARD);
         d[ICE] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_SOLID | AstrattoNative.BLOCK_LIGHT_PASS);
         d[FENCE] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_SOLID | AstrattoNative.BLOCK_CUTOUT);
@@ -348,6 +378,7 @@ public final class Blocks {
         r[ICE] = def(FACES[ICE],AstrattoNative.RB_SOLID|AstrattoNative.RB_TRANSLUCENT);
         r[WATER] = def(FACES[WATER], AstrattoNative.RB_LIQUID | AstrattoNative.RB_TRANSLUCENT);
         r[LAMP] = def(FACES[LAMP], cube | AstrattoNative.RB_EMISSIVE);
+        r[LAVA] = def(FACES[LAVA], cube | AstrattoNative.RB_EMISSIVE);
         for (int leaves : new int[]{LEAVES, OAK_LEAVES, WILLOW_LEAVES, PINE_LEAVES, BERRY_BUSH}) r[leaves] = def(FACES[leaves], AstrattoNative.RB_SOLID | AstrattoNative.RB_CUTOUT | AstrattoNative.RB_LEAF);
         r[HEDGE]=def(FACES[HEDGE],AstrattoNative.RB_SOLID | AstrattoNative.RB_CUTOUT | AstrattoNative.RB_SWAY);
         r[FENCE] = def(FACES[FENCE], AstrattoNative.RB_SOLID); r[FENCE].shape = SHAPE_HIDDEN;   // the game draws fences as models (Props.fences)
@@ -359,7 +390,8 @@ public final class Blocks {
         r[EMBERS] = def(FACES[EMBERS], 0); r[EMBERS].shape = SHAPE_HIDDEN;
         for (int i = 0; i < COUNT; i++) if (objectCell(i)) { r[i] = def(FACES[i], AstrattoNative.RB_SOLID); r[i].shape = SHAPE_HIDDEN; }   // the game draws these
         for (int i = 0; i < COUNT; i++) if (plant(i)) r[i] = def(FACES[i], AstrattoNative.RB_CROSS | AstrattoNative.RB_CUTOUT | AstrattoNative.RB_SWAY);
-        for (int i = DUAL0; i < COUNT; i++) if (dual(i)) r[i] = def(FACES[i], cube | (innerDir(i) + 1) << AstrattoNative.RB_INNER_SHIFT);
+        for (int i = DUAL0; i < COUNT; i++) if (pairOf(i) >= 0) r[i] = def(FACES[i], cube | (innerDir(i) + 1) << AstrattoNative.RB_INNER_SHIFT);
+        for (int[] a : AUTO_PAIRS) r[a[0]] = def(FACES[a[0]], cube | INNER_AUTO << AstrattoNative.RB_INNER_SHIFT);
         r[STAIRS]=def(FACES[STAIRS],AstrattoNative.RB_SOLID | AstrattoNative.RB_STEP); r[STAIRS].shape=2;
         r[LADDER]=def(FACES[LADDER],AstrattoNative.RB_SOLID); r[LADDER].shape=3;
         return r;

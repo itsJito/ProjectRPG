@@ -245,6 +245,138 @@
    "lakeshore"
   ]
  },
+ "weather": {
+  "_about": "(0.4.7, gamefixes: every weather polished) the weather heard: looped beds (sounds/elements: real recordings cut into seamless loops by work/gen47/hqsnd/build_sounds.py, sources in sounds/CREDITS.txt) each brought up by the part of the weather it follows ('rain', 'wind', 'hail', 'snow', 'sand', 'drift', 'storm', or two multiplied: 'snow*wind') - silent below 'from', full at 'full', and faded out again from 'fadeFrom' to 'fadeTo' where a heavier bed takes over; 'gain' is its loudness when full. Under a roof every bed is heard at 'indoors' (the rain on the roof), underground at 'underground'; each eases to its level over 'fade' seconds. (0.4.8) The rain is a wash over the land (the beds: light rain in a wood under rain on leaves; a downpour on leaves), a 'roof' bed of rain drumming overhead heard only under a roof (the open air's beds are dulled through the walls by the mixer), and 'drops': single recorded drops scattered round the listener, 'rate' a second at full rain between 'near' and 'far' metres, each on what it lands on ('surfaces': its files, 'gain', 'pitch', or 'as' another surface's bank) and heard within 'range'.",
+  "fade": 1.5,
+  "indoors": 0.55,
+  "underground": 0.0,
+  "beds": {
+   "rain_light": {
+    "file": "elements/rain_light.ogg",
+    "follows": "rain",
+    "from": 0.03,
+    "full": 0.3,
+    "fadeFrom": 0.5,
+    "fadeTo": 0.85,
+    "gain": 0.5
+   },
+   "rain_heavy": {
+    "file": "elements/rain_heavy.ogg",
+    "follows": "rain",
+    "from": 0.35,
+    "full": 0.95,
+    "gain": 0.6
+   },
+   "wind_soft": {
+    "file": "elements/wind_soft.ogg",
+    "follows": "wind",
+    "from": 0.12,
+    "full": 0.42,
+    "fadeFrom": 0.75,
+    "fadeTo": 1.15,
+    "gain": 0.3
+   },
+   "wind_gale": {
+    "file": "elements/wind_gale.ogg",
+    "follows": "wind",
+    "from": 0.6,
+    "full": 1.3,
+    "gain": 0.55
+   },
+   "hail": {
+    "file": "elements/hail.ogg",
+    "follows": "hail",
+    "from": 0.05,
+    "full": 0.6,
+    "gain": 0.55
+   },
+   "blizzard": {
+    "file": "elements/blizzard.ogg",
+    "follows": "snow*wind",
+    "from": 0.35,
+    "full": 1.1,
+    "gain": 0.5
+   },
+   "sand": {
+    "file": "elements/sand.ogg",
+    "follows": "sand",
+    "from": 0.05,
+    "full": 0.7,
+    "gain": 0.5
+   },
+   "rain_roof": {
+    "file": "elements/rain_roof.ogg",
+    "follows": "rain",
+    "from": 0.03,
+    "full": 0.8,
+    "gain": 0.5,
+    "roof": true
+   }
+  },
+  "drops": {
+   "rate": 24,
+   "near": 1.2,
+   "far": 9,
+   "range": 16,
+   "gain": 0.45,
+   "surfaces": {
+    "stone": {
+     "files": [
+      "elements/drops/drop_stone_1.ogg",
+      "elements/drops/drop_stone_2.ogg",
+      "elements/drops/drop_stone_3.ogg",
+      "elements/drops/drop_stone_4.ogg",
+      "elements/drops/drop_stone_5.ogg",
+      "elements/drops/drop_stone_6.ogg"
+     ],
+     "gain": 0.9
+    },
+    "water": {
+     "files": [
+      "elements/drops/drop_water_1.ogg",
+      "elements/drops/drop_water_2.ogg",
+      "elements/drops/drop_water_3.ogg",
+      "elements/drops/drop_water_4.ogg",
+      "elements/drops/drop_water_5.ogg",
+      "elements/drops/drop_water_6.ogg",
+      "elements/drops/drop_water_7.ogg",
+      "elements/drops/drop_water_8.ogg",
+      "elements/drops/drop_water_9.ogg"
+     ],
+     "gain": 0.8
+    },
+    "leaf": {
+     "files": [
+      "elements/drops/drop_leaf_1.ogg",
+      "elements/drops/drop_leaf_2.ogg",
+      "elements/drops/drop_leaf_3.ogg",
+      "elements/drops/drop_leaf_4.ogg",
+      "elements/drops/drop_leaf_5.ogg",
+      "elements/drops/drop_leaf_6.ogg"
+     ],
+     "gain": 0.7,
+     "pitch": 1.1
+    },
+    "roof": {
+     "files": [
+      "elements/drops/drop_roof_1.ogg",
+      "elements/drops/drop_roof_2.ogg",
+      "elements/drops/drop_roof_3.ogg",
+      "elements/drops/drop_roof_4.ogg",
+      "elements/drops/drop_roof_5.ogg",
+      "elements/drops/drop_roof_6.ogg",
+      "elements/drops/drop_roof_7.ogg"
+     ],
+     "gain": 0.85
+    },
+    "soft": {
+     "as": "leaf",
+     "gain": 0.35,
+     "pitch": 0.7
+    }
+   }
+  }
+ },
  "footsteps": {
   "_about": "(0.4.6, gamefixes: foley to match every material, in time with the feet, quieter) what a footfall on each kind of ground sounds like: one or more layers (a recorded bank, its share of the step's loudness, its pitch), played together. 'feet' is the people's overall loudness (and how much harder a running foot lands); 'hooves' the same for a horse or a Pegasus, whose shod hooves ring on stone and drum on wood. 'wading' is laid over any step in water up to the shins; 'snowCover' over open ground the snow has settled on.",
   "feet": {
@@ -466,6 +598,84 @@
    "bank": "step.snow",
    "gain": 0.8,
    "pitch": 1.0
+  }
+ },
+ "_voices": "(0.4.7, gamefixes: animals such as cows were too loud) each animal call's loudness (x the call's own), how far it carries (m) and the least time (s) between two idle calls of that kind heard anywhere about the player - a herd lows now and then, not all the time",
+ "voices": {
+  "_default": {
+   "volume": 0.6,
+   "reach": 26,
+   "gap": 6
+  },
+  "animal.cow": {
+   "volume": 0.28,
+   "reach": 20,
+   "gap": 18
+  },
+  "animal.pig": {
+   "volume": 0.4,
+   "reach": 16,
+   "gap": 12
+  },
+  "animal.chicken": {
+   "volume": 0.32,
+   "reach": 14,
+   "gap": 8
+  },
+  "animal.rooster": {
+   "volume": 0.45,
+   "reach": 30,
+   "gap": 40
+  },
+  "animal.sheep": {
+   "volume": 0.35,
+   "reach": 18,
+   "gap": 14
+  },
+  "animal.horse": {
+   "volume": 0.45,
+   "reach": 20,
+   "gap": 16
+  },
+  "animal.duck": {
+   "volume": 0.35,
+   "reach": 16,
+   "gap": 8
+  },
+  "animal.dog": {
+   "volume": 0.5,
+   "reach": 26,
+   "gap": 8
+  },
+  "animal.cat": {
+   "volume": 0.4,
+   "reach": 12,
+   "gap": 15
+  },
+  "animal.deer": {
+   "volume": 0.45,
+   "reach": 20,
+   "gap": 10
+  },
+  "animal.wolf": {
+   "volume": 0.7,
+   "reach": 40,
+   "gap": 12
+  },
+  "animal.coyote": {
+   "volume": 0.6,
+   "reach": 36,
+   "gap": 14
+  },
+  "animal.bear": {
+   "volume": 0.8,
+   "reach": 34,
+   "gap": 10
+  },
+  "animal.dire_wolf": {
+   "volume": 0.85,
+   "reach": 44,
+   "gap": 12
   }
  }
 }

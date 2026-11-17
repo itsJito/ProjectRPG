@@ -248,8 +248,8 @@ public final class Gfx implements AutoCloseable {
     private long sectAt; private int sectK = -1;
     private void sect(int k) { long now = System.nanoTime(); if (sectK >= 0) sectNs[sectK] += now - sectAt; sectK = k; sectAt = now; }
     /** (0.4.4) The regional fog tint: as it is now, as it is going to, when it was last asked and eased. */
-    private final float[] fogTint = {1, 1, 1};
-    private float[] fogTintWant = {1, 1, 1};
+    private final float[] fogTint = {1, 1, 1, 1};
+    private float[] fogTintWant = {1, 1, 1, 1};
     private double fogTintAt = -1, fogTintEased;
     /** (0.4.4) The river's drops near the eye this frame {distance, x, y, z, height, dx, dz}, and how many are poured. */
     private final java.util.List<float[]> nearFalls = new java.util.ArrayList<>();
@@ -261,7 +261,9 @@ public final class Gfx implements AutoCloseable {
     static final long FOLIAGE_BUDGET_NS = (long) (rpg.Tuning.f("render.foliageBudgetMs", 2.5f) * 1e6);
     /** (0.4.4) How near the eye a building's furnishings are drawn (m). */
     static final float INTERIOR_DRAW = rpg.Tuning.f("render.interiorDraw", 30f);
-    static final int FALL_EMITTERS = rpg.Tuning.i("render.fallEmitters", 26), FALL_SPRAYS = rpg.Tuning.i("render.fallSprays", 6), FALL_STIRS = rpg.Tuning.i("render.fallStirs", 12);
+    /** (0.4.7) A fall's sheet: drops a second at its lip (and more for each metre it drops, to a cap) and their size. */
+    static final float FALL_RATE = rpg.Tuning.f("render.fallRate", 80f), FALL_RATE_PER_M = rpg.Tuning.f("render.fallRatePerM", 18f), FALL_RATE_MAX = Math.min(200f, rpg.Tuning.f("render.fallRateMax", 190f)), FALL_SIZE = rpg.Tuning.f("render.fallSize", 0.06f);
+    static final int FALL_EMITTERS = rpg.Tuning.i("render.fallEmitters", 28), FALL_SPRAYS = rpg.Tuning.i("render.fallSprays", 6), FALL_STIRS = rpg.Tuning.i("render.fallStirs", 12);
     /**
      * (0.4.4, gamefixes: interiors black, the light budget) every point light of the frame, held until it ends: the renderer
      * takes only the first so many it is given (its quality's budget), and ShadowVeil's street lamps alone filled it
@@ -343,7 +345,7 @@ public final class Gfx implements AutoCloseable {
         if (rpg.world.WorldMap.shadowveil() && sceneGame != null) {
             if (time - fogTintAt > 0.5 || time < fogTintAt) { fogTintAt = time; fogTintWant = rpg.world.shadowveil.ShadowVeil.fogTint(camX, camZ); }
             float k = (float) Math.min(1, Math.max(0, time - fogTintEased) * 0.6); fogTintEased = time;
-            for (int i = 0; i < 3; i++) fogTint[i] += (fogTintWant[i] - fogTint[i]) * k;
+            for (int i = 0; i < 4; i++) fogTint[i] += (fogTintWant[i] - fogTint[i]) * k;
             fogR = clamp01(fogR * fogTint[0]); fogG = clamp01(fogG * fogTint[1]); fogB = clamp01(fogB * fogTint[2]);
         }
         // (gamefixes: fog as part of the world, its strength by the hour, never plain white) the mist: heaviest round
@@ -361,13 +363,20 @@ public final class Gfx implements AutoCloseable {
         if (weather != null && weather.dark > 0) { float k = 1 - 0.55f * weather.dark; fogR *= k; fogG *= k; fogB *= k; }
         // (0.2.1) the noon haze thinner (it washed the near world out), the depth kept by the bank further off
         float mist = 0.0022f + 0.0075f * dawn + 0.0045f * dusk + 0.0045f * night + wfog * 0.012f + wfog * wfog * wfog * 0.03f;
-        boolean indoorsScene = sceneGame == null;
+        // (0.4.7) down in a dungeon under the map there is no sky, no weather's haze and no fog bank: it is lit as a room is
+        boolean indoorsScene = sceneGame == null || rpg.world.DungeonLayout.underAt(camX, camY, camZ) != null;
+        // (0.4.7, gamefixes: fog did not change by region) the region's air: a marsh's thick, a desert's thin
+        float regionFog = rpg.world.WorldMap.shadowveil() && sceneGame != null ? Math.max(0.3f, Math.min(3f, fogTint[3])) : 1f;
+        // (a room's air is its own: the region's thick or thin air stays outside the door)
+        mist *= regionFog + (1 - regionFog) * indoorFill;
+        // (0.4.7) under a roof the air of the room, not the weather's: the haze indoors is a fraction of the open air's
+        mist *= 1 - INDOOR_MIST_CUT * indoorFill;
         // A nearer complete bank also bounds chunk and prop submission, including dense weather at night.
         // (0.3.7, gamefixes: bring the fog in, a circle round the player, everything past it culled) a ring round the
         // player, nearer than it was - the street and the next house clear, the far side of the town going into it, the
         // world past it not drawn at all - thicker at dawn, dusk, by night and in weather
         // (0.4.6) dense fog, a sandstorm, a whiteout: the bank closes right in (a few dozen metres and the world is gone)
-        float bankStart = indoorsScene ? 1e9f : Math.max(FOG_MIN * (1 - 0.6f * wfog * wfog), (FOG_START - 10*dawn - 6*dusk - 8*night - 10*wfog) * (1 - 0.72f * wfog * wfog * wfog)) * reviewFogScale;
+        float bankStart = indoorsScene ? 1e9f : Math.max(FOG_MIN * (1 - 0.6f * wfog * wfog), (FOG_START - 10*dawn - 6*dusk - 8*night - 10*wfog) * (1 - 0.72f * wfog * wfog * wfog) / (float) Math.sqrt(regionFog)) * reviewFogScale;
         float bankEnd = indoorsScene ? 2e9f : bankStart + (FOG_DEPTH + 6*(1-night)) * reviewFogScale;
         fogFar = indoorsScene ? 400 : bankEnd;
         fogNear = indoorsScene ? 300 : bankStart;
@@ -381,7 +390,8 @@ public final class Gfx implements AutoCloseable {
         boolean roofedNow = !indoorsScene && sceneGame != null && !sceneGame.vox.sight(camX, camY + 0.2f, camZ, camX, camY + 14, camZ);
         indoorFill += ((roofedNow ? 1 : 0) - indoorFill) * Math.min(1, (float) Math.max(0.001, time - atmosAt) * 2.5f);
         float roomDay = indoorFill * clamp01(daylight) * (1 - 0.6f * (weather == null ? 0 : weather.overcast));
-        cmd.env(sx, sy, sz, daylight, (float) time, weather==null?0:weather.rain, weather==null?0:weather.wetness, weather==null?0:weather.snowCover, weather==null?0.1f:weather.overcast, weather==null?0:weather.lightning, fogR, fogG, fogB, indoorsScene ? 1f / 300f : mist, bankStart, bankEnd, indoorsScene ? 0 : 0.62f, 0, tr * (sceneGame==null?1:sceneGame.timeSystem.tintR), tg * (sceneGame==null?1:sceneGame.timeSystem.tintG), tb * (sceneGame==null?1:sceneGame.timeSystem.tintB), (0.004f + 0.006f * night + wfog * 0.012f) * (sceneGame==null?1:sceneGame.timeSystem.fogScale) + 0.03f * roomDay, indoorsScene ? Float.NaN : fogX, indoorsScene ? 0 : sceneGame.player.eyeY(), indoorsScene ? 0 : fogZ, (0.05f + 0.03f * low) * (sceneGame == null ? 1f : sceneGame.cfg.bloom));
+        cmd.env(sx, sy, sz, daylight, (float) time, weather==null?0:weather.rain, weather==null?0:weather.wetness, weather==null?0:weather.snowCover, weather==null?0.1f:weather.overcast, weather==null?0:weather.lightning, fogR, fogG, fogB, indoorsScene ? 1f / 300f : mist, bankStart, bankEnd, indoorsScene ? 0 : Math.min(1f, 0.62f + 0.38f * wfog) * (1 - INDOOR_MIST_CUT * indoorFill), indoorsScene ? 0 : Math.min(0.98f, SKY_FOG * smooth01((wfog - 0.15f) / 0.75f) + 0.2f * Math.max(0, regionFog - 1.4f)), tr * (sceneGame==null?1:sceneGame.timeSystem.tintR), tg * (sceneGame==null?1:sceneGame.timeSystem.tintG), tb * (sceneGame==null?1:sceneGame.timeSystem.tintB), (0.004f + 0.006f * night + wfog * 0.012f) * (sceneGame==null?1:sceneGame.timeSystem.fogScale) + 0.03f * roomDay, indoorsScene ? Float.NaN : fogX, indoorsScene ? 0 : sceneGame.player.eyeY(), indoorsScene ? 0 : fogZ, (0.05f + 0.03f * low) * (sceneGame == null ? 1f : sceneGame.cfg.bloom),
+                0, 0, edgeX1(), edgeX1(), indoorsScene || edgeX1() <= 0 ? 0 : EDGE_FOG_BAND);
         // (0.3.0, gamefixes) the environment preset of the hour, the weather and the roof over the camera: the ambient cube
         // and the grade move with the sky and the fog in one blend
         atmosphere.apply(cmd, hour, sx, weather, new float[]{fogR, fogG, fogB}, roofedNow, (float) Math.max(0.001, time - atmosAt));
@@ -391,6 +401,11 @@ public final class Gfx implements AutoCloseable {
 
     /** The fog ring by day: where it begins and how deep it is (m from the player); never nearer than FOG_MIN, whatever the weather. */
     static final float FOG_START = 34, FOG_DEPTH = 22, FOG_MIN = 18;
+    /** (0.4.7) How much of the room's haze a roof takes away; how much of the sky overhead the thickest weather fog covers; the world-edge fog's depth, m. */
+    static final float INDOOR_MIST_CUT = rpg.Tuning.f("fog.indoorCut", 0.92f), SKY_FOG = rpg.Tuning.f("fog.skyCover", 0.95f), EDGE_FOG_BAND = rpg.Tuning.f("world.edgeFogBand", 64f);
+    /** (0.4.7) The far side of the world's square on ShadowVeil (its edge fog); 0 elsewhere - the band is then off. */
+    private static float smooth01(float x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+    private static float edgeX1() { return rpg.world.WorldMap.shadowveil() ? rpg.world.WorldMap.active().sizeX : 0; }
     /** (0.4.1) How far past the fog bank's far edge the world is still drawn (m): the bank covers the end of the rendering. */
     static final float RENDER_PAST_FOG = rpg.Tuning.f("render.pastFog", 24f);
     /** (0.4.1) The review cameras' fog ring scale (the gallery's high views push the bank back to see a whole town); 1 in play. */
@@ -408,7 +423,7 @@ public final class Gfx implements AutoCloseable {
      * above its chimney. The renderer marches the light through them, so a fire's smoke catches the sun and the lamps.
      */
     private void smoke(Rpg g) {
-        int n = 0;
+        int n = volcanoes(0);
         for (WorldObject o : g.objects.all()) {
             if (!(o instanceof Fire f) || f.removed || n >= 30) continue;
             n = putSmoke(n, f.x, f.y + 1.3f, f.z, 0.95f, 0.55f, 0.30f, 0.28f, 0.26f, 0.12f, 0.7f, 0.95f, f.id);
@@ -457,6 +472,54 @@ public final class Gfx implements AutoCloseable {
                 drawn++;
             }
         }
+    }
+
+    /**
+     * (0.4.7, gamefixes: Ashmaw more impressive) every volcano with a 'plume' in the map's data smokes: a column of dark
+     * ash cloud rising from its crater and spreading as it climbs, leaning with the wind, lit red from beneath by the lava
+     * (a strong light in the crater that the cloud and the cone catch, by night a glow seen for miles), and embers thrown
+     * up out of the lake when the eye is near.
+     */
+    private int volcanoes(int n) {
+        var t = rpg.world.WorldMap.shadowveil() ? rpg.world.shadowveil.ShadowVeil.terrain() : null;
+        if (t == null || t.craters.isEmpty()) return n;
+        var peaks = rpg.world.shadowveil.Atlas.list(rpg.world.shadowveil.Atlas.get().root, "peaks");
+        int k = 0;
+        for (var p : peaks) {
+            java.util.Map<String, Object> plume = rpg.world.shadowveil.Atlas.map(p, "plume");
+            if (plume.isEmpty() || k >= t.craters.size()) continue;
+            double[] c = t.craters.get(k++);
+            float cx = (float) c[0], cz = (float) c[1];
+            float d = (float) Math.hypot(cx - camX, cz - camZ);
+            if (d > rpg.world.shadowveil.Atlas.d(plume, "reach", 900)) continue;
+            float floor = rpg.world.WorldMap.standY(cx, cz);
+            int puffs = rpg.world.shadowveil.Atlas.i(plume, "puffs", 8);
+            float height = (float) rpg.world.shadowveil.Atlas.d(plume, "height", 60);
+            double[] rad = rpg.world.shadowveil.Atlas.pt(plume.get("radius")), den = rpg.world.shadowveil.Atlas.pt(plume.get("density")), col = rpg.world.shadowveil.Atlas.pt(plume.get("colour"));
+            float glow = (float) rpg.world.shadowveil.Atlas.d(plume, "glow", 0.5);
+            var w = sceneGame == null ? null : sceneGame.timeSystem.weather;
+            float wx = w == null ? 0.6f : 0.6f + w.wind * 2.2f, lean = 0.35f;
+            for (int i = 0; i < puffs && n < 14; i++) {
+                float f = i / (float) Math.max(1, puffs - 1);
+                float y = floor + 6 + f * height, drift = f * f * height * lean * wx;
+                float r = (float) (rad[0] + (rad[1] - rad[0]) * f), dens = (float) (den[0] + (den[1] - den[0]) * f);
+                float wob = (float) Math.sin(clock * 0.21 + i * 1.7) * r * 0.18f;
+                n = putSmoke(n, cx + drift + wob, y, cz + drift * 0.4f - wob, r, dens, (float) col[0], (float) col[1], (float) col[2], glow * (1 - f) * (1 - f), 0.25f, 0.6f, 0x7A11L + i);
+            }
+            // the lake's own light, the cone and the cloud lit by it
+            float flick = 0.85f + 0.15f * (float) Math.sin(clock * 3.1) * (float) Math.sin(clock * 1.7 + 1);
+            pointLight(cx, floor + 4, cz, 46, 6.5f * flick, 2.2f * flick, 0.5f * flick, 0);
+            if (d < 260) {
+                // the renderer takes an emitter's reach up to 3 m: the lake's embers from a few points across it
+                float lr = (float) c[2] * 0.5f;
+                for (int e = 0; e < 3; e++) {
+                    double a2 = e * 2.1 + clock * 0.05;
+                    cmd.emitter(0x7A15L + e, 2, cx + (float) Math.cos(a2) * lr, floor + 1.2f, cz + (float) Math.sin(a2) * lr, 2.8f, 40, 0.6f, 2.4f, 1.0f, 0.5f, 0.12f, 0, 3.2f, 0);
+                }
+                cmd.emitter(0x7A19L, 1, cx, floor + 3f, cz, 2.8f, 40, 0.5f, 3.0f, 0.24f, 0.21f, 0.2f, 0, 1.2f, 0);
+            }
+        }
+        return n;
     }
 
     private int putSmoke(int n, float x, float y, float z, float radius, float density, float r, float gg, float b, float glow, float rise, float swirl, long seed) {
@@ -552,6 +615,7 @@ public final class Gfx implements AutoCloseable {
         // (0.4.6, gamefixes: rain looked terrible) the precipitation: rain, sleet, snow, hail, sand and drifting snow as
         // world-space layers round the eye (the engine's precipitation pass), stopping on whatever roofs the sky
         precipitation(g, weather);
+        lightningBolt(weather);
         // lights: lamps by night, fires, the furnace, spells in flight
         sect(0);
         lampLights(g.vox, daylight >= 0.6f);
@@ -642,8 +706,11 @@ public final class Gfx implements AutoCloseable {
                 float lipX=x-dx*0.5f,lipZ=z-dz*0.5f,lipY=low+h;
                 long id=0x7A12L<<24|((long)f[1]<<11)|(long)f[3];
                 // the stream: drops leaving the lip at the river's pace across the cell's width, falling the drop's height
-                float life=Math.min(2.5f,0.3f+(float)Math.sqrt(2*h/9.8f)*1.2f),rate=Math.min(200,70+h*22);
-                cmd.emitter(id,11,lipX+dx*0.08f,lipY-0.02f,lipZ+dz*0.08f,0.045f,rate,0.46f,life,0.82f,0.9f,0.98f,dx*1.1f,-0.4f,dz*1.1f);poured++;
+                float life=Math.min(2.5f,0.3f+(float)Math.sqrt(2*h/9.8f)*1.2f),rate=Math.min(FALL_RATE_MAX,FALL_RATE+h*FALL_RATE_PER_M);
+                // (0.4.7, gamefixes: waterfalls had no water flowing down them - a trickle of drops down a bare face) a
+                // sheet: thick drops across the whole cell, and a second, thinner veil thrown a little further out
+                cmd.emitter(id,11,lipX+dx*0.08f,lipY-0.02f,lipZ+dz*0.08f,FALL_SIZE,rate,0.5f,life,0.82f,0.9f,0.98f,dx*1.1f,-0.4f,dz*1.1f);poured++;
+                if(h>=2 && poured<FALL_EMITTERS){cmd.emitter(id^0x3333L,11,lipX+dx*0.22f,lipY-0.05f,lipZ+dz*0.22f,FALL_SIZE*0.7f,rate*0.5f,0.5f,life,0.9f,0.95f,1f,dx*1.6f,-0.2f,dz*1.6f);poured++;}
                 // the pool takes the falling water's blows (rings spread through the wave grid)
                 if(stirred<FALL_STIRS){float k=(float)Math.sin(clock*13.1+f[1]*0.7+f[3]*1.3);cmd.ripple(x+dx*0.15f+k*0.25f*dz,z+dz*0.15f+k*0.25f*dx,Math.min(1.6f,0.5f+h*0.12f),Math.min(6f,1.2f+h*0.5f));stirred++;}
                 if(h>=2 && sprays<FALL_SPRAYS){cmd.emitter(id^0x55L,1,x+dx*0.35f,low+0.25f,z+dz*0.35f,0.55f,Math.min(120,12+h*7),0.5f,1.6f,0.9f,0.93f,0.97f,dx*0.35f,0.55f,dz*0.35f);sprays++;}
@@ -1110,11 +1177,32 @@ public final class Gfx implements AutoCloseable {
     }
     /** The share of the precipitation's particles the quality preset affords (low: half). */
     private float cfgPrecip() { int q = sceneGame == null ? 2 : sceneGame.cfg.quality; return q <= 0 ? 0.5f : q == 1 ? 0.75f : 1f; }
+    /**
+     * (0.4.7, gamefixes: every weather polished) The last bolt of lightning, while it lasts: its channel and forks drawn
+     * as one jagged, unbroken line of white-hot light from the cloud to the ground (it was a string of separate glowing
+     * beads), broad enough at a distance to be seen, blazing with each pulse of the flash and fading after it.
+     */
+    private void lightningBolt(astratto.weather.Weather w) {
+        if (w.boltPoints < 2 || w.boltAge > BOLT_LIFE) return;
+        float fade = 1 - w.boltAge / BOLT_LIFE, pulse = Math.max(w.lightning, 0.25f) * fade;
+        float[] p = w.bolt, a = new float[3], b = new float[3];
+        for (int i = 1; i < w.boltPoints; i++) {
+            a[0] = p[i * 3 - 3]; a[1] = p[i * 3 - 2]; a[2] = p[i * 3 - 1];
+            b[0] = p[i * 3]; b[1] = p[i * 3 + 1]; b[2] = p[i * 3 + 2];
+            float dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2];
+            if (dx * dx + dy * dy + dz * dz > 64) continue;   // one channel's end to the next fork's start: not joined
+            float far = (float) Math.hypot(a[0] - camX, a[2] - camZ);
+            float width = Math.max(0.08f, far * 0.0022f) * (i < w.boltPoints * 0.75f ? 1 : 0.6f);
+            spellDraw.beam(a, b, width, 1.2f, 1.3f, 1.6f, 40 * pulse);
+        }
+    }
+    private static final float BOLT_LIFE = 0.32f;
+
     private void precipitation(Rpg g, astratto.weather.Weather w) {
         precipCount = 0;
         var ws = g.weatherSystem;
         if (ws == null) return;
-        // sleet: rain and wet snow together; a hailstorm's rain with it
+        // (0.4.8) never rain and snow together (the engine lets one stop before the other starts); sleet is rain with ice
         precipLayer(ws, "rain", 0, w.rain, 1, w.rain);
         precipLayer(ws, "snow", 1, w.snow, 2, 0);
         precipLayer(ws, "hail", 2, w.hail, 3, 0);
@@ -1687,7 +1775,7 @@ public final class Gfx implements AutoCloseable {
             pitch += -hitFwd * 0.22f * hitK;
         }
         // (0.3.0) in flight a Pegasus's body follows its climb and dive, and leans into its bank
-        if (sp == Species.PEGASUS && a.flying) pitch -= a.flightPitch * 0.8f;
+        if ((sp == Species.PEGASUS || sp.flies) && a.flying) pitch -= a.flightPitch * 0.8f;
         // (0.3.9) the stroke works the whole body: it rises a touch on each downstroke and settles on the recovery; slow and
         // low over the ground it flares - nose up, the wings thrown forward to brake - to come down
         float heave = 0, flare = 0;
@@ -1713,7 +1801,7 @@ public final class Gfx implements AutoCloseable {
             body.translate(0, f.bodyY * vs, f.legB[2] * vs).rotateX(rear * (sp == Species.BROWN_BEAR ? 1.05f : 0.7f)).translate(0, (y - f.bodyY) * vs, -f.legB[2] * vs);
         } else body.translate(0, y * vs, -lunge * sp.reach * 0.6f);
         body.rotateX(pitch);
-        if (sp == Species.PEGASUS && a.flying) body.rotateZ(-a.flightBank * 0.9f);
+        if ((sp == Species.PEGASUS || sp.flies) && a.flying) body.rotateZ(-a.flightBank * 0.9f);
         if (a.rider != 0 && !dead) {
             // the saddle's movement this frame, for the rider (Animal.seatDelta): drawn body x inverse(standing body)
             seatRest.identity().translate(a.x, a.y, a.z).rotateY(a.yaw).translate(0, f.bodyY * vs, 0);
@@ -1734,7 +1822,8 @@ public final class Gfx implements AutoCloseable {
         float fold = lie * (dead ? 0 : 1);
         if (f.bird) {
             float stepA = (float) Math.sin(ph) * 0.75f * amp;
-            float hide = fold > 0.6f ? 0 : 1;
+            // (0.4.7) a flier aloft tucks its feet up under it
+            float hide = fold > 0.6f || a.flying && !dead ? 0 : 1;
             if (paddling) {
                 // the feet paddle under the water, one then the other: swept back on the power stroke, folded forward on
                 // the return - quicker when it is going somewhere
@@ -1745,11 +1834,26 @@ public final class Gfx implements AutoCloseable {
                 }
             } else if (hide > 0) for (int side = -1; side <= 1; side += 2) limb(side < 0 ? rpg.combat.Gore.Part.LEG_L : rpg.combat.Gore.Part.LEG_R, f.legFront, vs, f.legF[0] * side * 0.6f, f.legF[1], f.legF[2], stepA * side, 0, 0);
             // wings: tucked, beating when it runs or flees
-            boolean flapping = running || a.goal == rpg.animal.Animal.Goal.FLEE && speed > 0.5f;
-            a.flap += ((flapping ? 1 : 0) - a.flap) * Math.min(1, dt * 6);
-            float beat = a.flap * (0.25f + 0.85f * Math.abs((float) Math.sin(time * 21 + a.id)));
-            limb(rpg.combat.Gore.Part.ARM_R, f.wing, vs, f.wingAt[0], f.wingAt[1], f.wingAt[2], 0, 0, beat);
-            limb(rpg.combat.Gore.Part.ARM_L, f.wing, vs, -f.wingAt[0], f.wingAt[1], f.wingAt[2], 0, 0, -beat);
+            if (a.flying && !dead) {
+                // (0.4.7, gamefixes: birds that fly) aloft the wings are spread: beaten on the climb and the take-off (a
+                // crow's steady rowing, a pigeon's quick clatter, a vulture's few slow heavy strokes), held out flat in
+                // the glide, a soarer's tips lifted in a shallow V; the beat's phase runs on so the stroke never jumps
+                float rate = sp == Species.VULTURE ? 4.2f : sp == Species.PIGEON ? 15f : 10f;
+                a.wingPhase += dt * rate * (0.25f + 0.75f * a.flap);
+                // the folded panel laid flat (its depth becomes the wing's chord) and swung out from along the body to
+                // straight out from the shoulder (its length the span), then beaten up and down about the body's line
+                float stroke = a.flap * (sp == Species.VULTURE ? 0.5f : 0.75f) * (float) Math.sin(a.wingPhase);
+                float lift = (sp.soars ? 0.16f : 0.06f) + stroke, sweep = (sp == Species.VULTURE ? 0.05f : 0.22f) * (1 - a.flap * 0.5f);
+                float out = (float) Math.PI / 2 - sweep, flat = (float) Math.PI / 2;
+                limb(rpg.combat.Gore.Part.ARM_R, f.wing, vs, f.wingAt[0], f.wingAt[1], f.wingAt[2], lift, out, flat);
+                limb(rpg.combat.Gore.Part.ARM_L, f.wing, vs, -f.wingAt[0], f.wingAt[1], f.wingAt[2], lift, -out, -flat);
+            } else {
+                boolean flapping = running || a.goal == rpg.animal.Animal.Goal.FLEE && speed > 0.5f;
+                a.flap += ((flapping ? 1 : 0) - a.flap) * Math.min(1, dt * 6);
+                float beat = a.flap * (0.25f + 0.85f * Math.abs((float) Math.sin(time * 21 + a.id)));
+                limb(rpg.combat.Gore.Part.ARM_R, f.wing, vs, f.wingAt[0], f.wingAt[1], f.wingAt[2], 0, 0, beat);
+                limb(rpg.combat.Gore.Part.ARM_L, f.wing, vs, -f.wingAt[0], f.wingAt[1], f.wingAt[2], 0, 0, -beat);
+            }
             // the head bobs with each step (a chicken's peck-walk) and dips to feed
             float bobZ = sp == Species.CHICKEN ? (float) Math.sin(ph * 2) * 0.9f * Math.min(1, amp * 3) : 0;
             float peck = !dead && a.headDown && !paddling ? 0.4f * Math.max(0, (float) Math.sin(time * 6 + a.id)) : 0;
@@ -1931,7 +2035,10 @@ public final class Gfx implements AutoCloseable {
     private static final float TORCH_REACH = 46;
     private void dungeonLights(Rpg g) {
         var dl = rpg.world.DungeonLayout.at(camX, camZ);
+        // (0.4.7) or the ShadowVeil dungeon level the eye is down in
+        if (dl == null) dl = rpg.world.DungeonLayout.underAt(camX, camY, camZ);
         if (dl == null) return;
+        float floorY = dl.floorY;
         // (0.3.7, gamefixes: dungeons were hard to see in) eyes used to the dark: a faint cool fill round the visitor, so
         // the floor ahead, a wall and whatever is coming along it can be told apart between one torch and the next
         pointLight(g.player.x, g.player.y + 1.7f, g.player.z, 11, 0.5f, 0.56f, 0.7f, 0);
@@ -1944,7 +2051,7 @@ public final class Gfx implements AutoCloseable {
             switch (s.what()) {
                 case "lamp" -> {
                     int[] f = rpg.world.DungeonLayout.lampFacing(s.arg());
-                    float tx = x + f[0] * 0.62f, tz = z + f[1] * 0.62f, ty = DevMap.FLOOR + 2.0f;
+                    float tx = x + f[0] * 0.62f, tz = z + f[1] * 0.62f, ty = floorY + 2.0f;
                     m.identity().translate(tx, ty, tz).rotateY((float) Math.atan2(-f[0], -f[1]));
                     drawLayers("dungeon-torch", Props::torch);
                     cmd.emitter(emit, 0, tx + f[0] * 0.06f, ty + 0.36f, tz + f[1] * 0.06f, 0.05f, 22, 0.06f, 0.42f, 5.5f, 1.8f, 0.35f, 0, 0.45f, 0);
@@ -1952,10 +2059,10 @@ public final class Gfx implements AutoCloseable {
                     if (Math.hypot(tx - camX, tz - camZ) < TORCH_REACH) pointLight(tx + f[0] * 0.3f, ty + 0.45f, tz + f[1] * 0.3f, 13, 5.4f * fl, 2.9f * fl, 1.0f * fl, 0);
                 }
                 case "brazier" -> {
-                    cmd.emitter(emit, 0, x, rpg.world.Ground.at(x, z) + 1.3f, z, 0.25f, 46, 0.12f, 0.8f, 5.5f, 1.8f, 0.3f, 0, 0.9f, 0);
-                    pointLight(x, rpg.world.Ground.at(x, z) + 2.0f, z, 14, 6.5f * fl, 3.2f * fl, 1.0f * fl, 0);
+                    cmd.emitter(emit, 0, x, floorY + 1.3f, z, 0.25f, 46, 0.12f, 0.8f, 5.5f, 1.8f, 0.3f, 0, 0.9f, 0);
+                    pointLight(x, floorY + 2.0f, z, 14, 6.5f * fl, 3.2f * fl, 1.0f * fl, 0);
                 }
-                case "embers" -> { if (i % 3 == 0) pointLight(x, rpg.world.Ground.at(x, z) + 0.6f, z, 5, 2.6f * fl, 0.9f * fl, 0.2f, 0); }
+                case "embers" -> { if (i % 3 == 0) pointLight(x, floorY + 0.6f, z, 5, 2.6f * fl, 0.9f * fl, 0.2f, 0); }
                 default -> { }
             }
         }
@@ -2068,7 +2175,7 @@ public final class Gfx implements AutoCloseable {
 
     /** A monster, posed from what it is doing (gamefixes: each its own walk, run and attack): the living by their kind, the dead as they fell. */
     private void monster(rpg.monster.Monster mo, float dt) {
-        var f = MonsterModels.of(mo.kind, mo.breed);
+        var f = MonsterModels.of(mo.kind, mo.breed, mo.variant);
         float previous = charTint; charTint = 1 - mo.charred * 0.86f;
         try {
             boolean ghost = mo.kind == rpg.monster.MonsterKind.GHOST;
@@ -2096,7 +2203,7 @@ public final class Gfx implements AutoCloseable {
                 else if (mo.alive) humanoidMonster(mo, f, st, dt);
             } else switch (mo.kind) {
                 case BAT -> bat(mo, f, st, dt);
-                case GIANT_SPIDER -> spider(mo, f, st, dt);
+                case GIANT_SPIDER, SMALL_SCORPION, LARGE_SCORPION -> spider(mo, f, st, dt);
                 default -> dragon(mo, f, st, dt);
             }
             if (mo.alive && !ghost) cmd.shadowBody(mo.x, mo.y, mo.z, Math.max(mo.radius, mo.kind.hw * 0.4f), mo.height);
@@ -2123,10 +2230,17 @@ public final class Gfx implements AutoCloseable {
         float speed = (float) Math.hypot(mo.vx, mo.vz);
         boolean ghost = k == rpg.monster.MonsterKind.GHOST;
         boolean airborne = k == rpg.monster.MonsterKind.IMP && mo.altitude > 0.35f;
+        // (0.4.8, gamefixes: the greater demon's wings flap and it hovers from time to time - mostly grounded, never in full
+        // flight) lifted on its beating wings over the ground for a few seconds: risen, held, set down
+        float hover = 0;
+        if (mo.hoverUntil > clock && clock > mo.hoverFrom) {
+            float span = (float) (mo.hoverUntil - mo.hoverFrom), into = (float) (clock - mo.hoverFrom);
+            hover = smooth(Math.min(1, into / 0.6f)) * smooth(Math.min(1, (span - into) / 0.7f));
+        }
         boolean run = speed > k.walk * 1.35f;
         // the stride: a step per leg's length (a zombie's shuffle is short; a werewolf lopes)
         float legLen = (f.thigh + f.shin) * vs;
-        float stride = Math.max(0.15f, legLen * switch (k) { case ZOMBIE -> 0.85f; case GOBLIN, IMP -> 1.0f; case WEREWOLF -> run ? 1.9f : 1.3f; case TROLL -> 1.15f; default -> 1.3f; });
+        float stride = Math.max(0.15f, legLen * switch (k) { case ZOMBIE -> 0.85f; case GOBLIN, IMP -> 1.0f; case WEREWOLF -> run ? 1.9f : 1.3f; case TROLL, ICE_TROLL, RIVER_TROLL -> 1.15f; case LESSER_DEMON -> 1.05f; default -> 1.3f; });
         if (!ghost && !airborne && speed > 0.05f) st.phase += speed / stride * (float) Math.PI * dt;
         float wantAmp = speed < 0.05f || airborne || ghost ? 0 : Math.min(run ? 0.95f : 0.55f, speed / Math.max(0.2f, k.walk) * 0.42f);
         st.amp += (wantAmp - st.amp) * Math.min(1, dt * 8);
@@ -2137,7 +2251,13 @@ public final class Gfx implements AutoCloseable {
         switch (k) {
             case GOBLIN -> { lean = 0.16f + amp * 0.14f; kneeBase = 0.5f; thighBase = 0.28f; armFwd = 0.3f; spread = 0.25f; elbowBase = 0.5f; headX = -0.05f; }
             case ORC -> { lean = 0.08f + amp * 0.12f; kneeBase = 0.12f; thighBase = 0.04f; armFwd = 0.05f; spread = 0.22f; elbowBase = 0.25f; roll = 0.05f * (float) Math.sin(ph) * amp; }
-            case TROLL -> { lean = 0.42f + amp * 0.1f; kneeBase = 0.35f; thighBase = 0.2f; armFwd = 0.5f; spread = 0.16f; elbowBase = 0.25f; headX = 0.05f; roll = 0.09f * (float) Math.sin(ph) * Math.max(0.3f, amp); swingArms = 0.45f; }
+            case TROLL, ICE_TROLL -> { lean = 0.42f + amp * 0.1f; kneeBase = 0.35f; thighBase = 0.2f; armFwd = 0.5f; spread = 0.16f; elbowBase = 0.25f; headX = 0.05f; roll = 0.09f * (float) Math.sin(ph) * Math.max(0.3f, amp); swingArms = 0.45f; }
+            // (0.4.8) the river troll: lower and longer, its long arms trailing near the ground, a sidelong slink
+            case RIVER_TROLL -> { lean = 0.52f + amp * 0.12f; kneeBase = 0.45f; thighBase = 0.28f; armFwd = 0.62f; spread = 0.22f; elbowBase = 0.18f; headX = -0.08f; roll = 0.12f * (float) Math.sin(ph) * Math.max(0.3f, amp); swingArms = 0.55f; }
+            // the lesser demon: hunched and coiled, knees bent, claws out before it, head thrust up in a snarl
+            case LESSER_DEMON -> { lean = 0.3f + amp * 0.14f; kneeBase = 0.36f; thighBase = 0.18f; armFwd = 0.38f; spread = 0.32f; elbowBase = 0.62f; headX = -0.16f; roll = 0.06f * (float) Math.sin(ph) * Math.max(0.4f, amp); swingArms = 0.5f; }
+            // the greater demon: upright and dominant, the chest out, arms held wide of its bulk, a slow heavy tread
+            case GREATER_DEMON -> { lean = 0.02f + amp * 0.08f; kneeBase = 0.1f; thighBase = 0.04f; armFwd = 0.12f; spread = 0.3f; elbowBase = 0.32f; headX = -0.06f; roll = 0.045f * (float) Math.sin(ph) * amp; swingArms = 0.4f; }
             case IMP -> { lean = airborne ? 0.35f + Math.min(0.5f, speed * 0.08f) : 0.12f; kneeBase = airborne ? 0.8f : 0.2f; thighBase = airborne ? 0.5f : 0.08f; armFwd = 0.25f; spread = 0.3f; elbowBase = 0.7f; headX = -0.1f; }
             case GHOST -> { lean = 0.1f + Math.min(0.3f, speed * 0.1f); kneeBase = 0; thighBase = 0; armFwd = 0.3f; spread = 0.12f; elbowBase = 0.3f; headX = 0.15f; }
             case ZOMBIE -> { lean = 0.18f; kneeBase = 0.18f; thighBase = 0.05f; armFwd = 1.35f; spread = 0.12f; elbowBase = 0.15f; headZ = 0.3f + 0.08f * (float) Math.sin(t * 0.7); headX = 0.15f; roll = 0.07f * (float) Math.sin(ph); swingArms = 0.15f; }
@@ -2191,6 +2311,30 @@ public final class Gfx implements AutoCloseable {
             roll += 0.035f * (float) Math.sin(t * 0.45);
             headZ += 0.18f * (float) Math.sin(t * 0.23 + 1.1);
         }
+        // (0.4.8, gamefixes: monsters' animation sets polished and expanded - an idle) left to itself it is never a statue:
+        // every few seconds one of its kind's idle actions, eased in and out over two to three seconds - looking about,
+        // stretching, scratching, crouching to sniff the ground, beating its chest, shifting its weight
+        float[] armLift = new float[2], armBend = new float[2];
+        float lookAdd = 0;
+        if (!engaged && !swinging && !dormant && !ghost && !airborne && amp < 0.08f && hover == 0) {
+            int[] clips = idleClips(k);
+            double window = 8.5 + (mo.id % 5) * 0.7, span = 2.8;
+            long w = (long) Math.floor((t + mo.id % 13) / window);
+            float u = (float) ((t + mo.id % 13) - w * window);
+            if (clips.length > 0 && u < span) {
+                int clip = clips[(int) Math.floorMod(w * 31 + mo.id * 7, clips.length)];
+                float e = (float) Math.sin(Math.PI * u / span), q = u / (float) span;
+                e = e * e * (3 - 2 * e);
+                switch (clip) {
+                    case 0 -> { lookAdd += 0.9f * (float) Math.sin(q * Math.PI * 2) * e; headX -= 0.08f * e; }                                  // look about
+                    case 1 -> { armLift[0] += 2.3f * e; armLift[1] += 2.3f * e; armBend[0] += 0.3f * e; armBend[1] += 0.3f * e; lean -= 0.18f * e; headX -= 0.35f * e; }   // stretch
+                    case 2 -> { armLift[0] += 2.1f * e; armBend[0] += 1.7f * e; headZ += 0.18f * e; headX += 0.08f * (float) Math.sin(t * 11) * e; }                    // scratch
+                    case 3 -> { kneeBase += 0.55f * e; thighBase += 0.4f * e; lean += 0.4f * e; headX += 0.4f * e; lookAdd += 0.25f * (float) Math.sin(t * 3.1) * e; } // sniff
+                    case 4 -> { float drum = (float) Math.sin(t * 9) * 0.35f * e; armLift[0] += 1.25f * e + drum; armLift[1] += 1.25f * e - drum; armBend[0] += 1.3f * e; armBend[1] += 1.3f * e; spread += 0.18f * e; headX -= 0.3f * e; }   // beat its chest
+                    default -> { roll += 0.1f * e * (float) Math.sin(q * Math.PI); kneeBase += 0.12f * e; }                                     // shift its weight
+                }
+            }
+        }
         // the attack: the stroke the combat system is sweeping (the same path its hit test follows)
         float u = phaseU(mo);
         boolean striking = mo.cs.phase != Actor.Combat.Phase.IDLE && mo.cs.move != null;
@@ -2206,7 +2350,7 @@ public final class Gfx implements AutoCloseable {
         lean = st.lean;
         // skeletons move in jerks: their phase snaps between poses rather than flowing
         float gp = k == rpg.monster.MonsterKind.SKELETON ? (float) (Math.floor(ph / 0.35f) * 0.35f + (ph % 0.35f) * 0.4f) : ph;
-        float breath = 0.03f * (float) Math.sin(t * (k == rpg.monster.MonsterKind.TROLL ? 1.2 : 2.1));
+        float breath = (k == rpg.monster.MonsterKind.GREATER_DEMON ? 0.045f : 0.03f) * (float) Math.sin(t * (k.troll() || k == rpg.monster.MonsterKind.GREATER_DEMON ? 1.2 : 2.1));
         // ---- the legs: thigh, knee, foot for each side; the pelvis rides at the height that keeps the planted foot down
         float[][] leg = new float[2][3];
         float lowest = 0;
@@ -2226,13 +2370,16 @@ public final class Gfx implements AutoCloseable {
                 foot = -(thighA - knee) + (run ? Math.max(0, -sw) * 0.4f * amp : 0);
             }
             if (airborne) { thighA = thighBase + 0.15f * (float) Math.sin(t * 2 + side); knee = kneeBase + 0.2f * (float) Math.sin(t * 2.3 + side); foot = 0.5f; }
+            if (hover > 0) { thighA += hover * (0.25f + 0.08f * (float) Math.sin(t * 3 + side)); knee += hover * 0.5f; foot += hover * 0.45f; }
             leg[side][0] = thighA; leg[side][1] = knee; leg[side][2] = foot;
             float a2 = thighA - knee, a3 = a2 + foot;
             float depth = f.thigh * (float) Math.cos(thighA) + f.shin * (float) Math.cos(a2) + (f.foot == null ? 0 : (f.digitigrade ? 2.6f : 1) * (float) Math.cos(a3));
             lowest = Math.max(lowest, depth);
         }
         float pelvis = ghost ? f.hipY + 0.6f * (float) Math.sin(t * 1.3) : airborne ? f.hipY : lowest;
-        float bob = ghost || airborne ? 0 : Math.abs((float) Math.sin(gp)) * amp * (run ? 1.2f : 0.55f) * (k == rpg.monster.MonsterKind.TROLL ? 1.5f : 1);
+        float bob = ghost || airborne ? 0 : Math.abs((float) Math.sin(gp)) * amp * (run ? 1.2f : 0.55f) * (k.troll() ? 1.5f : 1);
+        // the hover: up to 'monsters.hoverLift' metres, bobbing on each down-stroke of the wings
+        if (hover > 0) bob += hover * (rpg.Tuning.f("monsters.hoverLift", 0.7f) + 0.12f * (float) Math.sin(t * 9)) / vs;
         mf.identity().translate(mo.x, mo.y, mo.z).rotateY(mo.yaw).scale(vs, vs, vs);
         float castT = (float) (clock - mo.castAt), throwT = (float) (clock - mo.throwAt);
         boolean casting = castT >= 0 && castT < 0.5f, throwing = throwT >= 0 && throwT < 0.6f;
@@ -2240,7 +2387,7 @@ public final class Gfx implements AutoCloseable {
         mq.set(mf).translate(0, pelvis + bob, -lunge * 6).rotateY(twist * 0.25f).rotateZ(roll * 0.5f);
         mpart(mp, f.torso);
         // the head: it looks ahead (or at its foe) against the lean
-        float look = mo.fightTarget != 0 ? 0 : 0.25f * (float) Math.sin(t * 0.3);
+        float look = mo.fightTarget != 0 ? 0 : 0.25f * (float) Math.sin(t * 0.3) + lookAdd;
         ma.set(mp).translate(f.neck[0], f.neck[1], f.neck[2]).rotateY(look - twist * 0.5f).rotateX(lean - breath - headX).rotateZ(headZ);
         if (lostPart(mo, rpg.combat.Gore.Part.HEAD)) mstump(ma, f.headHalf * 1.2f); else mpart(ma, f.head);
         float[] headTop = at(ma, 0, 5, 0), neckW = at(ma, 0, 0, 0);
@@ -2253,7 +2400,8 @@ public final class Gfx implements AutoCloseable {
             boolean main = side == 0 != mo.cs.offHand;
             float pitch = armFwd + (float) Math.sin(lp) * amp * swingArms;
             if (k == rpg.monster.MonsterKind.WEREWOLF && run) pitch = 1.25f + (float) Math.sin(lp) * amp * 0.9f;   // its arms reach and pull like forelegs
-            float el = elbowBase + (run ? 0.6f : 0.15f) * amp;
+            float el = elbowBase + (run ? 0.6f : 0.15f) * amp + armBend[side];
+            pitch += armLift[side];
             if (k == rpg.monster.MonsterKind.ZOMBIE) pitch += 0.12f * (float) Math.sin(t * 1.3 + side * 2);
             if (ghost) { pitch += 0.15f * (float) Math.sin(t * 1.1 + side); if (mo.fightTarget != 0) { pitch = 1.3f; el = 0.1f; } }
             if (main && casting) { pitch = 1.5f * Math.min(1, castT * 6); el = 0.1f; }
@@ -2311,12 +2459,18 @@ public final class Gfx implements AutoCloseable {
             mpart(ma, f.tail);
         }
         if (f.wing != null) {
-            st.flap += ((airborne ? 1 : 0.15f) - st.flap) * Math.min(1, dt * 5);
-            float beat = st.flap * (float) Math.sin(t * 26) * 0.85f;
+            boolean big = k == rpg.monster.MonsterKind.GREATER_DEMON;
+            st.flap += ((airborne || hover > 0.05f ? 1 : big && mo.state == rpg.monster.Monster.State.ENGAGE ? 0.25f : 0.15f) - st.flap) * Math.min(1, dt * 5);
+            // a greater demon's great wings beat slowly and hard (down fast, up slow); an imp's buzz
+            float wt = (float) (t * (big ? 5.2 : 26) % (Math.PI * 2));
+            float stroke = big ? (wt < 2.2f ? (float) Math.sin(wt / 2.2f * Math.PI / 2) : (float) Math.cos((wt - 2.2f) / (Math.PI * 2 - 2.2f) * Math.PI / 2)) * 2 - 1 : (float) Math.sin(wt);
+            float beat = st.flap * stroke * (big ? 0.7f : 0.85f);
+            // folded: drawn in along the back; spread: out to the sides
+            float fold = big ? 0.85f - 0.55f * Math.min(1, st.flap * 1.4f) : 0.55f;
             for (int side = 0; side < 2; side++) {
                 ma.set(mp).translate((side == 0 ? 1 : -1) * f.wingAt[0], f.wingAt[1], f.wingAt[2]);
                 if (side == 1) ma.rotateY((float) Math.PI);
-                ma.rotateY(side == 0 ? -(0.55f + beat) : 0.55f + beat).rotateZ(-0.15f);
+                ma.rotateY(side == 0 ? -(fold + beat * 0.35f) : fold + beat * 0.35f).rotateZ(big ? -0.15f + beat * 0.5f : -0.15f);
                 mpart(ma, f.wing);
             }
         }
@@ -2345,6 +2499,22 @@ public final class Gfx implements AutoCloseable {
         mo.hand[0] = hands[0][0]; mo.hand[1] = hands[0][1]; mo.hand[2] = hands[0][2]; mo.handAt = clock;
         // an imp's hand kindles as it casts
         if (casting) { float[] h = hands[mo.cs.offHand ? 1 : 0]; cmd.emitter(mo.id ^ (1L << 52), 0, h[0], h[1], h[2], 0.04f, 30, 0.04f, 0.25f, 5, 1.6f, 0.3f, 0, 0.1f, 0); }
+    }
+
+    /** (0.4.8) A kind's idle actions (0 look about, 1 stretch, 2 scratch, 3 sniff, 4 beat its chest, 5 shift its weight). */
+    private static int[] idleClips(rpg.monster.MonsterKind k) {
+        return switch (k) {
+            case GOBLIN -> new int[]{0, 2, 3, 5};
+            case ORC -> new int[]{0, 4, 1, 5};
+            case TROLL, ICE_TROLL, RIVER_TROLL -> new int[]{0, 3, 4, 2};
+            case IMP -> new int[]{0, 2, 5};
+            case ZOMBIE -> new int[]{5, 0};
+            case SKELETON -> new int[]{0, 5};
+            case WEREWOLF -> new int[]{0, 3, 1};
+            case LESSER_DEMON -> new int[]{0, 4, 2, 3};
+            case GREATER_DEMON -> new int[]{0, 1, 4};
+            default -> new int[]{0, 5};
+        };
     }
 
     private void monsterPosePoints(rpg.monster.Monster mo, Mat4 torso, Mat4 hips, MonsterModels.Fig f, float[] neck, float[] head, float[][] shoulders, float[][] elbows, float[][] hands, float[][] leg) {
@@ -2477,9 +2647,10 @@ public final class Gfx implements AutoCloseable {
         float y0 = dead ? standY + (lieY - standY) * Math.max(slump * 0.6f, roll) + hop : standY;
         mf.identity().translate(mo.x, mo.y, mo.z).rotateY(mo.yaw).scale(vs, vs, vs).translate(0, y0, 0);
         if (dead) mf.rotateZ((float) Math.PI * roll);
-        mf.rotateX(rear);
+        boolean scorp = f.clawA != null;
+        mf.rotateX(scorp ? rear * 0.25f : rear);
         mpart(mf, f.beastHead);
-        ma.set(mf).translate(0, 1, 0.5f).rotateX(-0.3f + 0.05f * (float) Math.sin(t * 0.9) - rear * 0.5f);
+        ma.set(mf).translate(0, scorp ? 0 : 1, 0.5f).rotateX(scorp ? 0.02f * (float) Math.sin(t * 0.9) : -0.3f + 0.05f * (float) Math.sin(t * 0.9) - rear * 0.5f);
         mpart(ma, f.body);
         for (int i = 0; i < 8; i++) {
             int side = i < 4 ? 0 : 1, n = i % 4;
@@ -2504,6 +2675,47 @@ public final class Gfx implements AutoCloseable {
             mb.set(ma).translate(0, 0, f.legALen).rotateX(r0 + r1);
             mpart(mb, f.legB);
         }
+        if (f.clawA != null) scorpionParts(mo, f, st, t, dead, curl, twitch, rearing, progress, recovery);
+    }
+
+    /**
+     * (0.4.8, gamefixes: scorpions with two attacks of their own) a scorpion's pincers and tail, on the spider's body and
+     * legs. The pincers are held out before it, opening and closing as it goes, raised and spread in its wind-up and
+     * snapped shut forward in a pincer strike; the tail of five segments arches up over its back, swaying, curled higher
+     * and drawn back in a sting's wind-up, then whipped forward over its head to drive the sting down. Dead, the pincers
+     * fall slack and the tail uncurls along the ground.
+     */
+    private void scorpionParts(rpg.monster.Monster mo, MonsterModels.Fig f, MonsterPose st, double t, boolean dead, float curl, float twitch, boolean rearing, float progress, float recovery) {
+        boolean sting = "sting".equals(mo.windup) || "sting".equals(mo.lastStrike);
+        boolean pinch = !sting && (rearing || recovery > 0);
+        float wind = rearing ? smooth(progress) : 0;
+        float snap = recovery;                         // 1 at the strike, easing to 0
+        float open = dead ? 0.1f : 0.25f + 0.2f * (float) Math.sin(t * 2.3) + (pinch ? 0.55f * wind - 0.6f * snap : 0);
+        for (int side = 0; side < 2; side++) {
+            float sgn = side == 0 ? 1 : -1;
+            float reach = pinch ? 0.55f * wind - 0.9f * snap : 0;
+            float yaw = sgn * (0.55f + 0.15f * (float) Math.sin(t * 0.7 + side) + (pinch ? 0.35f * wind - 0.45f * snap : 0)) + (dead ? sgn * 0.6f : 0);
+            float pitch = dead ? -0.1f : 0.25f + 0.25f * wind - 0.15f * snap;
+            ma.set(mf).translate(sgn * f.clawAt[0], f.clawAt[1], f.clawAt[2]).rotateY((float) Math.PI - yaw).rotateX(-pitch);
+            mpart(ma, f.clawA);
+            // the elbow folds the claw back in toward the face, opening out as it strikes
+            mb.set(ma).translate(0, 0, 8).rotateY(sgn * (1.25f - reach * 0.9f)).rotateX(pitch * 0.6f);
+            mb.rotateZ(sgn * open * 0.15f);
+            mpart(mb, f.clawB);
+        }
+        // the tail: each segment pitched up a little more, the whole swaying side to side; in a sting's wind-up curled
+        // tighter and drawn back, at the strike whipped forward over the head
+        float sway = dead ? 0 : 0.18f * (float) Math.sin(t * 1.4) + 0.05f * twitch * (float) Math.sin(clock * 13);
+        float arch = dead ? -0.05f * (1 - curl) : 0.42f + 0.04f * (float) Math.sin(t * 1.9) + (sting ? 0.12f * wind - 0.18f * snap : 0);
+        float whip = sting ? -0.55f * snap + 0.2f * wind : 0;
+        ma.set(mf).translate(f.tailAt[0], f.tailAt[1], f.tailAt[2]).rotateY(sway).rotateX(-(dead ? 0.1f : 0.6f) - whip);
+        for (int i = 0; i < f.tailSegs; i++) {
+            mpart(ma, f.tailSeg);
+            ma.translate(0, 0, f.tailLen).rotateX(-arch).rotateY(sway * 0.3f);
+            ma.scale(1.06f, 1.06f, 1.06f);
+        }
+        ma.rotateX(-0.6f - (sting ? 0.8f * snap : 0));
+        mpart(ma, f.sting);
     }
 
     /**
@@ -2635,7 +2847,10 @@ public final class Gfx implements AutoCloseable {
     /** Where a sleeping NPC lies: the bed under their home, if they are in it; else null. */
     private Furniture sleeping(Rpg g, Npc n) {
         if (!n.asleep()) return null;
-        Furniture f = g.objects.furnitureAt((int) Math.floor(n.homeX), rpg.world.Ground.cell(n.homeX, n.homeZ), (int) Math.floor(n.homeZ));
+        // (0.4.8) the bed on its own floor (an upstairs bed was looked for on the ground floor under it, and its sleeper
+        // drawn standing beside it)
+        int floor = Float.isFinite(n.homeY) ? (int) Math.floor(n.homeY + 0.1f) : rpg.world.Ground.cell(n.homeX, n.homeZ);
+        Furniture f = g.objects.furnitureAt((int) Math.floor(n.homeX), floor, (int) Math.floor(n.homeZ));
         return f != null && f.kind == Furniture.Kind.BED && f.owner == n.id ? f : null;
     }
 
@@ -2982,8 +3197,38 @@ public final class Gfx implements AutoCloseable {
         for (int i = 0; i < newSoot && it.hasNext(); i++) { var st = it.next(); if (Math.hypot(st.x() - camX, st.z() - camZ) > 28) continue; decals.add(astratto.decal.DecalAtlas.SCORCH, st.x(), st.y(), st.z(), st.nx(), st.ny(), st.nz(), st.size(), st.rot(), 3600, 0x140F0C, 0.45f + (st.rot() % 1f) * 0.4f); }
         sootLaid = chem.sootCount;
         for (int[] c; (c = chem.gone.poll()) != null; ) decals.detach(c[0], c[1], c[2]);
+        prints(g);
+        decals.snow = g.timeSystem.weather.snowCover;
         decals.time = (float) g.time;
         decals.frame(cmd);
+    }
+
+    /**
+     * (0.4.8, gamefixes: footsteps in the snow and the puddles, each its own) every print the figures laid this frame,
+     * pressed into the ground as it is: in lying snow a shadowed hollow (never buried by it: a print's tint is given a
+     * negative alpha) lasting until the snow is renewed; on soaked open ground a dark wet sole that dries off; in mud a
+     * deep brown print, in sand a faint one. Rock, boards and turf in dry weather keep none.
+     */
+    private void prints(Rpg g) {
+        var w = g.timeSystem.weather;
+        for (float[] p; (p = Prints.poll()) != null; ) {
+            if (Math.hypot(p[0] - camX, p[2] - camZ) > 40) continue;
+            int bx = (int) Math.floor(p[0]), by = (int) Math.floor(p[1] - 0.05f), bz = (int) Math.floor(p[2]);
+            int below = g.vox.block(bx, by, bz);
+            if (below == rpg.world.Blocks.AIR || below == rpg.world.Blocks.WATER || rpg.world.Blocks.objectCell(below)) continue;
+            boolean open = g.vox.skyLight(bx, by + 1, bz) > 0.7f;
+            int kind = p[4] > 0.5f ? astratto.decal.DecalAtlas.HOOFPRINT : astratto.decal.DecalAtlas.FOOTPRINT;
+            float size = p[4] > 0.5f ? 0.3f : 0.4f, rot = -p[3];
+            float top = by + 1.0f;
+            if (open && w.snowCover > 0.18f && below != rpg.world.Blocks.STAIRS)
+                decals.add(kind, p[0], top, p[2], 0, 1, 0, size, rot, rpg.Tuning.f("weather.snowPrintLife", 1200), 0x6E7E9C, -0.62f * Math.min(1, w.snowCover * 1.6f));
+            else if (open && w.wetness > 0.35f && rpg.world.Blocks.material(below) != rpg.world.Blocks.Material.WOOD)
+                decals.add(kind, p[0], top, p[2], 0, 1, 0, size, rot, rpg.Tuning.f("weather.wetPrintLife", 100), 0x060504, 0.7f * Math.min(1, w.wetness));
+            else if (below == rpg.world.Blocks.MUD)
+                decals.add(kind, p[0], top, p[2], 0, 1, 0, size, rot, 600, 0x2A1C12, 0.62f);
+            else if (below == rpg.world.Blocks.SAND)
+                decals.add(kind, p[0], top, p[2], 0, 1, 0, size, rot, 240, 0x6A5A3A, 0.32f);
+        }
     }
 
     /** The current matrix: the figure's root times a segment's matrix (figure space, pixels). */
@@ -3286,6 +3531,21 @@ public final class Gfx implements AutoCloseable {
                 put(box, tassel, 1, 0.9f, 0);
                 m.set(headBase).translate(0, hh + 2.35f, 0.2f).rotateX(sw).translate(hw * 0.22f + 1.7f, -0.7f, 0).scale(0.55f, 0.8f, 0.55f);
                 put(box, Skin.shade(tassel, 1.2f) & 0xFFFFFF, 1, 0.9f, 0);
+            }
+            case "crown" -> {
+                // (0.4.7) a gold circlet round the brow, its fleurs standing over the hair, a jewel at the front
+                float rw = hw * 0.5f + 0.35f, rd = hd * 0.5f + 0.35f, y = hh + 0.15f;
+                int gold = head.color, gem = Garments.color(head, "gem", 0xA8142A);
+                headBox(0, y, -rd, rw * 2 + 0.3f, 0.75f, 0.3f, gold, 1, 0.3f);
+                headBox(0, y, rd, rw * 2 + 0.3f, 0.75f, 0.3f, gold, 1, 0.3f);
+                headBox(-rw, y, 0, 0.3f, 0.75f, rd * 2, gold, 1, 0.3f);
+                headBox(rw, y, 0, 0.3f, 0.75f, rd * 2, gold, 1, 0.3f);
+                for (float fx : new float[]{-rw, 0, rw}) for (float fz : new float[]{-rd, 0, rd}) {
+                    if (fx == 0 && fz == 0) continue;
+                    headBox(fx, y + 0.75f, fz, 0.42f, 0.8f, 0.42f, gold, 1, 0.3f);
+                    headBox(fx, y + 1.3f, fz, 0.26f, 0.32f, 0.26f, Skin.shade(gold, 1.15f) & 0xFFFFFF, 1, 0.25f);
+                }
+                headBox(0, y + 0.05f, -rd - 0.2f, 0.45f, 0.45f, 0.18f, gem, 0.2f, 0.15f);
             }
             case "straw_hat" -> {
                 int weave = Garments.color(head, "weave", Skin.shade(c, 0.85f) & 0xFFFFFF), band = Garments.color(head, "band", 0x7A4A2A);
@@ -3734,7 +3994,10 @@ public final class Gfx implements AutoCloseable {
             pointLight(fx, y, fz, l[0] * (0.6f + 0.4f * k), l[1] * flick * k, l[2] * flick * k, l[3] * flick * k, (float) Math.hypot(fu.x - camX, fu.z - camZ) < 14 ? AstrattoNative.LIGHT_SHADOW : 0);
             return;
         }
-        pointLight(fu.x, y, fu.z, l[0], l[1] * flick, l[2] * flick, l[3] * flick, fu.kind == Furniture.Kind.CHANDELIER && (float) Math.hypot(fu.x - camX, fu.z - camZ) < 12 ? AstrattoNative.LIGHT_SHADOW : 0);
+        // a sconce's flame stands out from its wall, not at the cell's middle
+        float lx = fu.x, lz = fu.z;
+        if (fu.kind == Furniture.Kind.SCONCE) { lx += (float) Math.sin(fu.yaw()) * 0.3f; lz += (float) Math.cos(fu.yaw()) * 0.3f; }
+        pointLight(lx, y, lz, l[0], l[1] * flick, l[2] * flick, l[3] * flick, fu.kind == Furniture.Kind.CHANDELIER && (float) Math.hypot(fu.x - camX, fu.z - camZ) < 12 ? AstrattoNative.LIGHT_SHADOW : 0);
     }
 
     private final java.util.Map<ItemModels.Model,int[]> itemBounds=new java.util.IdentityHashMap<>();
@@ -3811,7 +4074,9 @@ public final class Gfx implements AutoCloseable {
             drawLayers("station:" + st.kind, () -> Props.station(st.kind));
         } else if (o instanceof Furniture fu) {
             float w = fu.facing % 2 == 0 ? fu.width() : fu.depth(), d = fu.facing % 2 == 0 ? fu.depth() : fu.width();
-            m.identity().translate(fu.x, fu.floor, fu.z).rotateY(fu.yaw());
+            // (0.4.7) a chair drawn out from its table as far as it stands
+            float pulled = fu.pull * Furniture.CHAIR_PULL;
+            m.identity().translate(fu.x + (float) Math.sin(fu.yaw()) * pulled, fu.floor, fu.z + (float) Math.cos(fu.yaw()) * pulled).rotateY(fu.yaw());
             // (each its own look where a seed varies it: the beds' quilts, the books, the paintings, the rugs, the chairs' cloth)
             boolean own = fu.kind == Furniture.Kind.BED || fu.kind == Furniture.Kind.BOOKCASE || fu.kind == Furniture.Kind.HEADSTONE || fu.kind == Furniture.Kind.PAINTING
                     || fu.kind == Furniture.Kind.RUG || fu.kind == Furniture.Kind.FOURPOSTER || fu.kind == Furniture.Kind.ARMCHAIR || fu.kind == Furniture.Kind.SOFA
@@ -3943,7 +4208,8 @@ public final class Gfx implements AutoCloseable {
      * leaf model runs from its hinge edge (x = 0) to its free edge, so it is drawn half a leaf back from the body's middle.
      */
     private void doorLeaves(Rpg g, Door d, float dt) {
-        String key = d.cellDoor ? "cell-door:" + d.height : d.fenceGate ? "fencegate" : "door:" + d.height + ":" + d.locked;
+        boolean paired = d.leaf.length >= 2;
+        String key = d.cellDoor ? "cell-door:" + d.height : d.fenceGate ? "fencegate" : "door:" + d.height + ":" + d.locked + (paired ? ":pair" : "");
         for (int i = 0; i < d.leaf.length; i++) {
             Snapshots.Rigid r = g.lastRigids.body(d.leaf[i]);
             if (r == null) continue;
@@ -3951,7 +4217,7 @@ public final class Gfx implements AutoCloseable {
             System.arraycopy(m16, 0, m.m, 0, 16);
             float leafW = d.leafWidth, h = d.height - 0.04f;
             m.translate(-leafW / 2, -h / 2 - 0.02f, 0).scale(leafW, 1, 1);
-            drawLayers(key, () -> d.cellDoor ? Props.cellDoorLeaf(d.height) : d.fenceGate ? Props.fenceGateLeaf() : Props.doorLeaf(d.height, d.locked));
+            drawLayers(key, () -> d.cellDoor ? Props.cellDoorLeaf(d.height) : d.fenceGate ? Props.fenceGateLeaf() : Props.doorLeaf(d.height, d.locked, paired));
         }
     }
 

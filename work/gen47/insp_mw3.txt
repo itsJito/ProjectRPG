@@ -1,0 +1,123 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+
+> Task :probe
+
+WorldInspectProbeTest > inspect() STANDARD_OUT
+    [celldbg] set 0
+         rpg.world.shadowveil.Kit$Canvas.set(Kit.java:35)
+         rpg.world.shadowveil.Kit$Frame.put(Kit.java:73)
+         rpg.world.shadowveil.Kit.building(Kit.java:217)
+         rpg.world.shadowveil.Kit.hall(Kit.java:1183)
+         rpg.world.shadowveil.Architecture.raise(Architecture.java:609)
+         rpg.world.shadowveil.Terrain.generate(Terrain.java:134)
+         rpg.world.shadowveil.ShadowVeil.build(ShadowVeil.java:40)
+    [celldbg] set 0
+         rpg.world.shadowveil.Kit$Canvas.set(Kit.java:35)
+         rpg.world.shadowveil.Fitout.partition(Fitout.java:804)
+         rpg.world.shadowveil.Fitout.split(Fitout.java:728)
+         rpg.world.shadowveil.Fitout.layout(Fitout.java:690)
+         rpg.world.shadowveil.Fitout.fit(Fitout.java:184)
+         rpg.world.shadowveil.Fitout.fitAll(Fitout.java:149)
+         rpg.world.shadowveil.Architecture.raise(Architecture.java:629)
+         rpg.world.shadowveil.Terrain.generate(Terrain.java:134)
+         rpg.world.shadowveil.ShadowVeil.build(ShadowVeil.java:40)
+    [Load] ShadowVeil grown in 19.52s ({regions=820, overlays=475, variants=576, scarp=49, coast=433, erosion=478, peaks=72, lakes=55, isles=1, rivers=1108, wadis=13, ground=22, roads=685, causeways=3, architecture=1300, pitsFilled=1396, pits=421, banks=81, clamp=15, cliffs=52, columns=983, falls=15, raise=10356, trees=267, outcrops=0, ways=516, lava=0, dungeons=111, postsSunk=28, floatingRemoved=59, floating=569}), made and lit in 2.25s
+    [water] flow field grown in 1363 ms: 39016 columns moving
+    [gathering] 757 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+
+    ================ 348, 40, 947  law Loxford  stand Y 40.0
+    structure here: millwood_lodge Millwood Lodge (hall) lot 344,942 - 353,961 floor 39
+      near earl_manor                 Earl William's Manor                     building       18 m lot 334,924-349,935 floor 39
+      near millwood_yard              Millwood wood yard                       yard           17 m lot 352,926-361,939 floor 39
+      near loxford_cottages_3         Cottage                                  building       27 m lot 318,949-323,954 floor 38
+      near loxford_cottages_4         Cottage                                  building       37 m lot 309,935-314,940 floor 38
+      near loxford_cottages_5         Cottage                                  building       22 m lot 323,941-329,946 floor 39
+      near loxford_cottages_6         Cottage                                  building       36 m lot 313,927-318,933 floor 38
+      near loxford_cottages_7         Cottage                                  building       36 m lot 318,920-323,925 floor 38
+      near loxford_cottages_8         Cottage                                  building       29 m lot 337,916-342,921 floor 39
+      near loxford_cottages_9         Cottage                                  building       31 m lot 336,974-341,979 floor 39
+      near loxford_cottages_10        Cottage                                  building       28 m lot 343,972-348,977 floor 39
+      near loxford_cottages_13        Cottage                                  building       32 m lot 352,975-357,980 floor 39
+      near loxford_cottages_15        Cottage                                  building       35 m lot 360,975-366,980 floor 40
+      near loxford_cottages_16        Cottage                                  building       37 m lot 368,973-373,978 floor 40
+      near foresters_guild            Foresters' Guild Hall                    building       22 m lot 358,956-371,966 floor 40
+      object Furniture              Sideboard                      (349.0, 40.5, 948.5)
+      object Furniture              Tapestry                       (347.0, 41.0, 948.5)
+      object Furniture              Table                          (349.0, 40.5, 945.5)
+      object Furniture              Stool                          (348.5, 40.5, 946.5)
+      object Furniture              Stool                          (349.5, 40.5, 946.5)
+      object Furniture              Pantry shelves                 (346.5, 41.0, 946.5)
+      npc Oswin        WORKER         (342.5, 40.0, 951.5) goal IDLE
+      npc Dunstan      CRAFTSMAN      (347.5, 40.0, 959.5) goal IDLE
+      npc Cenric       WORKER         (341.5, 40.0, 949.5) goal IDLE
+      npc Aldred       CIVIC          (370.5, 41.0, 959.5) goal IDLE
+      npc Leofric      CRAFTSMAN      (349.5, 40.0, 958.5) goal IDLE
+      npc Count William CIVIC          (336.5, 44.0, 926.5) goal IDLE
+      npc Eadmund      CRAFTSMAN      (351.5, 40.0, 945.5) goal WORK
+      layer Y38 (x 346..350 across, z down; * the point)
+       aaaaa
+       aaaaa
+       aa*aa
+       aaaaa
+       aaaaa
+      layer Y39 (x 346..350 across, z down; * the point)
+       bbbbb
+       bbbbb
+       bb*bb
+       bbbbb
+       bbbbb
+      layer Y40 (x 346..350 across, z down; * the point)
+       ..cc.
+       c.dd.
+       ee*ee
+       ..cc.
+       .....
+      layer Y41 (x 346..350 across, z down; * the point)
+       .....
+       c....
+       ee*ee
+       .....
+       .....
+      layer Y42 (x 346..350 across, z down; * the point)
+       .....
+       .....
+       ee*ee
+       .....
+       .....
+      layer Y43 (x 346..350 across, z down; * the point)
+       bbbbb
+       bbbbb
+       bb*bb
+       bbbbb
+       bbbbb
+      layer Y44 (x 346..350 across, z down; * the point)
+       .....
+       .....
+       ..*..
+       .....
+       f....
+      legend: a=dirt b=planks c=table d=seat e=spruce_log f=bed
+  slow: rpg.probe.WorldInspectProbeTest.inspect() 34.677 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 54s
+9 actionable tasks: 2 executed, 7 up-to-date

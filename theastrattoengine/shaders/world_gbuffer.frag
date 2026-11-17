@@ -73,9 +73,12 @@ void main() {
         vec3 card = normalize(cross(dFdx(vWorld), dFdy(vWorld)));
         vec3 Nl = normalize(mix(card * sign(card.y + 1e-3), vec3(0.0, 1.0, 0.0), 0.55));
         vec4 lmL = texelFetch(uLayerMat, ivec2(vLayer, 0), 0);
+        // 0.4.7 (gamefixes: leaves did not react to rain) leaves out under the sky go darker and glossier as they wet
+        float leafWet = uRain * smoothstep(0.55, 0.9, vLight.x);
+        c *= 1.0 - 0.22 * leafWet;
         oAlbedo = vec4(c, 0.0);
         oNormal = vec4(Nl * 0.5 + 0.5, 1.0);
-        oMat = vec4(max(lmL.r, 0.62), 0.0, vLight.z, packLight(vLight.x, vLight.y));
+        oMat = vec4(mix(max(lmL.r, 0.62), 0.32, leafWet), 0.0, vLight.z, packLight(vLight.x, vLight.y));
         return;
     }
     vec4 tex = atlasTexel(bp);
@@ -128,7 +131,9 @@ void main() {
         rough = min(1.0, rough + grime * 0.5);
         // rain: open-sky tops darken and turn glossy, puddles gather in the low-frequency noise
         if (uRain > 0.0 && N.y > 0.5 && sky > 0.8) {
-            float puddle = smoothstep(0.42, 0.62, texture(uNoise, vWorld.xz / 23.0).r);
+            // 2.16: the puddles grow from the hollows as the ground soaks and shrink back as it dries
+            float pn = texture(uNoise, vWorld.xz / 23.0).r + texture(uNoise, vWorld.xz / 5.5).g * 0.08;
+            float puddle = smoothstep(0.66 - 0.26 * uRain, 0.74 - 0.18 * uRain, pn);
             float wet = uRain * mix(0.45, 1.0, puddle);
             float wetFloor = lm.a < 0.99 ? lm.a : 0.06;
             rough = mix(rough, min(rough, wetFloor), wet);
@@ -155,6 +160,18 @@ void main() {
             vec3 snowCol = mix(vec3(0.70, 0.74, 0.82), vec3(0.90, 0.91, 0.93), smoothstep(0.25, 0.8, grain + sn * 0.5));
             col = mix(col, snowCol, cover * (0.80 + 0.14 * grain));
             rough = mix(rough, 0.72, cover);
+        }
+        // 2.16: and it caps the faces' top edges, a ragged band under each open top that deepens with the snow: the cover
+        // reads as lying on the blocks, rounding over their edges, not painted on their tops
+        if (uWeather.x > 0.05 && abs(N.y) < 0.3 && sky > 0.75) {
+            float fy = fract(vWorld.y - 0.001);
+            vec2 along = abs(N.x) > 0.5 ? vWorld.zy : vWorld.xy;
+            float rag = texture(uNoise, along * vec2(0.45, 0.2) + 0.3).r * 0.5 + texture(uNoise, along * 1.3).g * 0.5;
+            float depth = uWeather.x * (0.10 + 0.14 * rag);
+            float cap = smoothstep(1.0 - depth - 0.02, 1.0 - depth + 0.03, fy);
+            vec3 capCol = mix(vec3(0.74, 0.78, 0.86), vec3(0.92, 0.93, 0.95), fy);
+            col = mix(col, capCol, cap * 0.92);
+            rough = mix(rough, 0.72, cap);
         }
     }
     oAlbedo = vec4(col, emissive ? lm.b : 0.0);

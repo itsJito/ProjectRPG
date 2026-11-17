@@ -367,6 +367,10 @@ public final class Sfx {
         for (int i = 1; i <= 5; i++) one("animal.lion", "animal/lion_call_" + i + ".ogg", 0);
         for (int i = 1; i <= 4; i++) one("animal.lion.growl", "animal/lion_growl_" + i + ".ogg", 0);
         // (0.3.5, gamefixes: ducks and deer their own sound) mallard quacks (xeno-canto XC62258; British Library W1CDR0001518)
+        // (0.4.7) the flying birds' calls (made for the game: a crow's caw, a pigeon's coo, a vulture's hiss)
+        for (int i = 1; i <= 3; i++) one("animal.crow", "animal/crow_caw_" + i + ".ogg", 0);
+        for (int i = 1; i <= 2; i++) one("animal.pigeon", "animal/pigeon_coo_" + i + ".ogg", 0);
+        for (int i = 1; i <= 2; i++) one("animal.vulture", "animal/vulture_hiss_" + i + ".ogg", 0);
         one("animal.duck", "animal/duck_quack_1.ogg", 0);
         for (int i = 1; i <= 6; i++) one("animal.duck", "animal/duck_call_" + i + ".ogg", 0);
         // (0.3.4) the deer: an alarm snort (a horse's breath, pitched up and short), and a thin bleat when hurt
@@ -552,6 +556,8 @@ public final class Sfx {
     private void alias(String name, String recorded) { var bank = banks.get(recorded); if (bank != null) banks.put(name, bank); }
 
     public boolean has(String name) { return banks.containsKey(name); }
+    /** (0.4.8) One recording added to a bank by name (a bank built from data: the rain's drops). */
+    public void bankFile(String name, String file) { if (game != null) one(name, file, 0); }
 
     private Long pick(String name) {
         List<Long> b = banks.get(name);
@@ -657,7 +663,8 @@ public final class Sfx {
         Long s = pick("ambience");
         if (s == null) return;
         ambience = game.reserve(AstrattoNative.KIND_VOICE);
-        game.commands().voicePlay(ambience, s, AstrattoNative.BUS_AMBIENCE, AstrattoNative.VOICE_LOOP, gain, 1, 0, 0, 0, 0, 0, 0);
+        // (0.4.8, gamefixes: outside not muffled when inside) the open air's bed: the mixer dulls it through the walls
+        game.commands().voicePlay(ambience, s, AstrattoNative.BUS_AMBIENCE, AstrattoNative.VOICE_LOOP | AstrattoNative.VOICE_OUTDOOR, gain, 1, 0, 0, 0, 0, 0, 0);
     }
 
     /** (0.4.2) The ambience bed's level now (sent only when it moves). */
@@ -667,6 +674,24 @@ public final class Sfx {
         game.commands().voiceSet(ambience, AstrattoNative.SET_GAIN, gain, 1, 0, 0, 0, 0, 0);
     }
     private float ambienceSent = -1;
+
+    /**
+     * (0.4.7) A looped bed of its own on the ambience bus (a weather's: the rain, the wind), started silent; its level is
+     * set with {@link #loopLevel}. The file is loaded the first time it is asked for. 0 if it could not be.
+     */
+    public long loop(String name, String file) { return loop(name, file, true); }
+    /** (0.4.8) A looped bed; an outdoor one (the weather's) is muffled by the mixer while the listener is indoors. */
+    public long loop(String name, String file, boolean outdoor) {
+        if (game == null) return 0;
+        if (!banks.containsKey(name)) one(name, file, 0);
+        Long s = pick(name);
+        if (s == null) return 0;
+        long v = game.reserve(AstrattoNative.KIND_VOICE);
+        game.commands().voicePlay(v, s, AstrattoNative.BUS_AMBIENCE, AstrattoNative.VOICE_LOOP | (outdoor ? AstrattoNative.VOICE_OUTDOOR : 0), 0, 1, 0, 0, 0, 0, 0, 0);
+        return v;
+    }
+    /** (0.4.7) A looped bed's level now. */
+    public void loopLevel(long voice, float gain) { if (voice != 0) game.commands().voiceSet(voice, AstrattoNative.SET_GAIN, gain, 1, 0, 0, 0, 0, 0); }
 
     /**
      * A footfall: what it sounds like depends on what the foot came down on, and how hard (0..1). (0.4.6, gamefixes: foley
@@ -696,15 +721,20 @@ public final class Sfx {
     }
     /** Whether an actor's feet are in water up to the shins, and whether it walks on open ground the snow lies on (the game's). */
     public java.util.function.Predicate<Actor> wading = a -> false, snowy = a -> false;
-    /** (0.4.6) The footfalls' data (audio.json "footsteps"). */
-    private static final java.util.Map<String, Object> FOOTSTEPS = readFootsteps();
+    /** (0.4.6) The footfalls' data (audio.json "footsteps"); (0.4.7) the animals' calls ("voices"). */
+    private static final java.util.Map<String, Object> FOOTSTEPS = readSection("footsteps"), VOICES = readSection("voices");
     @SuppressWarnings("unchecked")
-    private static java.util.Map<String, Object> readFootsteps() {
+    private static java.util.Map<String, Object> readSection(String key) {
         try (var in = Sfx.class.getResourceAsStream("/data/audio.json")) {
             if (in == null) return java.util.Map.of();
             var m = astratto.util.Json.parseObject(new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8));
-            return m.get("footsteps") instanceof java.util.Map<?, ?> f ? (java.util.Map<String, Object>) f : java.util.Map.of();
+            return m.get(key) instanceof java.util.Map<?, ?> f ? (java.util.Map<String, Object>) f : java.util.Map.of();
         } catch (Exception e) { return java.util.Map.of(); }
+    }
+    /** (0.4.7) An animal call's {volume, reach, gap} (audio.json "voices", else its "_default"). */
+    public static float[] voice(String key) {
+        java.util.Map<String, Object> v = obj(VOICES, key), d = obj(VOICES, "_default");
+        return new float[]{num(v, "volume", num(d, "volume", 0.6f)), num(v, "reach", num(d, "reach", 26)), num(v, "gap", num(d, "gap", 6))};
     }
     @SuppressWarnings("unchecked")
     private static java.util.Map<String, Object> obj(java.util.Map<?, ?> m, String k) { return m.get(k) instanceof java.util.Map<?, ?> v ? (java.util.Map<String, Object>) v : java.util.Map.of(); }

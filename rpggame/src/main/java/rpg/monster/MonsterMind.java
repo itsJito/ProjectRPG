@@ -66,7 +66,7 @@ public final class MonsterMind {
     }
 
     /** Hunters of flesh: hunger turns them on prey. */
-    static boolean predator(Monster m) { return m.kind == MonsterKind.WEREWOLF || m.kind == MonsterKind.GIANT_SPIDER || m.kind == MonsterKind.DRAGON || m.kind == MonsterKind.BAT || m.kind == MonsterKind.GOBLIN || m.kind == MonsterKind.TROLL; }
+    static boolean predator(Monster m) { return m.kind == MonsterKind.WEREWOLF || m.kind == MonsterKind.GIANT_SPIDER || m.kind.scorpion() || m.kind.troll() || m.kind.demon() || m.kind == MonsterKind.DRAGON || m.kind == MonsterKind.BAT || m.kind == MonsterKind.GOBLIN || m.kind == MonsterKind.TROLL; }
 
     // ------------------------------------------------------------------ senses
     /** Looks, listens and smells (four times a second): what it knows is refreshed, and what it no longer does is forgotten in time. */
@@ -414,6 +414,17 @@ public final class MonsterMind {
 
     // ------------------------------------------------------------------ doing
     void act(Monster m, float dt) {
+        // (0.4.8, gamefixes: the greater demon's wings flap and it hovers from time to time, mostly grounded) now and then -
+        // more often closing on a foe across open ground - it beats its wings and lifts off the ground for a few seconds
+        if (m.kind == MonsterKind.GREATER_DEMON && m.alive && g.time >= m.nextHover && m.hoverUntil < g.time) {
+            Actor foe = m.state == State.ENGAGE ? g.actor(m.target) : null;
+            boolean closing = foe != null && m.distTo(foe) > 5;
+            if (closing || sys.rnd(m) < 0.25f) {
+                m.hoverFrom = g.time; m.hoverUntil = g.time + 2.6 + sys.rnd(m) * 2.2;
+                sys.sound(m, "swish", 0.8f);
+            }
+            m.nextHover = g.time + (closing ? 9 : 18) + sys.rnd(m) * 14;
+        }
         if(m.observedFire!=null) {
             if(g.time-m.fireObservedAt>1 || m.distTo(m.fireEscapeX,m.fireEscapeZ)<0.8f){var retreat=rpg.world.FireSafety.refuge(g,m,m.observedFire);m.fireEscapeX=retreat[0];m.fireEscapeZ=retreat[1];m.fireObservedAt=g.time;}
             m.state=State.FLEE;m.lastOutcome="avoiding uncontrolled fire";sys.moveTo(m,m.fireEscapeX,m.fireEscapeZ,true,0.8f);return;
@@ -539,7 +550,7 @@ public final class MonsterMind {
         if (weak || isolated(t) && d < 9 || g.time - m.stateSince > 45) { m.state = State.ENGAGE; m.stateSince = g.time; return; }
         // keep 9 m off, on the far side of cover from its eyes if there is any
         float ax = m.x - t.x, az = m.z - t.z, l = Math.max(0.1f, (float) Math.hypot(ax, az));
-        float keep = m.kind == MonsterKind.GIANT_SPIDER ? 0 : 9;
+        float keep = m.kind == MonsterKind.GIANT_SPIDER || m.kind.scorpion() ? 0 : 9;
         if (keep == 0) { hold(m); m.wantYaw = yawTo(m, t.x, t.z); return; }
         float[] p = sys.open(m, t.x + ax / l * keep, t.z + az / l * keep);
         m.sneaking = true;
@@ -845,12 +856,14 @@ public final class MonsterMind {
                 case DRAGON -> sys.rnd(m) < 0.3 ? "tail" : sys.rnd(m) < 0.5 ? "claw" : "bite";
                 case BAT -> "bite";
                 case GIANT_SPIDER -> "bite";
+                // (0.4.8) a scorpion seizes with a pincer, or arches its tail and stings (more often the larger, the closer)
+                case SMALL_SCORPION, LARGE_SCORPION -> sys.rnd(m) < (m.kind == MonsterKind.LARGE_SCORPION ? 0.45 : 0.35) ? "sting" : "pincer";
                 default -> "bite";
             };
             m.windup = what;
             m.windupStart = g.time;
             m.strikeTarget = t.id;
-            m.windupUntil = g.time + switch (m.kind) { case DRAGON -> 0.9; case GIANT_SPIDER -> 0.45; default -> 0.25; };
+            m.windupUntil = g.time + switch (m.kind) { case DRAGON -> 0.9; case GIANT_SPIDER -> 0.45; case SMALL_SCORPION, LARGE_SCORPION -> what.equals("sting") ? 0.7 : 0.4; default -> 0.25; };
             sys.sound(m, m.kind.alarmSound, 0.6f);
         }
     }

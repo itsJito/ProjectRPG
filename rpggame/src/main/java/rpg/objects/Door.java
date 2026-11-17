@@ -40,6 +40,12 @@ public final class Door extends WorldObject {
     public boolean cellDoor;
     /** open: unlatched (swung, or free to swing); locked: latched and locked. */
     public boolean open, locked;
+    /**
+     * (0.4.7, gamefixes: NPCs stood outside the bank and the guild chapter they live in) those besides its owner who hold
+     * its key - everyone who lives or works behind it - and whether one of them may pass.
+     */
+    public final java.util.Set<Long> keepers = new java.util.HashSet<>();
+    public boolean keeps(long id) { return id != 0 && (owner == id || keepers.contains(id)); }
     public final ItemDef key;
     public final int lockLevel;
     /** Opened by an NPC passing through (closed again behind them); relock: they unlocked it, and lock it again once shut. */
@@ -149,7 +155,8 @@ public final class Door extends WorldObject {
             inward[i] = (ez * nx + -ex * nz) > 0 ? -1 : 1;
             leaf[i] = g.game.reserve(AstrattoNative.KIND_RIGID);
             hinge[i] = g.game.reserve(AstrattoNative.KIND_JOINT);
-            float half = leafW / 2 - 0.015f;
+            // (0.4.7) a pair's leaves meet at the middle (a hair apart, so they never bind on each other)
+            float half = leafW / 2 - (n >= 2 ? 0.004f : 0.015f);
             g.game.commands().rigidCreate(leaf[i], AstrattoNative.SHAPE_BOX, AstrattoNative.RIGID_NO_WORLD | AstrattoNative.RIGID_REPORT, half, h / 2, 0.06f, LEAF_MASS,
                     hx + ex * leafW / 2, y, hz + ez * leafW / 2, qw, 0, qy, 0, 0, 0, 0, 0, 0, 0, 0.5f, 0, 0.05f, 0.6f, 0, 0, 0, MATERIAL_WOOD_DOOR, null);
             float lo = open ? lo(i) : 0, hi = open ? hi(i) : 0;

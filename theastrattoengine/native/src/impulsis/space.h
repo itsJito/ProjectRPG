@@ -213,6 +213,7 @@ private:
     std::vector<int> parent_;
     float acc_ = 0;
     float step_ = STEP;
+    std::vector<int> order_, worldBodies_;   // (2.14) the broadphase's order along x, kept; the bodies that touch the world
     int iterations_ = VELOCITY_ITERATIONS;
     /** (2.10.1) The joints with a waking end this step (the rest are skipped). */
     std::vector<int> active_;

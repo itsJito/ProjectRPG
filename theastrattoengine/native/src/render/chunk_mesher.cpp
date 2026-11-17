@@ -63,6 +63,25 @@ bool ChunkMesher::solidAt(int lx, int y, int lz) const {
     return (def(id(lx, y, lz)).flags & ASTRATTO_RB_SOLID) != 0;
 }
 
+// 0.4.7 (the game's gamefixes: interiors did not use the two-faced blocks fully) whether a wall's face looks indoors: from
+// the cell before it, outward along the face's normal, every cell has something over it (a ceiling, a floor above, a
+// roof) until another wall stops the way - a room - while an open cell under the sky on the way means the outside (a
+// roof's eaves over the cell before the wall are not a room). Where the march leaves the column's array, the light
+// decides: the open air's sky light is near full, a room's is not.
+bool ChunkMesher::indoors(int nx, int ny, int nz, int dx, int dz) const {
+    if (ny < 0 || ny >= H_) return false;
+    const int reachUp = 24;
+    for (int k = 0; k < 24; k++) {
+        const int x = nx + dx * k, z = nz + dz * k;
+        if (x < -1 || z < -1 || x > 16 || z > 16) return ((lightAt(nx, ny, nz) >> 4) & 15) < 14;
+        if (k > 0 && opq(x, ny, z)) return true;
+        bool roofed = false;
+        for (int y = ny + 1; y < std::min(H_, ny + reachUp) && !roofed; y++) roofed = opq(x, y, z);
+        if (!roofed) return false;
+    }
+    return true;
+}
+
 bool ChunkMesher::opq(int lx, int y, int lz) const { return (def(id(lx, y, lz)).flags & ASTRATTO_RB_OCCLUDES) != 0; }
 bool ChunkMesher::leaf(int bid) const { return (def(bid).flags & ASTRATTO_RB_LEAF) != 0; }
 
@@ -215,7 +234,8 @@ bool ChunkMesher::mesh(const astratto_mesh_io& io) {
                                     // (0.2.1) a two-faced wall block (ASTRATTO_RB_INNER): its inner side shows the bottom's
                                     // layer - a house's plaster inside, its brick outside, in one block
                                     const int inner = static_cast<int>(b.flags >> 13) & 7, dir = a == 0 ? (sgn > 0 ? 1 : 2) : (sgn > 0 ? 3 : 4);
-                                    if (inner != 0 && inner == dir) { layer = b.layerBottom; var = b.varBottom; }
+                                    // 0.4.7: an auto-faced wall (inner 5) turns its finish toward whichever side is indoors
+                                    if (inner == 5 ? indoors(nx, ny, nz, AX[a][0] * sgn, AX[a][2] * sgn) : inner != 0 && inner == dir) { layer = b.layerBottom; var = b.varBottom; }
                                     else { layer = b.layerSide; var = b.varSide; }
                                 }
                                 const bool leafy = leaf(bid);
@@ -486,8 +506,9 @@ void copyColumn(const VoxelWorld& w, int cx, int cz, std::vector<uint8_t>& cells
     const uint8_t* b = w.blocks();
     const uint8_t* l = w.light();
     for (int lx = -1; lx <= 16; lx++) for (int lz = -1; lz <= 16; lz++) {
-        const int x = cx * 16 + lx, z = cz * 16 + lz;
-        if (x < 0 || z < 0 || x >= w.sizeX() || z >= w.sizeZ()) continue;
+        // 0.4.7 (gamefixes: a pale wall of water stood at the world's edge) past the edge the world goes on as its last
+        // column: the sea and the ground meet nothing there, so no face is drawn into the void (the fog bank hides the rest)
+        const int x = std::clamp(cx * 16 + lx, 0, w.sizeX() - 1), z = std::clamp(cz * 16 + lz, 0, w.sizeZ() - 1);
         const size_t src = w.index(x, 0, z), dst = static_cast<size_t>(((lx + 1) * REG + (lz + 1))) * static_cast<size_t>(H);
         std::memcpy(cells.data() + dst, b + src, static_cast<size_t>(H));
         std::memcpy(light.data() + dst, l + src, static_cast<size_t>(H));

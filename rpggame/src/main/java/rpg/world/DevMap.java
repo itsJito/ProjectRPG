@@ -394,7 +394,7 @@ public final class DevMap {
         void debugZone() {
             ground(54, 54, 74, 74, DEBUG_FLOOR);
             // the terminal plinth and four lamp posts
-            fill(DEBUG_TERMINAL[0] - 1, FLOOR, DEBUG_TERMINAL[1] - 1, DEBUG_TERMINAL[0] + 1, FLOOR, DEBUG_TERMINAL[1], MARK_YELLOW);
+            fill(DEBUG_TERMINAL[0] - 1, FLOOR, DEBUG_TERMINAL[1] - 1, DEBUG_TERMINAL[0] + 1, FLOOR, DEBUG_TERMINAL[1], GOLD_BLOCK);
             for (int[] p : new int[][]{{55, 55}, {73, 55}, {55, 73}, {73, 73}}) lampPost(p[0], p[1]);
         }
 
@@ -405,7 +405,7 @@ public final class DevMap {
             fill(33, FLOOR, 56, 33, FLOOR + 1, 60, RED_SANDSTONE);
             // archery: two targets (furniture) on a backstop, distance stripes at 10, 20 and 30 m
             fill(TARGET_X - 1, FLOOR, 53, TARGET_X - 1, FLOOR + 3, 64, BRICK);
-            for (int d : new int[]{10, 20, 30}) fill(TARGET_X + d, FLOOR - 1, 54, TARGET_X + d, FLOOR - 1, 64, MARK_YELLOW);
+            for (int d : new int[]{10, 20, 30}) fill(TARGET_X + d, FLOOR - 1, 54, TARGET_X + d, FLOOR - 1, 64, GOLD_BLOCK);
             // dummies stand on stone pads; the equipment cabinet against a wall
             for (int[] d : DUMMIES) set(d[0], FLOOR - 1, d[1], STONE);
             fill(CABINET[0] - 1, FLOOR, CABINET[1] - 1, CABINET[0] + 1, FLOOR + 2, CABINET[1] - 1, PLANKS);
@@ -513,10 +513,10 @@ public final class DevMap {
             // occluders for perception tests
             fill(108, FLOOR, 76, 112, FLOOR + 2, 76, BRICK);
             fill(88, FLOOR, 76, 88, FLOOR + 2, 80, BRICK);
-            for (float[] p : PATROL) set((int) p[0], FLOOR - 1, (int) p[1], MARK_RED);
+            for (float[] p : PATROL) set((int) p[0], FLOOR - 1, (int) p[1], RED_SANDSTONE);
             lampPost(95, 70); lampPost(115, 78);
             // the jurisdiction markers: red posts on Alpha's edge
-            for (int z = 50; z < 100; z += 8) { fill(83, FLOOR, z, 83, FLOOR + 2, z, BEAM); set(83, FLOOR + 3, z, MARK_RED); }
+            for (int z = 50; z < 100; z += 8) { fill(83, FLOOR, z, 83, FLOOR + 2, z, BEAM); set(83, FLOOR + 3, z, RED_SANDSTONE); }
         }
 
         void economyBay() {
@@ -531,7 +531,7 @@ public final class DevMap {
             for (int[] c : new int[][]{{KIOSK_X0, KIOSK_Z0}, {KIOSK_X1, KIOSK_Z0}, {KIOSK_X0, KIOSK_Z1}, {KIOSK_X1, KIOSK_Z1}}) fill(c[0], FLOOR, c[1], c[0], FLOOR + 2, c[1], BIRCH_LOG);
             fill(KIOSK_X0, FLOOR + 3, KIOSK_Z0, KIOSK_X1, FLOOR + 3, KIOSK_Z1, ROOF);
             // blue posts on Beta's edge
-            for (int x = 6; x < 82; x += 8) { if (x >= 26 && x <= 30) continue; fill(x, FLOOR, 93, x, FLOOR + 2, 93, BEAM); set(x, FLOOR + 3, 93, MARK_BLUE); }
+            for (int x = 6; x < 82; x += 8) { if (x >= 26 && x <= 30) continue; fill(x, FLOOR, 93, x, FLOOR + 2, 93, BEAM); set(x, FLOOR + 3, 93, WALLPAPER_BLUE); }
             lampPost(30, 100); lampPost(55, 100);
             bank();
         }

@@ -102,6 +102,13 @@ public final class Monsters {
             float[] h = as.homeStage();
             settled.add(new float[]{h[0], h[1], DevMap.WILDS.equals(rpg.world.shadowveil.ShadowVeil.jurisdiction(h[0], h[1])) ? homestead : town});
         }
+        // (0.4.8, gamefixes: monsters spawned too close to people at their day's work) everyone's places too - where they
+        // live, where they work, where they start their day - with the berth the data gives people ("people")
+        float people = (float) rpg.world.shadowveil.Atlas.d(clear, "people", 60);
+        for (rpg.ai.Npc n : g.npcs) {
+            settled.add(new float[]{n.postX, n.postZ, people});
+            if (Math.hypot(n.homeX - n.postX, n.homeZ - n.postZ) > 8) settled.add(new float[]{n.homeX, n.homeZ, people});
+        }
         int made = 0, wet = 0, realm = 0, town0 = 0, road0 = 0, biome0 = 0;
         for (int x = grid / 2; x < t.S - 8 && made < most; x += grid) for (int z = grid / 2; z < t.S - 8 && made < most; z += grid) {
             float px = x + (float) ((rpg.world.shadowveil.Noise.hash(a.seed, x, z, 151) - 0.5) * grid * 0.6), pz = z + (float) ((rpg.world.shadowveil.Noise.hash(a.seed, x, z, 152) - 0.5) * grid * 0.6);
@@ -120,6 +127,11 @@ public final class Monsters {
                 try { kind = MonsterKind.valueOf(String.valueOf(gr.get(0))); } catch (IllegalArgumentException e) { continue; }
                 if (rpg.world.shadowveil.Noise.hash(a.seed, x + k, z, 153 + kind.ordinal()) >= rpg.world.shadowveil.Atlas.dn(gr.get(4)) / 100.0) continue;
                 int lo = rpg.world.shadowveil.Atlas.n(gr.get(1)), hi = rpg.world.shadowveil.Atlas.n(gr.get(2)), cap = rpg.world.shadowveil.Atlas.n(gr.get(3));
+                // (0.4.8, gamefixes: the dangerous further from Loxford) the territory's levels are its place's: a kind
+                // too strong for where it would live makes no home there
+                int[] band = rpg.world.shadowveil.Danger.levels(kind, p[0], p[1]);
+                if (band == null) continue;
+                lo = band[0]; hi = band[1];
                 Lair l = new Lair(g.state.newEntityId(), kind, rpg.world.shadowveil.Atlas.s(names, kind.name(), kind.title + "s' ground"), p[0], p[1], lo, hi, cap);
                 lairs.add(l);
                 int start = Math.max(1, (cap + 1) / 2);
@@ -150,14 +162,17 @@ public final class Monsters {
     public Lair lair(long id) { for (Lair l : lairs) if (l.id == id) return l; return null; }
 
     /** A monster made in the world (a birth at its lair, a recolonisation, a dungeon's resident): its body, kit, drives. */
-    public Monster spawn(MonsterKind kind, int level, float x, float z, Lair lair) {
+    public Monster spawn(MonsterKind kind, int level, float x, float z, Lair lair) { return spawnAt(kind, level, x, Float.NaN, z, lair); }
+    /** (0.4.7) One made at a height (a dungeon's level under the map); NaN: on the ground. */
+    public Monster spawnAt(MonsterKind kind, int level, float x, float y, float z, Lair lair) {
         level = Math.max(kind.minLevel, Math.min(kind.maxLevel, level));
         // (0.4.0) a resident placed by the devmap's numbers comes home to its lair where the lair has moved
-        if (lair != null && rpg.world.WorldMap.shadowveil() && Math.hypot(x - lair.x, z - lair.z) > 24) {
+        if (lair != null && rpg.world.WorldMap.shadowveil() && Float.isNaN(y) && Math.hypot(x - lair.x, z - lair.z) > 24) {
             float[] p = rpg.world.shadowveil.ShadowVeil.dry(lair.x + (float) Math.cos(lair.id + spawned) * 2.5f, lair.z + (float) Math.sin(lair.id + spawned) * 2.5f);
             x = p[0]; z = p[1];
         }
         Monster m = new Monster(g.state.newEntityId(), kind, level, x, z);
+        if (!Float.isNaN(y)) m.y = y;
         if (lair != null) { m.lair = lair.id; m.lairX = lair.x; m.lairZ = lair.z; }
         else { m.lairX = x; m.lairZ = z; }
         m.spawnX = x; m.spawnZ = z; m.homeX = m.lairX; m.homeZ = m.lairZ; m.postX = m.lairX; m.postZ = m.lairZ;
@@ -167,6 +182,10 @@ public final class Monsters {
         m.look = rpg.actor.Appearance.monster(kind, m.id);
         if (kind == MonsterKind.GHOST) m.spellBook = rpg.combat.Spells.Book.FOGISH;
         if (kind == MonsterKind.DRAGON) m.breed = MonsterKind.Breed.values()[(int) Math.floorMod(m.id, MonsterKind.Breed.values().length)];
+        // (0.4.8) its look among its kind's: by its own seed; the greatest of the greater demons (level 100 and over)
+        // the crested, bearded one
+        m.variant = (int) Math.floorMod(m.id * 0x2545F4914F6CDD1DL >>> 33, Math.max(1, kind.variants()));
+        if (kind == MonsterKind.GREATER_DEMON) m.variant = level >= rpg.Tuning.i("monsters.demonLordLevel", 100) ? 2 : m.variant % 2;
         kit(m);
         m.restore();
         m.nextThink = g.time + Math.floorMod(m.id * 73, 400) / 1000.0;
@@ -383,7 +402,7 @@ public final class Monsters {
 
     /** A flyer's own steering: toward its goal at the height it wants, rising over what is in its way (ghosts drift straight through). */
     private void fly(Monster m, float dt) {
-        float speed = (m.running ? m.kind.run : m.kind.walk) * (m.cs.frozenT > 0 ? 0 : m.cs.slowT > 0 ? 0.6f : 1);
+        float speed = (m.running ? m.kind.run : m.kind.walk) * (m.cs.frozenT > 0 || m.cs.heldT > 0 ? 0 : m.cs.slowT > 0 ? 0.6f : 1);
         float dx = m.hasGoalPos ? m.tx - m.x : 0, dz = m.hasGoalPos ? m.tz - m.z : 0, l = (float) Math.hypot(dx, dz);
         float vx = 0, vz = 0;
         if (l > 0.3f) { vx = dx / l * speed; vz = dz / l * speed; }
@@ -461,7 +480,7 @@ public final class Monsters {
             }
             if (m.windup != null && g.time >= m.windupUntil) {
                 Actor victim = g.actor(m.strikeTarget);
-                m.strikeAt = g.time;
+                m.strikeAt = g.time; m.lastStrike = m.windup;
                 if (victim != null && victim.alive) strike(m,victim,m.windup);
                 m.windup = null; m.strikeTarget = 0;
             }
@@ -635,16 +654,30 @@ public final class Monsters {
     }
 
     // ------------------------------------------------------------------ striking (the creatures' own blows) and ranged attacks
+    /** (0.4.8, tests and the console) a creature's strike of a kind landed now on a target. */
+    public void strikeFor(Monster m, Actor t, String what) { strike(m, t, what); }
     /** A telegraphed creature strike lands - if the target is still where the blow goes (it may have stepped away). */
     void strike(Monster m, Actor t, String what) {
         m.strikeAt = g.time;
-        float reach = m.kind.reach * Math.max(0.6f, m.kind.scale()) + (what.equals("tail") ? 1.6f : 0);
+        m.lastStrike = what;
+        float reach = m.kind.reach * Math.max(0.6f, m.kind.scale()) + (what.equals("tail") ? 1.6f : what.equals("sting") ? m.kind.reach * 0.6f : 0);
         float d = m.distTo(t) - t.radius - m.radius;
         float facing = Math.abs(Actor.wrap(MonsterMind.yawTo(m, t.x, t.z) - m.yaw));
         if (d > reach + 0.3f || facing > (what.equals("tail") ? Math.PI : 1.0f)) { sound(m, "swish", 0.4f); return; }
-        float dmg = m.kind.damage * (what.equals("tail") ? 0.8f : what.equals("claw") ? 0.9f : 1);
+        float dmg = m.kind.damage * (what.equals("tail") ? 0.8f : what.equals("claw") ? 0.9f : what.equals("sting") ? 0.6f : 1);
         g.combat.creatureBlow(m, t, dmg, m.kind.impact * (what.equals("tail") ? 1.4f : 1), m.kind.damageType, what);
         if (m.kind == MonsterKind.GIANT_SPIDER && t.alive) t.cs.slowT = Math.max(t.cs.slowT, 3);   // the venom
+        // (0.4.8) a scorpion's pincer closes on its prey and holds it; its sting leaves its venom working in the blood
+        if (m.kind.scorpion() && t.alive) {
+            if (what.equals("pincer")) { t.cs.heldT = Math.max(t.cs.heldT, rpg.Tuning.f("monsters.pincerHold", 1.3f) * (m.kind == MonsterKind.LARGE_SCORPION ? 1.4f : 1)); sound(m, "hit.blunt", 0.5f); }
+            if (what.equals("sting")) {
+                float dps = Math.max(0.6f, m.kind.damage * rpg.Tuning.f("monsters.venomPerDamage", 0.35f) * (0.6f + m.level / 60f));
+                t.cs.poisonDps = Math.max(t.cs.poisonDps, dps);
+                t.cs.poisonT = Math.max(t.cs.poisonT, rpg.Tuning.f("monsters.venomSeconds", 8));
+                t.cs.poisonBy = m.id;
+                if (t == g.player) g.chat.warn("You have been poisoned.");
+            }
+        }
     }
 
     /** Its ranged attack, as its kind has one: a throw, a firebolt, a spectral bolt, a boulder, breath, a web, a screech, a war shout. */
@@ -731,7 +764,7 @@ public final class Monsters {
         if (m.kind.form == MonsterKind.Form.SPIDER) {
             if (m.ragdoll != 0) { g.game.commands().release(m.ragdoll); m.ragdoll = 0; }
             m.reacting = false;
-            m.y = Math.max(rpg.world.Ground.at(m.x, m.z), (float) Math.floor(m.y + 0.5f));
+            m.y = rpg.world.WorldMap.settleY(m.x, Math.max(rpg.world.DungeonLayout.underAt(m.x, m.y, m.z) != null ? m.y : rpg.world.Ground.at(m.x, m.z), (float) Math.floor(m.y + 0.5f)), m.z);
             while (m.y > 0 && !g.vox.solid((int) Math.floor(m.x), (int) Math.floor(m.y - 0.5f), (int) Math.floor(m.z))) m.y -= 1;
         } else if (m.kind.fallsApart && g.bones != null) {
             // (0.3.8, gamefixes: a skeleton's whole body should fall apart) no body to fall as one: each bone goes its own way
@@ -778,6 +811,7 @@ public final class Monsters {
             o.put("kind", m.kind.name()); o.put("level", m.level); o.put("lair", m.lair); o.put("lairX", m.lairX); o.put("lairZ", m.lairZ);
             o.put("hunger", (double) m.hunger); o.put("fatigue", (double) m.fatigue); o.put("loaded", m.loaded); o.put("leader", m.leader);
             if (m.breed != null) o.put("breed", m.breed.name());
+            if (m.variant != 0) o.put("variant", m.variant);
             var rd = !m.alive && m.ragdoll != 0 ? g.lastBodies.ragdoll(m.ragdoll) : null;
             if (rd != null) { List<Object> pose = new ArrayList<>(); for (float v : rd.p) pose.add((double) v); o.put("pose", pose); }
             o.put("corpse", m.corpse);
@@ -806,6 +840,7 @@ public final class Monsters {
             MonsterKind kind;
             try { kind = MonsterKind.valueOf(astratto.util.Json.str(r, "kind", "")); } catch (IllegalArgumentException e) { continue; }
             Monster m = new Monster(astratto.util.Json.lng(r, "id", 0), kind, astratto.util.Json.integer(r, "level", kind.minLevel), (float) astratto.util.Json.num(r, "x", 0), (float) astratto.util.Json.num(r, "z", 0));
+            m.variant = astratto.util.Json.integer(r, "variant", 0);
             m.look = rpg.actor.Appearance.monster(kind, m.id);
             apply.accept(m, r);
             m.sheathed = false;

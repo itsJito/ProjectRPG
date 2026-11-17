@@ -89,7 +89,7 @@ public final class Shrines {
 
     /** The nearest 2 x 2 of open, level ground (with a cell of room round it) to a spot, near a floor height: {x0, floor, z0}. */
     private int[] clear(int cx, int cz, int near) {
-        for (int r = 0; r < 14; r++) for (int dx = -r; dx <= r; dx++) for (int dz = -r; dz <= r; dz++) {
+        for (int r = 0; r < 22; r++) for (int dx = -r; dx <= r; dx++) for (int dz = -r; dz <= r; dz++) {
             if (Math.max(Math.abs(dx), Math.abs(dz)) != r) continue;
             int x0 = cx + dx, z0 = cz + dz;
             for (int floor = near - 2; floor <= near + 2; floor++) {
@@ -97,10 +97,26 @@ public final class Shrines {
                 for (int x = x0 - 1; x <= x0 + 2 && ok; x++) for (int z = z0 - 1; z <= z0 + 2 && ok; z++)
                     ok = g.vox.solid(x, floor - 1, z) && g.vox.block(x, floor - 1, z) != Blocks.WATER
                             && g.vox.block(x, floor, z) == Blocks.AIR && g.vox.block(x, floor + 1, z) == Blocks.AIR && g.vox.block(x, floor + 2, z) == Blocks.AIR;
+                // (0.4.7, gamefixes: the shrine by Loxford's graveyard stood across a path) never on or beside a road,
+                // lane, square or laid path, and with a ring of two cells clear of them
+                for (int x = x0 - PATH_CLEAR; x <= x0 + 1 + PATH_CLEAR && ok; x++) for (int z = z0 - PATH_CLEAR; z <= z0 + 1 + PATH_CLEAR && ok; z++)
+                    ok = !onPath(x, floor - 1, z);
                 if (ok) return new int[]{x0, floor, z0};
             }
         }
         return null;
+    }
+
+    /** (0.4.7) Cells kept between a shrine's footprint and any path. */
+    private static final int PATH_CLEAR = rpg.Tuning.i("shrines.pathClear", 2);
+    /** (0.4.7) Whether a ground cell is a way people walk: a laid path block, or a road, lane, square or yard of the map. */
+    private boolean onPath(int x, int y, int z) {
+        int b = g.vox.block(x, y, z);
+        if (b == Blocks.GRAVEL || b == Blocks.COBBLE || b == Blocks.FLAGSTONE || b == Blocks.BARE_PATCH) return true;
+        var t = rpg.world.shadowveil.ShadowVeil.terrain();
+        if (g.map.kind == WorldMap.Kind.SHADOWVEIL && t != null && t.in(x, z))
+            return (t.flags[t.idx(x, z)] & (rpg.world.shadowveil.Terrain.ROAD | rpg.world.shadowveil.Terrain.LANE | rpg.world.shadowveil.Terrain.SQUARE | rpg.world.shadowveil.Terrain.BUILT)) != 0;
+        return false;
     }
 
     // ------------------------------------------------------------------ resting
@@ -123,7 +139,7 @@ public final class Shrines {
         a.restore();
         g.chemistry.cleanse(a);
         if (g.gore != null) g.gore.healed(a);
-        a.cs.cancel(); a.cs.slowT = 0; a.cs.frozenT = 0; a.cs.staggered = 0; a.bloodied = 0; a.oxygen = rpg.actor.Swimming.lungs(a);
+        a.cs.cancel(); a.cs.slowT = 0; a.cs.frozenT = 0; a.cs.heldT = 0; a.cs.poisonT = 0; a.cs.poisonDps = 0; a.cs.staggered = 0; a.bloodied = 0; a.oxygen = rpg.actor.Swimming.lungs(a);
         // the night passes: the next morning
         double hour = g.state.hourOfDay(), wait = (MORNING - hour + 24) % 24;
         if (wait < 1) wait += 24;

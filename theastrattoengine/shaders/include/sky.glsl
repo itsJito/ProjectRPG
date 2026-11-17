@@ -30,12 +30,24 @@ vec3 skyColor(vec3 d) {
     float md = max(dot(d, uMoonDir), 0.0);
     col += vec3(0.8, 0.85, 0.95) * pow(md, 1500.0) * 1.2 * (1.0 - uDay);
     if (d.y > 0.0) {
-        vec2 cp = d.xz / (d.y + 0.15) * 2.0 + vec2(uTime * 0.01, 0.0);
-        float c = n2(cp) * 0.6 + n2(cp * 2.3) * 0.3 + n2(cp * 5.1) * 0.1;
-        float cover = mix(0.55, 0.2, uRain);
-        float cl = smoothstep(cover, cover + 0.3, c) * smoothstep(0.0, 0.25, d.y);
-        vec3 lit = uSkyHorizon * 1.1 + uSunCol * 0.10 * max(uSunDir.y, 0.0);
-        col = mix(col, lit * mix(1.0, 0.55, uRain), cl * 0.85);
+        // (2.14, gamefixes: every weather polished) the cloud deck: a warped, many-layered field drifting on the wind,
+        // thickening with the overcast; lit from the sun's side and shadowed on the far side of each billow (the field
+        // sampled again a step toward the sun), dark-bellied under a heavy sky, a silver edge where thin cloud crosses
+        // the sun - it was one flat pale smear at any weather
+        vec2 cp = d.xz / (d.y + 0.12) * 1.7 + vec2(uTime * 0.012, uTime * 0.004);
+        cp += (vec2(n2(cp * 0.6 + 3.1), n2(cp * 0.6 - 1.7)) - 0.5) * 1.3;
+        float c = n2(cp) * 0.5 + n2(cp * 2.1) * 0.27 + n2(cp * 4.3) * 0.15 + n2(cp * 8.9) * 0.08;
+        float cover = mix(0.58, 0.1, uRain);
+        float cl = smoothstep(cover, cover + 0.26, c) * smoothstep(0.0, 0.2, d.y);
+        float thick = smoothstep(cover, cover + 0.55, c);
+        vec2 toSun = uSunDir.xz / max(length(uSunDir.xz), 1e-3) * 0.22;
+        float c2 = n2(cp + toSun) * 0.5 + n2((cp + toSun) * 2.1) * 0.27 + n2((cp + toSun) * 4.3) * 0.15;
+        float shade = clamp(0.55 + (c - c2) * 2.6, 0.0, 1.0);
+        float sunUp = max(uSunDir.y, 0.0);
+        vec3 lit = mix(uSkyHorizon * 0.72, uSkyHorizon * 1.12 + uSunCol * 0.16 * sunUp, shade);
+        lit *= mix(1.0, 0.5, uRain * thick);
+        col = mix(col, lit, cl * 0.9);
+        col += uSunCol * pow(sd, 10.0) * 0.35 * cl * (1.0 - thick) * (1.0 - uRain) * step(-0.05, uSunDir.y);
         // 1.0: lightning lights the cloud from inside - unevenly, brightest where the cloud is thickest
         col += vec3(0.62, 0.68, 0.90) * uLightning * (0.9 + 3.2 * cl * c);
         if (uDay < 0.35) col += vec3(step(0.9975, h21(floor(d.xz / (d.y + 0.3) * 300.0)))) * (0.35 - uDay) * 0.9 * (1.0 - cl);

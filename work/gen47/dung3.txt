@@ -1,0 +1,62 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+DungeonsProbeTest > dungeons() STANDARD_OUT
+    [Load] ShadowVeil grown in 19.78s ({regions=864, overlays=488, variants=623, scarp=48, coast=429, erosion=336, peaks=75, lakes=55, isles=1, rivers=1173, wadis=13, ground=23, roads=583, causeways=4, architecture=1341, pitsFilled=1396, pits=456, banks=77, clamp=16, cliffs=52, columns=889, falls=17, raise=10600, trees=258, outcrops=0, ways=599, lava=0, dungeons=102, postsSunk=28, floatingRemoved=59, floating=565}), made and lit in 2.17s
+    [water] flow field grown in 1102 ms: 39016 columns moving
+    [gathering] 757 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+    [dungeons]   mouth 412.5,42.0,835.5
+    [dungeons] Goblin Hollow, level 1             MACRO  WARREN floor Y26 at 382,806 rooms 7 residents 18 entry open route 27 legs
+    [dungeons] Goblin Hollow, level 2             ELITE  WARREN floor Y15 at 389,811 rooms 5 residents 9 entry open route (stair)
+    [dungeons]   mouth 552.5,46.0,861.5
+    [dungeons] Murk caves, level 1                MACRO  CAVE   floor Y30 at 522,832 rooms 8 residents 19 entry open route 24 legs
+    [dungeons] Murk caves, level 2                ELITE  CAVE   floor Y19 at 529,837 rooms 5 residents 9 entry open route (stair)
+    [dungeons]   mouth 861.5,62.0,568.5
+    [dungeons] Spider Nest, level 1               MACRO  CAVE   floor Y46 at 831,539 rooms 8 residents 18 entry open route 28 legs
+    [dungeons] Spider Nest, level 2               ELITE  CAVE   floor Y35 at 838,544 rooms 4 residents 8 entry open route (stair)
+    [dungeons]   mouth 1015.5,91.0,536.5
+    [dungeons] Ashmaw Throat, level 1             MACRO  CAVE   floor Y52 at 985,507 rooms 7 residents 17 entry open route 51 legs
+    [dungeons] Ashmaw Throat, level 2             MACRO  CAVE   floor Y41 at 985,507 rooms 7 residents 17 entry open route (stair)
+    [dungeons] Ashmaw Throat, level 3             ELITE  CAVE   floor Y30 at 992,512 rooms 5 residents 9 entry open route (stair)
+    [dungeons]   mouth 625.5,33.0,947.5
+    [dungeons] Culvert cave                       MICRO  CAVE   floor Y15 at 608,930 rooms 3 residents 5 entry open route NONE
+    [dungeons]   mouth 200.5,58.0,590.5
+    [dungeons] Sunkissed Mine, level 1            MACRO  HALL   floor Y39 at 170,561 rooms 8 residents 0 entry open route NONE
+    [dungeons] Sunkissed Mine, level 2            ELITE  HALL   floor Y28 at 177,566 rooms 5 residents 12 entry open route (stair)
+    [dungeons]   mouth 120.5,44.0,584.5
+    [dungeons] Marble Mine, level 1               MACRO  HALL   floor Y18 at 90,555 rooms 6 residents 0 entry open route 39 legs
+    [dungeons] Marble Mine, level 2               ELITE  HALL   floor Y7 at 97,560 rooms 6 residents 11 entry open route (stair)
+    [dungeons]   mouth 228.5,86.0,472.5
+    [dungeons] Highland adit                      MICRO  HALL   floor Y57 at 211,455 rooms 4 residents 0 entry open route 33 legs
+    [dungeons]   mouth 209.5,71.0,550.5
+    [dungeons] Hollow Crags mine                  MICRO  HALL   floor Y45 at 192,533 rooms 3 residents 0 entry open route 31 legs
+    [dungeons]   mouth 130.5,71.0,504.5
+    [dungeons] Hollow Crags mine                  MICRO  HALL   floor Y48 at 113,487 rooms 4 residents 0 entry open route 35 legs
+    [dungeons]   mouth 206.5,40.0,957.0
+    [dungeons] Loxford Graveyard                  MICRO  CRYPT  floor Y25 at 189,939 rooms 3 residents 5 entry open route 22 legs
+    [dungeons] 16 of 18 levels open and reached
+  slow: rpg.probe.DungeonsProbeTest.dungeons() 47.37 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 51s
+9 actionable tasks: 1 executed, 8 up-to-date

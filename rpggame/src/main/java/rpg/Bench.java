@@ -18,6 +18,7 @@ import rpg.world.DevMap;
  * the simulation (the game's modules and the engine's frame), the scene built and submitted, the renderer's own CPU, the
  * GPU (by pass, read back from timer queries a few frames late), and the swap. Reports the mean, the 99th percentile and
  * the worst, and how many frames missed 60 and 144 per second. {@code RPG_BENCH_FRAMES} sets frames a stop (default 400).
+ * On ShadowVeil (the default map; {@code RPG_MAP=devmap} for the old tour) the stops are ShadowVeil's own towns and wilds.
  */
 final class Bench {
     private final Window win;
@@ -44,6 +45,38 @@ final class Bench {
             new Stop("battle in the yard (monsters, the watch)", 13f, 96f, 74f, 104f, 66f, false),
     };
 
+    /**
+     * (0.4.7, gamefixes: aggressive optimization) ShadowVeil's tour, the world as it is played: the towns at their busiest,
+     * the woods, the desert city, the harbour, a night street and a sprint through a town. Each stop is a named place of
+     * {@code shadowveil.json} (its chunk), the eye on dry ground a little off it and looking at it.
+     */
+    private static final String[][] SV_TOUR = {
+            {"Severia market, morning (crowds)", "9", "great_market", "-14", "10"},
+            {"Loxford, noon (castle street)", "12", "loxford_store", "-12", "12"},
+            {"Millwood, noon (woods)", "12", "millwood_lodge", "10", "-14"},
+            {"Azharad, afternoon (desert city)", "15", "azharad_workshop", "-12", "-10"},
+            {"Valgard, evening (smithies)", "18", "metallists_guild", "12", "12"},
+            {"Severia harbour, dusk (water)", "19.5", "harbor", "-10", "-16"},
+            {"Loxford, night (lamps)", "22", "drunken_duck", "-10", "10"},
+            {"sprint through Severia", "14", "town_square", "-40", "0", "run"},
+            {"battle in Loxford (monsters, the watch)", "13", "loxford_castle", "-14", "14"},
+    };
+
+    /** ShadowVeil's tour as stops (world x, z of each named place's chunk middle; the eye offset from it). */
+    private static Stop[] shadowveilTour() {
+        List<Stop> out = new ArrayList<>();
+        for (String[] r : SV_TOUR) {
+            float[] at = rpg.world.shadowveil.ShadowVeil.place(r[2]);
+            if (at == null) continue;
+            float dx = Float.parseFloat(r[3]), dz = Float.parseFloat(r[4]);
+            boolean run = r.length > 5 && r[5].equals("run");
+            float tx = run ? at[0] - dx : at[0], tz = run ? at[1] - dz : at[1];
+            float[] eye = rpg.world.shadowveil.ShadowVeil.dry(at[0] + dx, at[1] + dz);
+            out.add(new Stop(r[0], Float.parseFloat(r[1]), eye[0], eye[1], tx, tz, run));
+        }
+        return out.toArray(new Stop[0]);
+    }
+
     /** The battle stop's fight: goblins and orcs set upon the yard, where the watch stands; the player out of reach. */
     private void battle(Rpg g, Stop s) {
         g.player.skills.setLevel(rpg.skill.Skill.HEALTH, 99); g.player.restore();
@@ -53,7 +86,7 @@ final class Bench {
             var m = g.monsters.spawn(kind, kind == rpg.monster.MonsterKind.ORC ? 25 : 10, s.tx + (float) Math.sin(a) * 4, s.tz + (float) Math.cos(a) * 4, null);
             m.hostileToPlayer = true;
         }
-        for (var n : g.npcs) if (n.watch() && n.loaded) { g.teleport(n, s.tx + (n.id % 5) - 2, DevMap.FLOOR, s.tz + 2); n.nextThink = 0; }
+        for (var n : g.npcs) if (n.watch() && n.loaded) { g.teleport(n, s.tx + (n.id % 5) - 2, floorAt(s.tx + (n.id % 5) - 2, s.tz + 2), s.tz + 2); n.nextThink = 0; }
     }
 
     // a sampler: the main thread's stack every 2 ms while a frame runs; a slow frame prints where its time went
@@ -104,10 +137,12 @@ final class Bench {
         g.cfg.quality = Integer.parseInt(System.getenv().getOrDefault("RPG_BENCH_QUALITY", Integer.toString(g.cfg.quality)));
         System.out.printf("bench: %d x %d, %d frames a stop, %s%n", win.width, win.height, frames, Runtime.version());
         List<double[]> all = new ArrayList<>();
-        for (Stop s : TOUR) {
+        Stop[] tour = rpg.world.WorldMap.shadowveil() ? shadowveilTour() : TOUR;
+        for (Stop s : tour) {
             String only = System.getenv("RPG_BENCH_ONLY");
             if (only != null && !s.name.contains(only)) continue;
-            g.teleport(g.player, s.x, DevMap.FLOOR, s.z);
+            g.teleport(g.player, s.x, floorAt(s.x, s.z), s.z);
+            if (rpg.world.WorldMap.shadowveil()) { Main.preloadAll(g, gfx); gfx.preloadWorld(g, s.x, s.z); gfx.preloadChunks(g, s.x, s.z); }
             g.controller.snapTo((float) Math.atan2(-(s.tx - s.x), -(s.tz - s.z)));
             g.controller.camPitch = -0.08f;
             double now = g.state.hourOfDay();
@@ -121,6 +156,7 @@ final class Bench {
             double[][] rows = new double[frames][];
             int gcBefore = gcCount();
             java.util.Arrays.fill(g.prof, 0);
+            long[] sect0 = gfx.sectNs.clone();
             for (int i = 0; i < frames; i++) {
                 int gc0 = gcCount();
                 long[] prof0 = Rpg.PROF ? g.prof.clone() : null;
@@ -143,11 +179,17 @@ final class Bench {
                         System.out.println(top);
                     }
                 }
-                if (r[0] > 25 && r[3] < r[2] * 0.5) printHotspots();
+                if (r[0] > 25 && (r[3] < r[2] * 0.5 || r[1] > 15)) printHotspots();
             }
             if (gcCount() > gcBefore) System.out.printf("  %d gc in the stop%n", gcCount() - gcBefore);
             report(s.name + (g.cfg.fixedScale() > 0 ? "" : String.format(" [scale %.2f, aiming %d fps]", gfx.renderScaleNow(), g.cfg.targetFps)), rows);
             if (Rpg.PROF) { System.out.println("  sim by system (whole stop):"); g.profile().lines().limit(8).forEach(l -> System.out.println("    " + l)); }
+            // (0.4.7) the scene's own stretches, a frame's mean (ms): where the drawing's Java time goes
+            if (Rpg.PROF) {
+                StringBuilder b = new StringBuilder("  scene by stretch:");
+                for (int k = 0; k < SCENE_SECTS.length; k++) b.append(String.format(" %s %.2f", SCENE_SECTS[k], (gfx.sectNs[k] - sect0[k]) / 1e6 / frames));
+                System.out.println(b);
+            }
             all.addAll(Arrays.asList(rows));
             g.controller.in.forward = 0; g.controller.in.sprint = false;
         }
@@ -158,6 +200,11 @@ final class Bench {
     }
 
     private astratto.bridge.Snapshots.Stats nsLast;
+    /** (0.4.7) The names of Gfx.scene's profiled stretches, in its order. */
+    private static final String[] SCENE_SECTS = {"lights", "smoke+fx", "sea", "foliage", "farms+shops", "fences+animals", "player+people", "monsters+dummies", "objects", "gore", "debris+particles"};
+
+    /** The floor a body stands on at a place: the devmap's street level, ShadowVeil's ground. */
+    private static float floorAt(float x, float z) { return rpg.world.WorldMap.shadowveil() ? rpg.world.WorldMap.standY(x, z) : DevMap.FLOOR; }
 
     /** One frame of play; with a row, its times: total, sim, draw, render cpu, gpu, swap, quads, models, then gpu by pass. */
     private double[] frame(Rpg g, Hud hud, Stop s, double[] row) {

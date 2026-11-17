@@ -1,0 +1,81 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+DungeonsProbeTest > dungeons() STANDARD_OUT
+    [Load] ShadowVeil grown in 19.19s ({regions=836, overlays=501, variants=512, scarp=49, coast=423, erosion=412, peaks=74, lakes=57, isles=1, rivers=767, wadis=12, ground=20, roads=580, causeways=3, architecture=1243, pitsFilled=1396, pits=482, banks=74, clamp=15, cliffs=54, columns=850, falls=15, raise=10367, trees=270, outcrops=0, ways=710, lava=0, dungeons=150, postsSunk=28, floatingRemoved=59, floating=623}), made and lit in 2.15s
+    [water] flow field grown in 1779 ms: 39016 columns moving
+    [gathering] 757 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+    [dungeons]   mouth 412.5,42.0,835.5
+    [dungeons] Goblin Hollow, level 1             MACRO  WARREN floor Y26 at 382,806 rooms 7 residents 18 entry open route 24 legs
+    [dungeons] Goblin Hollow, level 2             ELITE  WARREN floor Y15 at 389,811 rooms 5 residents 9 entry open route (stair)
+    [dungeons]   mouth 552.5,46.0,861.5
+    [dungeons] Murk caves, level 1                MACRO  CAVE   floor Y30 at 522,832 rooms 8 residents 19 entry open route 26 legs
+    [dungeons] Murk caves, level 2                ELITE  CAVE   floor Y19 at 529,837 rooms 5 residents 9 entry open route (stair)
+    [dungeons]   mouth 861.5,62.0,568.5
+    [dungeons] Spider Nest, level 1               MACRO  CAVE   floor Y46 at 831,539 rooms 8 residents 18 entry open route 29 legs
+    [dungeons] Spider Nest, level 2               ELITE  CAVE   floor Y35 at 838,544 rooms 4 residents 8 entry open route (stair)
+    [dungeons]   mouth 1015.5,91.0,536.5
+    [dungeons] Ashmaw Throat, level 1             MACRO  CAVE   floor Y52 at 985,507 rooms 7 residents 17 entry open route 56 legs
+    [dungeons] Ashmaw Throat, level 2             MACRO  CAVE   floor Y41 at 985,507 rooms 7 residents 17 entry open route (stair)
+    [dungeons] Ashmaw Throat, level 3             ELITE  CAVE   floor Y30 at 992,512 rooms 5 residents 9 entry open route (stair)
+    [dungeons]   mouth 625.5,33.0,947.5
+    [dungeons] Culvert cave                       MICRO  CAVE   floor Y15 at 608,930 rooms 3 residents 5 entry open route 21 legs
+    [dungeons]   mouth 200.5,58.0,590.5
+    [dungeons] Sunkissed Mine, level 1            MACRO  HALL   floor Y39 at 170,561 rooms 8 residents 0 entry open route 25 legs
+    [dungeons] Sunkissed Mine, level 2            ELITE  HALL   floor Y28 at 177,566 rooms 5 residents 12 entry open route (stair)
+    [dungeons]   mouth 120.5,44.0,584.5
+    [dungeons] Marble Mine, level 1               MACRO  HALL   floor Y18 at 90,555 rooms 6 residents 0 entry open route 34 legs
+    [dungeons] Marble Mine, level 2               ELITE  HALL   floor Y7 at 97,560 rooms 6 residents 11 entry open route (stair)
+    [dungeons]   mouth 228.5,86.0,472.5
+    [dungeons] Highland adit                      MICRO  HALL   floor Y57 at 211,455 rooms 4 residents 0 entry open route 34 legs
+    [dungeons]   mouth 209.5,71.0,550.5
+    [dungeons] Hollow Crags mine                  MICRO  HALL   floor Y45 at 192,533 rooms 3 residents 0 entry open route 29 legs
+    [dungeons]   mouth 130.5,71.0,504.5
+    [dungeons] Hollow Crags mine                  MICRO  HALL   floor Y48 at 113,487 rooms 4 residents 0 entry open route 29 legs
+    [dungeons]   mouth 206.5,40.0,957.0
+    [dungeons] Loxford Graveyard                  MICRO  CRYPT  floor Y25 at 189,939 rooms 3 residents 5 entry open route 24 legs
+    [dungeons] 18 of 18 levels open and reached (by walking, mouth to entry)
+    [dungeons] shaft 415,835 Y42->Y26 ladder true head true foot true
+    [dungeons] shaft 436,847 Y26->Y15 ladder true head true foot true
+    [dungeons] shaft 549,861 Y46->Y30 ladder true head true foot true
+    [dungeons] shaft 540,856 Y30->Y19 ladder true head true foot true
+    [dungeons] shaft 861,565 Y62->Y46 ladder true head true foot true
+    [dungeons] shaft 861,587 Y46->Y35 ladder true head true foot true
+    [dungeons] shaft 1018,536 Y91->Y52 ladder true head true foot true
+    [dungeons] shaft 1029,521 Y52->Y41 ladder true head true foot true
+    [dungeons] shaft 1020,558 Y41->Y30 ladder true head true foot true
+    [dungeons] shaft 622,947 Y33->Y15 ladder true head true foot true
+    [dungeons] shaft 200,587 Y58->Y39 ladder true head true foot true
+    [dungeons] shaft 212,570 Y39->Y28 ladder true head true foot true
+    [dungeons] shaft 120,581 Y44->Y18 ladder true head true foot true
+    [dungeons] shaft 139,563 Y18->Y7 ladder true head true foot true
+    [dungeons] shaft 225,472 Y86->Y57 ladder true head true foot true
+    [dungeons] shaft 209,547 Y71->Y45 ladder true head true foot true
+    [dungeons] shaft 133,504 Y71->Y48 ladder true head true foot true
+    [dungeons] shaft 209,957 Y40->Y25 ladder true head true foot true
+    [dungeons] 18 of 18 shafts whole
+  slow: rpg.probe.DungeonsProbeTest.dungeons() 45.818 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 50s
+9 actionable tasks: 1 executed, 8 up-to-date

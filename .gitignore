@@ -3,3 +3,11 @@ instructions.md
 ProjectRPG/instructions.md
 gamefixes.md
 ProjectRPG/gamefixes.md
+
+# profiler recordings (hold the machine environment)
+*.jfr
+# raw downloaded source recordings (the game ships the trimmed .ogg)
+work/**/hqsnd/*.mp3
+work/**/hqsnd/*.flac
+work/**/hqsnd/*.wav
+work/**/hqsnd/*.ogg

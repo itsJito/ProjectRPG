@@ -61,6 +61,9 @@ class WorldLifeProbeTest {
                     left.removeIf(o -> Math.hypot(o.homeX - cx, o.homeZ - cz) < 120);
                 }
             }
+            StringBuilder plan = new StringBuilder("[life] stops:");
+            for (float[] s : stops) plan.append(String.format(" %.0f,%.0f;", s[0], s[1]));
+            System.out.println(plan);
             Map<Long, Integer> spins = new HashMap<>(), blocked = new HashMap<>(), still = new HashMap<>(), seen = new HashMap<>();
             Map<Long, String> spinAt = new HashMap<>(), lastWhy = new HashMap<>();
             for (float[] s : stops) {

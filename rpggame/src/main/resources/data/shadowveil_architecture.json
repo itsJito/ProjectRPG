@@ -769,9 +769,38 @@
     ],
     "minArea": 40,
     "beds": 1
+   },
+   "bunker": {
+    "enter": true,
+    "rooms": [
+     "hearth room",
+     "sleeping room"
+    ],
+    "minArea": 9,
+    "beds": 1,
+    "perResident": true
+   },
+   "guildhall": {
+    "enter": true,
+    "rooms": [
+     "guild hall with counter",
+     "workroom",
+     "master's chamber"
+    ],
+    "minArea": 40,
+    "beds": 1,
+    "perResident": true
    }
   },
   "purposeRules": [
+   {
+    "name": "Guild Hall|Guild Chapter|Moon Chapter",
+    "purpose": "guildhall"
+   },
+   {
+    "name": "Bunker",
+    "purpose": "bunker"
+   },
    {
     "template": "mouth",
     "purpose": "dungeon"
@@ -2743,6 +2772,65 @@
       "chimney": true,
       "search": 64,
       "backDoor": false
+     },
+     {
+      "id": "loxford_undertaker_bunker",
+      "name": "Loxford Undertaker's Bunker",
+      "template": "building",
+      "beside": "loxford_graveyard",
+      "at": [
+       11.3,
+       11.2
+      ],
+      "size": [
+       7,
+       6
+      ],
+      "search": 36,
+      "nearRoad": 12,
+      "laneReach": 140
+     },
+     {
+      "id": "foresters_guild",
+      "name": "Foresters' Guild Hall",
+      "template": "building",
+      "beside": "millwood_lodge",
+      "at": [
+       19.3,
+       11.0
+      ],
+      "size": [
+       14,
+       11
+      ],
+      "search": 40,
+      "nearRoad": 14,
+      "laneReach": 120,
+      "guild": "FORESTERS",
+      "seat": "hq"
+     },
+     {
+      "id": "loxford_bank",
+      "name": "Loxford Bank",
+      "template": "building",
+      "at": [
+       16.2,
+       8.6
+      ],
+      "size": [
+       10,
+       11
+      ],
+      "storeys": 2,
+      "wallH": 4,
+      "roof": "hip",
+      "banner": true,
+      "materials": {
+       "wall": "stone_bricks"
+      },
+      "search": 64,
+      "nearRoad": 14,
+      "laneReach": 120
      }
     ]
    },
@@ -3093,6 +3181,41 @@
       "purpose": "bank",
       "search": 64,
       "backDoor": false
+     },
+     {
+      "id": "harlette_undertaker_bunker",
+      "name": "Harlette Undertaker's Bunker",
+      "template": "building",
+      "beside": "harlette_graveyard",
+      "at": [
+       7.5,
+       22.3
+      ],
+      "size": [
+       7,
+       6
+      ],
+      "search": 36,
+      "nearRoad": 12,
+      "laneReach": 140
+     },
+     {
+      "id": "farmers_guild",
+      "name": "Farmers' Guild Hall",
+      "template": "building",
+      "at": [
+       8.4,
+       21.6
+      ],
+      "size": [
+       14,
+       11
+      ],
+      "search": 64,
+      "nearRoad": 14,
+      "laneReach": 120,
+      "guild": "FARMERS",
+      "seat": "hq"
      }
     ]
    },
@@ -3222,7 +3345,9 @@
       "facing": "e",
       "storeys": 2,
       "wallH": 5,
-      "banner": true
+      "banner": true,
+      "guild": "METALLISTS",
+      "seat": "hq"
      },
      {
       "id": "valgard_bank",
@@ -3556,6 +3681,23 @@
       ],
       "template": "graveyard",
       "search": 64
+     },
+     {
+      "id": "valgard_undertaker_bunker",
+      "name": "Valgard Undertaker's Bunker",
+      "template": "building",
+      "beside": "valgard_graveyard",
+      "at": [
+       7.4,
+       30.2
+      ],
+      "size": [
+       7,
+       6
+      ],
+      "search": 36,
+      "nearRoad": 12,
+      "laneReach": 140
      }
     ]
    },
@@ -3807,6 +3949,41 @@
       ],
       "template": "graveyard",
       "search": 64
+     },
+     {
+      "id": "gorrick_undertaker_bunker",
+      "name": "Gorrick Undertaker's Bunker",
+      "template": "building",
+      "beside": "gorrick_graveyard",
+      "at": [
+       21.9,
+       44.1
+      ],
+      "size": [
+       7,
+       6
+      ],
+      "search": 36,
+      "nearRoad": 12,
+      "laneReach": 140
+     },
+     {
+      "id": "provisioners_chapter",
+      "name": "Provisioners' Guild Chapter",
+      "template": "building",
+      "at": [
+       24.3,
+       42.0
+      ],
+      "size": [
+       12,
+       10
+      ],
+      "search": 64,
+      "nearRoad": 14,
+      "laneReach": 120,
+      "guild": "PROVISIONERS",
+      "seat": "chapter"
      }
     ]
    },
@@ -4292,6 +4469,60 @@
       ],
       "template": "graveyard",
       "search": 64
+     },
+     {
+      "id": "azharad_undertaker_bunker",
+      "name": "Azharad Undertaker's Bunker",
+      "template": "building",
+      "beside": "azharad_graveyard",
+      "at": [
+       52.0,
+       17.2
+      ],
+      "size": [
+       7,
+       6
+      ],
+      "search": 36,
+      "nearRoad": 12,
+      "laneReach": 140
+     },
+     {
+      "id": "artisans_guild",
+      "name": "Artisans' Guild Hall",
+      "template": "building",
+      "beside": "azharad_workshop",
+      "at": [
+       53.0,
+       12.55
+      ],
+      "size": [
+       14,
+       12
+      ],
+      "search": 48,
+      "nearRoad": 14,
+      "laneReach": 120,
+      "guild": "ARTISANS",
+      "seat": "hq"
+     },
+     {
+      "id": "arcanists_moon_chapter",
+      "name": "Arcanists' Moon Chapter",
+      "template": "building",
+      "at": [
+       55.0,
+       15.6
+      ],
+      "size": [
+       12,
+       10
+      ],
+      "search": 64,
+      "nearRoad": 14,
+      "laneReach": 120,
+      "guild": "ARCANISTS",
+      "seat": "chapter"
      }
     ]
    },
@@ -5031,6 +5262,78 @@
       "template": "graveyard",
       "style": "severia_stone",
       "search": 64
+     },
+     {
+      "id": "severia_undertaker_bunker",
+      "name": "Severian Undertaker's Bunker",
+      "template": "building",
+      "beside": "severia_graveyard",
+      "at": [
+       25.4,
+       58.2
+      ],
+      "size": [
+       7,
+       6
+      ],
+      "search": 36,
+      "nearRoad": 12,
+      "laneReach": 140
+     },
+     {
+      "id": "mariners_guild",
+      "name": "Mariners' Guild Hall",
+      "template": "building",
+      "beside": "harbor_tenement",
+      "at": [
+       29.9,
+       65.0
+      ],
+      "size": [
+       14,
+       11
+      ],
+      "search": 48,
+      "nearRoad": 14,
+      "laneReach": 120,
+      "guild": "MARINERS",
+      "seat": "hq"
+     },
+     {
+      "id": "provisioners_guild",
+      "name": "Provisioners' Guild Hall",
+      "template": "building",
+      "at": [
+       28.0,
+       57.2
+      ],
+      "size": [
+       14,
+       11
+      ],
+      "search": 64,
+      "nearRoad": 14,
+      "laneReach": 120,
+      "guild": "PROVISIONERS",
+      "seat": "hq"
+     },
+     {
+      "id": "arcanists_guild",
+      "name": "Arcanists' Guild Hall",
+      "template": "building",
+      "at": [
+       31.5,
+       57.0
+      ],
+      "size": [
+       16,
+       12
+      ],
+      "search": 64,
+      "nearRoad": 14,
+      "laneReach": 120,
+      "guild": "ARCANISTS",
+      "seat": "hq"
      }
     ]
    },
@@ -5240,6 +5543,58 @@
       ],
       "template": "graveyard",
       "search": 64
+     },
+     {
+      "id": "sinclair_undertaker_bunker",
+      "name": "Sinclair Undertaker's Bunker",
+      "template": "building",
+      "beside": "sinclair_graves",
+      "at": [
+       49.2,
+       42.9
+      ],
+      "size": [
+       7,
+       6
+      ],
+      "search": 36,
+      "nearRoad": 12,
+      "laneReach": 140
+     },
+     {
+      "id": "camelot_undertaker_bunker",
+      "name": "Camelot Undertaker's Bunker",
+      "template": "building",
+      "beside": "camelot_graveyard",
+      "at": [
+       49.0,
+       45.8
+      ],
+      "size": [
+       7,
+       6
+      ],
+      "search": 36,
+      "nearRoad": 12,
+      "laneReach": 140
+     },
+     {
+      "id": "arcanists_chapter",
+      "name": "Arcanists' Guild Chapter",
+      "template": "building",
+      "at": [
+       48.6,
+       44.4
+      ],
+      "size": [
+       12,
+       10
+      ],
+      "search": 64,
+      "nearRoad": 14,
+      "laneReach": 120,
+      "guild": "ARCANISTS",
+      "seat": "chapter"
      }
     ]
    },

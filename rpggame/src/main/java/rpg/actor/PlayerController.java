@@ -380,7 +380,7 @@ public final class PlayerController {
         if (c.charge > 0) max *= 0.7f;
         if (c.draw > 0) max *= 0.75f;
         if (c.slowT > 0) max *= 0.6f;
-        if (c.frozenT > 0) max = 0;
+        if (c.frozenT > 0 || c.heldT > 0) max = 0;
         // the load: a heavy pack slows every gait, makes the body slower to get going and tires a sprint sooner
         float burden = p.burden();
         max *= burden * p.actionRate();

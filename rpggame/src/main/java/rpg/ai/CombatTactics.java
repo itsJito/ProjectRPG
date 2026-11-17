@@ -20,7 +20,7 @@ final class CombatTactics {
 
     boolean move(Npc n, Actor foe, boolean visible) {
         Plan plan = n.tactic;
-        if (plan != null && (plan.target != foe.id || g.time >= plan.until || n.stuck || !g.vox.navigation.validPoint(plan.x,plan.y,plan.z,d->!d.locked || d.owner==n.id))) n.tactic = plan = null;
+        if (plan != null && (plan.target != foe.id || g.time >= plan.until || n.stuck || !g.vox.navigation.validPoint(plan.x,plan.y,plan.z,d->!d.locked || d.keeps(n.id)))) n.tactic = plan = null;
         if (plan != null) {
             // A moving attacker can expose cover. Reconsider only when actually seen.
             if (plan.kind == Kind.COVER && visible && !covered(foe.x, foe.eyeY(), foe.z, plan.x, n.eyeY(), plan.z)) n.tactic = plan = null;
@@ -88,11 +88,14 @@ final class CombatTactics {
         record Site(float x,float y,float z,float score){} var sites=new java.util.ArrayList<Site>();
         for(int dx=-12;dx<=12;dx+=2)for(int dz=-12;dz<=12;dz+=2)for(int dy=2;dy<=8;dy++){
             float x=(float)Math.floor(n.x)+dx+.5f,z=(float)Math.floor(n.z)+dz+.5f,y=(float)Math.floor(n.y)+dy;
-            if(Math.hypot(dx,dz)>12 || !g.vox.navigation.validPoint(x,y,z,d->!d.locked || d.owner==n.id) || !g.vox.sight(x,y+1.5f,z,foe.x,foe.chestY(),foe.z))continue;
+            // (0.4.7) a firing position is footing: not a rung of a ladder, where an archer can neither stand nor draw
+            int bx=(int)Math.floor(x),by=(int)Math.floor(y),bz=(int)Math.floor(z);
+            if(rpg.world.Blocks.ladder(g.vox.block(bx,by,bz)) || rpg.world.Blocks.ladder(g.vox.block(bx,by-1,bz)))continue;
+            if(Math.hypot(dx,dz)>12 || !g.vox.navigation.validPoint(x,y,z,d->!d.locked || d.keeps(n.id)) || !g.vox.sight(x,y+1.5f,z,foe.x,foe.chestY(),foe.z))continue;
             sites.add(new Site(x,y,z,(float)Math.hypot(dx,dz)+dy*.6f));
         }
         sites.sort(java.util.Comparator.comparingDouble(Site::score));
-        for(var site:sites.stream().limit(2).toList())if(g.vox.navigation.route(n.x,n.y,n.z,site.x,site.y,site.z,d->!d.locked || d.owner==n.id,Brain.canUseLadders(n),n.id,n.routeBook,g.time)!=null){var plan=plan(Kind.HIGH_GROUND,foe,site.x,site.z,12);plan.y=site.y;return plan;}
+        for(var site:sites.stream().limit(2).toList())if(g.vox.navigation.route(n.x,n.y,n.z,site.x,site.y,site.z,d->!d.locked || d.keeps(n.id),Brain.canUseLadders(n),n.id,n.routeBook,g.time)!=null){var plan=plan(Kind.HIGH_GROUND,foe,site.x,site.z,12);plan.y=site.y;return plan;}
         return null;
     }
     int allies(Npc n, Actor foe) {

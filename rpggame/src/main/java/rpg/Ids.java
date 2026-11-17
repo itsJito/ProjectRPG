@@ -64,6 +64,8 @@ public final class Ids {
     public static final long SV_PEOPLE = ESTATE + 990_000;
     /** (0.4.4) ShadowVeil's interiors: their furniture, inner doors, stations, chests, altars and cell doors, in the order fitted. */
     public static final long SV_INTERIORS = ESTATE + 1_100_000;
+    /** (0.4.7) ShadowVeil's dungeons under the map: their chests and traps, level by level. */
+    public static final long SV_DUNGEONS = ESTATE + 1_900_000;
     /** Whether an id is a fixture's (built with the world, kept by its id in a save) rather than made in play. */
     public static boolean fixture(long id) { return id < DYNAMIC || id >= ESTATE && id < ESTATE_END; }
 }

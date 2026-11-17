@@ -1,0 +1,272 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+
+> Task :probe
+
+WorldInspectProbeTest > inspect() STANDARD_OUT
+    [Load] ShadowVeil grown in 21.34s ({regions=871, overlays=504, variants=721, scarp=60, coast=647, erosion=370, peaks=84, lakes=62, isles=1, rivers=1306, wadis=14, ground=29, roads=664, causeways=3, architecture=1503, pitsFilled=1396, pits=500, banks=68, clamp=13, cliffs=44, columns=1327, falls=18, raise=10983, trees=287, outcrops=0, ways=523, lava=0, dungeons=98, postsSunk=28, floatingRemoved=59, floating=594}), made and lit in 2.18s
+    [water] flow field grown in 1825 ms: 39016 columns moving
+    [gathering] 757 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+
+    ================ 204, 58, 664  law Valgard  stand Y 53.0
+    structure here: valgard_keep Valgard Keep (castle) lot 185,660 - 214,691 floor 52
+      near valgard_square             Keep Square                              plaza          38 m lot 189,697-210,706 floor 52
+      near sanctuary_jaehaerys        Sanctuary of Jaehaerys                   church         26 m lot 175,637-198,650 floor 59
+      near metallists_guild           Metallists Guild                         hall           30 m lot 228,651-239,666 floor 55
+      near valgard_bank               Valgard Bank & Ore Exchange              building       32 m lot 228,672-237,683 floor 52
+      near valgard_homes_4            House                                    building       35 m lot 229,640-236,647 floor 58
+      near valgard_homes_6            House                                    building       38 m lot 223,630-227,634 floor 59
+      near valgard_homes_8            House                                    building       32 m lot 218,689-222,693 floor 52
+      near valgard_homes_9            House                                    building       33 m lot 224,686-228,690 floor 52
+      near valgard_homes_33           House                                    building       30 m lot 175,677-182,684 floor 53
+      near valgard_homes_35           House                                    building       30 m lot 171,668-178,675 floor 52
+      near valgard_homes_36           House                                    building       31 m lot 171,660-175,664 floor 53
+      near valgard_jail               Valgard Jail                             building       16 m lot 204,643-214,655 floor 56
+      object Furniture              King Phillip's bed             (207.0, 58.5, 669.0)
+      object Furniture              Bedside table                  (205.5, 58.5, 669.5)
+      object Furniture              Roder's bed                    (196.0, 63.5, 668.0)
+      object Furniture              Bedside table                  (196.5, 63.5, 669.5)
+      object Furniture              Fireplace                      (197.5, 54.0, 667.0)
+      object Furniture              Dining table                   (203.0, 53.5, 669.0)
+      object Furniture              Chair                          (204.5, 53.5, 670.5)
+      object Furniture              Chair                          (203.5, 53.5, 670.5)
+      object Furniture              Chair                          (202.5, 53.5, 670.5)
+      object Furniture              Chair                          (201.5, 53.5, 670.5)
+      object Furniture              Chair                          (204.5, 53.5, 667.5)
+      object Furniture              Chair                          (203.5, 53.5, 667.5)
+      object Furniture              Chair                          (202.5, 53.5, 667.5)
+      object Furniture              Chair                          (201.5, 53.5, 667.5)
+      object Furniture              Chair                          (205.5, 53.5, 669.5)
+      object Furniture              Chair                          (200.5, 53.5, 669.5)
+      object Furniture              Sideboard                      (199.0, 53.5, 664.5)
+      object Furniture              Suit of armour                 (206.5, 54.0, 670.5)
+      object Furniture              Suit of armour                 (197.5, 54.0, 669.5)
+      object Furniture              Armchair                       (207.5, 53.5, 666.5)
+      object Furniture              Tapestry                       (197.5, 54.0, 665.0)
+      object Furniture              Weapon trophy                  (206.5, 54.0, 666.5)
+      object Furniture              Rug                            (202.5, 53.5, 669.0)
+      object Furniture              Chandelier                     (202.5, 54.0, 666.5)
+      object Furniture              Chandelier                     (200.5, 54.0, 668.5)
+      object Furniture              Candelabrum                    (207.5, 53.5, 669.5)
+      object Furniture              Candelabrum                    (197.5, 53.5, 664.5)
+      object Furniture              Kitchen dresser                (195.5, 54.0, 669.5)
+      object Furniture              Wardrobe                       (207.5, 59.0, 666.5)
+      object Furniture              Chest of drawers               (203.5, 58.5, 667.5)
+      object Furniture              Armchair                       (203.5, 58.5, 670.5)
+      object Furniture              Washstand                      (203.5, 58.5, 669.5)
+      object Furniture              Mirror                         (207.5, 59.0, 667.5)
+      object Furniture              Tapestry                       (205.5, 59.0, 665.0)
+      object Furniture              Rug                            (206.0, 58.5, 669.0)
+      object Furniture              Candelabrum                    (206.5, 58.5, 670.5)
+      object Furniture              Armchair                       (197.5, 58.5, 669.5)
+      object Furniture              Mirror                         (198.5, 59.0, 669.5)
+      object Furniture              Tapestry                       (201.5, 59.0, 671.0)
+      object Furniture              Rug                            (197.0, 58.5, 671.0)
+      object Furniture              Settee                         (195.0, 58.5, 667.5)
+      object Furniture              Bookcase                       (197.5, 59.0, 667.5)
+      object Furniture              Bookcase                       (198.5, 59.0, 667.5)
+      object Furniture              Potted fern                    (195.5, 58.5, 664.5)
+      object Furniture              Painting                       (196.5, 59.0, 664.5)
+      object Furniture              Rug                            (197.0, 58.5, 666.0)
+      object Furniture              Chandelier                     (197.5, 59.0, 666.5)
+      object Furniture              Counter                        (203.5, 63.5, 668.5)
+      object Furniture              Bookcase                       (207.5, 64.0, 666.5)
+      object Furniture              Tapestry                       (198.5, 64.0, 668.0)
+      object Furniture              Chandelier                     (203.5, 64.0, 669.5)
+      object Furniture              Chandelier                     (201.5, 64.0, 667.5)
+      object Furniture              Candelabrum                    (206.5, 63.5, 670.5)
+      object Furniture              Candelabrum                    (207.5, 63.5, 669.5)
+      object Furniture              Chest of drawers               (196.5, 63.5, 671.5)
+      object Furniture              Armchair                       (195.5, 63.5, 664.5)
+      object Furniture              Washstand                      (196.5, 63.5, 670.5)
+      object Furniture              Rug                            (195.0, 63.5, 669.0)
+      object Door                   Valgard Keep chamber door      (202.5, 59.2, 666.5)
+      object Door                   Valgard Keep chamber door      (197.5, 64.2, 666.5)
+      object Station                Range                          (195.5, 53.6, 670.5)
+      object Container              Chest                          (206.5, 58.4, 666.5)
+      object Container              Vault strongbox (locked)       (205.5, 63.4, 671.5)
+      object Container              Vault strongbox (locked)       (205.5, 63.4, 664.5)
+      object Furniture              Duke Edran's bed               (204.0, 58.5, 672.0)
+      object Furniture              Sir Garran's bed               (200.0, 58.5, 672.0)
+      object Furniture              Bedside table                  (198.5, 58.5, 672.5)
+      object Furniture              Tapestry                       (202.0, 54.0, 672.5)
+      object Furniture              Candelabrum                    (204.5, 53.5, 672.5)
+      object Furniture              Chest of drawers               (195.5, 58.5, 672.5)
+      object Furniture              Candelabrum                    (201.5, 58.5, 672.5)
+      object Furniture              Writing desk                   (204.5, 63.5, 672.5)
+      object Furniture              Longcase clock                 (199.5, 64.0, 672.5)
+      object Furniture              Bench                          (201.0, 63.5, 672.5)
+      object Furniture              Candelabrum                    (198.5, 63.5, 672.5)
+      object Furniture              Mirror                         (196.5, 64.0, 672.5)
+      object Furniture              Candelabrum                    (196.5, 63.5, 672.5)
+      object Container              Chest                          (196.5, 58.4, 672.5)
+      npc Roder        GUARD          (203.5, 53.0, 693.5) goal IDLE
+      npc Sir Garran   KNIGHT         (199.5, 53.0, 693.5) goal IDLE
+      npc King Phillip CIVIC          (193.5, 53.0, 659.5) goal IDLE
+      npc Duke Edran   CIVIC          (186.5, 53.0, 659.5) goal IDLE
+      npc Sir Vaelor   KNIGHT         (200.5, 59.0, 644.5) goal IDLE
+      npc Lothar       GUARD          (205.5, 57.0, 642.5) goal IDLE
+      layer Y56 (x 195..213 across, z down; * the point)
+       aaaaaabbbcccccccccc
+       aaaaaabbbbbbbbbbbbb
+       ddddd..bbbbbbbbbbbb
+       ...................
+       ................eee
+       eeeeeeeeeeeeeeeee.e
+       eeeeeeeeeeeeeeee...
+       ...........e..ee...
+       ffcfffffcffefdee...
+       .f.......*heff.ee.e
+       .f.........eeeeeeee
+       .f...........f....e
+       .f...........f....e
+       .f...........c....e
+       .f...........f....e
+       .f..........eee...e
+       .f.........ee.ee..e
+       .f........eef..ee.e
+       ffcfffffcfe.....e.e
+      layer Y57 (x 195..213 across, z down; * the point)
+       aaaaab...diiiiiiiii
+       bbbbbb.............
+       ...................
+       ...................
+       ................eee
+       eeeeeeeeeeeeeeeee.e
+       eeeeeeeeeeeeeeee...
+       ...........e..ee...
+       ccccccccccceccee...
+       hhhhhhh..*gehc.ee.e
+       hhhhhhhhhhheeeeeeee
+       hhhhhhhhhhhhhc....e
+       hhhhhhhhhhhhhc....e
+       hhhhhhhhhhhhhc....e
+       hhhhhhhhhhhhhc....e
+       hhhhhhhhhhhheee...e
+       hhhhhhhhhhhee.ee..e
+       hhhhhhhhhheeh..ee.e
+       cccccccccce.....e.e
+      layer Y58 (x 195..213 across, z down; * the point)
+       bbbbb....dfjffjffff
+       ...................
+       ...................
+       ...................
+       ................eee
+       eeeeeeeeeeeeeeeee.e
+       eeeeeeeeeeeeeeee...
+       ...........e..ee...
+       fffffffffffefdee...
+       k.ghhhh..*.eff.ee.e
+       ......llll.eeeeeeee
+       .......m...nkf....e
+       o.pp...fk....f....e
+       ffffff.f...qqf....e
+       ..o....fk.kqqf....e
+       .......fo..keee...e
+       ....qq.fqq.ee.ee..e
+       kn.kqqkfqqeef..ee.e
+       ffffffffffe.....e.e
+      layer Y59 (x 195..213 across, z down; * the point)
+       .........dfjffjffff
+       ...................
+       ...................
+       ...................
+       ................eee
+       eeeeeeeeeeeeeeeee.e
+       eeeeeeeeeeeeeeee...
+       ...........e..ee...
+       fffffjffjffefdee...
+       ...ghhh..*.eff.ee.e
+       .......f...eeeeeeee
+       .......m....kf....e
+       ..pp...f.....f....e
+       ffffff.f.....f....e
+       .......f.....f....e
+       .......f....eee...e
+       .......f...ee.ee..e
+       .......f..eef..ee.e
+       fffffjffjfe.....e.e
+      layer Y60 (x 195..213 across, z down; * the point)
+       .........dddddddddd
+       ...................
+       ...................
+       ...................
+       ................eee
+       eeeeeeeeeeeeeeeee.e
+       eeeeeeeeeeeeeeee...
+       ...........e..ee...
+       fffffjffjffefdee...
+       ....ghh..*.eff.ee.e
+       .......f...eeeeeeee
+       .......f.....f....e
+       .......f.....f....e
+       ffffffff.....f....e
+       .......f.....f....e
+       .......f....eee...e
+       .......f...ee.ee..e
+       .......f..eef..ee.e
+       fffffjffjfe.....e.e
+      layer Y61 (x 195..213 across, z down; * the point)
+       .........dfffffffff
+       ...................
+       ...................
+       ...................
+       ................eee
+       e.e.e.e.e.e.e.eee.e
+       ...........eeeee...
+       ...........e..ee...
+       fffffcffcffefdee...
+       .....gh..*.eff.ee.e
+       .......f...eeeeeeee
+       .......f.....f.....
+       .......f.....f.....
+       ffffffff.....f.....
+       .......f.....f.....
+       .......f....eee....
+       .......f...ee.ee...
+       .......f..eef..ee..
+       fffffcffcfe.....e..
+      layer Y62 (x 195..213 across, z down; * the point)
+       .........dfjffjffjf
+       ...................
+       ...................
+       ...................
+       ................eje
+       ...............ee.e
+       ...........eeeee...
+       ...........e..je...
+       ccccccccccceccee...
+       hhh...ghh*hehc.ee.e
+       hhhhhhhhhhheeeeeeje
+       hhhhhhhhhhhhhc.....
+       hhhhhhhhhhhhhc.....
+       hhhhhhhhhhhhhc.....
+       hhhhhhhhhhhhhc.....
+       hhhhhhhhhhhheee....
+       hhhhhhhhhhhee.ee...
+       hhhhhhhhhheeh..ee..
+       cccccccccce.....e..
+      legend: a=dirt b=grass c=stone_bricks d=granite e=granite_ashlar f=ashlar_linenfold g=stairs h=planks i=#91 j=white_glass k=table l=fence m=door n=crate o=seat p=bookcase q=bed
+  slow: rpg.probe.WorldInspectProbeTest.inspect() 36.973 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 49s
+9 actionable tasks: 2 executed, 7 up-to-date

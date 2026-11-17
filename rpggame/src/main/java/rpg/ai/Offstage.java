@@ -88,11 +88,11 @@ final class Offstage {
         for (Npc n : g.npcs) {
             if (n.loaded || !n.alive || !n.offstage) continue;
             steps++;
-            if (h < 6 || h >= 22) { at(n, n.homeX, n.homeZ); n.fatigue = Math.max(0, n.fatigue - 0.08f); note(n, minute, "asleep at home"); continue; }
-            if (h >= 12 && h < 13 || h < 7) { at(n, n.homeX, n.homeZ); n.hunger = Math.max(0, n.hunger - 0.3f); note(n, minute, h < 7 ? "up and about at home" : "home for the midday meal"); continue; }
+            if (h < 6 || h >= 22) { atFloor(n, n.homeX, n.homeY, n.homeZ, n.homeX, n.homeZ); n.fatigue = Math.max(0, n.fatigue - 0.08f); note(n, minute, "asleep at home"); continue; }
+            if (h >= 12 && h < 13 || h < 7) { atFloor(n, n.homeX, n.homeY, n.homeZ, n.homeX, n.homeZ); n.hunger = Math.max(0, n.hunger - 0.3f); note(n, minute, h < 7 ? "up and about at home" : "home for the midday meal"); continue; }
             if (h >= 18) {
                 String did = g.repairs == null ? null : g.repairs.offstage(n);
-                if (did == null) at(n, n.homeX + (float) Math.cos(n.id) * 3, n.homeZ + (float) Math.sin(n.id) * 3);
+                if (did == null) atFloor(n, n.homeX + (float) Math.cos(n.id) * 3, n.homeY, n.homeZ + (float) Math.sin(n.id) * 3, n.homeX, n.homeZ);
                 note(n, minute, did != null ? did : "about home for the evening"); continue;
             }
             work(n, minute);
@@ -101,14 +101,29 @@ final class Offstage {
     }
 
     private void note(Npc n, double minute, String what) { n.lastOutcome = "(off-stage) " + what; n.diary.note(minute, n.lastOutcome); }
+    /**
+     * (0.4.8, gamefixes: NPCs could not complete their daily tasks - a scholar whose bed is upstairs came back into play
+     * shut in the hollow of his manor's turret) about home, or at a post, on the bed's or the post's own floor (the column's top was a roof or the
+     * lane), and never somewhere shut off from it: a spot that is stays where they were.
+     */
+    private void atFloor(Npc n, float x, float floor, float z, float fallX, float fallZ) {
+        if (!Float.isFinite(floor)) { at(n, x, z); return; }
+        float y = g.vox.navigation.standY(x, floor, z);
+        if (!Float.isFinite(y) || Math.abs(y - floor) > 1.2f) { x = fallX; z = fallZ; y = floor; }
+        place(n, x, y, z);
+    }
     private void at(Npc n, float x, float z) {
         float[] p = rpg.world.shadowveil.ShadowVeil.dry(x, z);
-        float y = WorldMap.standY(p[0], p[1]);
+        place(n, p[0], WorldMap.standY(p[0], p[1]), p[1]);
+    }
+    private void place(Npc n, float px, float y, float pz) {
+        float[] p = {px, pz};
         // (0.4.6, gamefixes: spawn points clustered) two sharing a post or a doorstep off-stage stand apart, so nobody
         // comes back into play stood inside another
         java.util.List<float[]> others = new java.util.ArrayList<>();
         for (Npc o : g.npcs) if (o != n && o.alive && Math.abs(o.x - p[0]) < 4 && Math.abs(o.z - p[1]) < 4) others.add(new float[]{o.x, o.y, o.z});
         float[] q = others.isEmpty() ? new float[]{p[0], y, p[1]} : ai.apart(p[0], y, p[1], others);
+        if (ai.sealed(q[0], q[1], q[2])) return;
         n.x = q[0]; n.y = q[1]; n.z = q[2];
     }
 
@@ -138,7 +153,7 @@ final class Offstage {
         }
         if (p == Profession.CROP_FARMER && g.farming != null) { farm(n, minute); return; }
         // any other trade keeps its post through the working hours
-        at(n, n.postX, n.postZ);
+        atFloor(n, n.postX, n.postY, n.postZ, n.postX, n.postZ);
         note(n, minute, (p == null ? n.title : p.title) + ": at work");
     }
 
@@ -188,7 +203,7 @@ final class Offstage {
                 return;
             }
         }
-        at(n, n.postX, n.postZ);
+        atFloor(n, n.postX, n.postY, n.postZ, n.postX, n.postZ);
         note(n, minute, "Crop Farmer: weeding and watering the rows");
     }
 

@@ -1,0 +1,342 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 20.58s ({regions=869, overlays=489, variants=558, scarp=47, coast=650, erosion=342, peaks=72, lakes=55, isles=1, rivers=1162, wadis=12, ground=19, roads=663, causeways=4, architecture=1271, pitsFilled=1396, pits=414, banks=73, clamp=14, cliffs=52, columns=1059, falls=16, raise=11029, trees=268, outcrops=0, ways=505, lava=0, dungeons=105, postsSunk=28, floatingRemoved=59, floating=787}), made and lit in 2.20s
+    [water] flow field grown in 1946 ms: 39016 columns moving
+    [gathering] 757 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+    [life] start: 236 people, 0 stand with 3+ others within 2 m
+
+    [trace]    30 Elric      (238.50,53.04,672.50) yaw 0.00 want NaN v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 0.5 | getting up and dressed
+    [trace]    40 Elric      (238.50,53.00,672.50) yaw 0.25 want 0.26 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 0.7 | getting up and dressed
+    [trace]    50 Elric      (238.50,53.00,672.50) yaw 0.28 want 0.30 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 0.9 | getting up and dressed
+    [trace]    60 Elric      (238.50,53.00,672.50) yaw 0.31 want 0.33 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 1.0 | getting up and dressed
+    [trace]    70 Elric      (238.50,53.00,672.50) yaw 0.34 want 0.35 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 1.2 | getting up and dressed
+    [trace]    80 Elric      (238.50,53.00,672.50) yaw 0.34 want 0.35 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 1.4 | getting up and dressed
+    [trace]    90 Elric      (238.50,53.00,672.50) yaw 0.34 want 0.34 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 1.5 | getting up and dressed
+    [trace]   100 Elric      (238.50,53.00,672.50) yaw 0.34 want 0.32 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 1.7 | getting up and dressed
+    [trace]   110 Elric      (238.50,53.00,672.50) yaw 0.28 want 0.28 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 1.9 | getting up and dressed
+    [trace]   120 Elric      (238.50,53.00,672.50) yaw 0.25 want 0.23 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 2.0 | getting up and dressed
+    [trace]   130 Elric      (238.50,53.00,672.50) yaw 0.18 want 0.17 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 2.2 | getting up and dressed
+    [trace]   140 Elric      (238.50,53.00,672.50) yaw 0.12 want 0.11 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 2.4 | getting up and dressed
+    [trace]   150 Elric      (238.50,53.00,672.50) yaw 0.05 want 0.05 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 2.5 | getting up and dressed
+    [trace]   160 Elric      (238.50,53.00,672.50) yaw -0.02 want -0.03 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 2.7 | getting up and dressed
+    [trace]   170 Elric      (238.50,53.00,672.50) yaw -0.09 want -0.10 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 2.9 | getting up and dressed
+    [trace]   180 Elric      (238.50,53.00,672.50) yaw -0.15 want -0.16 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 3.0 | getting up and dressed
+    [trace]   190 Elric      (238.50,53.00,672.50) yaw -0.22 want -0.22 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 3.2 | getting up and dressed
+    [trace]   200 Elric      (238.50,53.00,672.50) yaw -0.25 want -0.27 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 3.4 | getting up and dressed
+    [trace]   210 Elric      (238.50,53.00,672.50) yaw -0.28 want -0.31 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 3.5 | getting up and dressed
+    [trace]   220 Elric      (238.50,53.00,672.50) yaw -0.31 want -0.34 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 3.7 | getting up and dressed
+    [trace]   230 Elric      (238.50,53.00,672.50) yaw -0.34 want -0.35 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 3.9 | getting up and dressed
+    [trace]   240 Elric      (238.50,53.00,672.50) yaw -0.34 want -0.35 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 4.0 | getting up and dressed
+    [trace]   250 Elric      (238.50,53.00,672.50) yaw -0.34 want -0.33 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 4.2 | getting up and dressed
+    [trace]   260 Elric      (238.50,53.00,672.50) yaw -0.31 want -0.31 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 4.4 | getting up and dressed
+    [trace]   270 Elric      (238.50,53.00,672.50) yaw -0.28 want -0.27 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 4.5 | getting up and dressed
+    [trace]   280 Elric      (238.50,53.00,672.50) yaw -0.22 want -0.22 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 4.7 | getting up and dressed
+    [trace]   290 Elric      (238.50,53.00,672.50) yaw -0.18 want -0.16 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 4.9 | getting up and dressed
+    [trace]   300 Elric      (238.50,53.00,672.50) yaw -0.12 want -0.09 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 5.0 | getting up and dressed
+    [trace]   310 Elric      (238.50,53.00,672.50) yaw -0.05 want -0.02 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 5.2 | getting up and dressed
+    [trace]   320 Elric      (238.50,53.00,672.50) yaw 0.02 want 0.05 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 5.4 | getting up and dressed
+    [trace]   330 Elric      (238.50,53.00,672.50) yaw 0.09 want 0.12 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 5.5 | getting up and dressed
+    [trace]   340 Elric      (238.50,53.00,672.50) yaw 0.15 want 0.18 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 5.7 | getting up and dressed
+    [trace]   350 Elric      (238.50,53.00,672.50) yaw 0.22 want 0.24 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 5.9 | getting up and dressed
+    [trace]   360 Elric      (238.50,53.00,672.50) yaw 0.28 want 0.28 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 6.0 | getting up and dressed
+    [trace]   370 Elric      (238.50,53.00,672.50) yaw 0.31 want 0.32 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 6.2 | getting up and dressed
+    [trace]   380 Elric      (238.50,53.00,672.50) yaw 0.31 want 0.34 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 229.1,53.0,682.2 legs - st 0 nu 0 ss 0.0 na 0.0 t 6.4 | getting up and dressed
+    [trace]   390 Elric      (238.50,53.00,672.50) yaw 0.34 want 0.35 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 6.5 | getting up and dressed
+    [trace]   400 Elric      (238.50,53.00,672.50) yaw 0.34 want 0.35 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 6.7 | getting up and dressed
+    [trace]   410 Elric      (238.50,53.00,672.50) yaw 0.34 want 0.33 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 6.9 | getting up and dressed
+    [trace]   420 Elric      (238.50,53.00,672.50) yaw 0.31 want 0.30 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 7.0 | getting up and dressed
+    [trace]   430 Elric      (238.50,53.00,672.50) yaw 0.28 want 0.25 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 7.2 | getting up and dressed
+    [trace]   440 Elric      (238.50,53.00,672.50) yaw 0.22 want 0.20 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 7.4 | getting up and dressed
+    [trace]   450 Elric      (238.50,53.00,672.50) yaw 0.15 want 0.14 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 7.5 | getting up and dressed
+    [trace]   460 Elric      (238.50,53.00,672.50) yaw 0.08 want 0.07 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 7.7 | getting up and dressed
+    [trace]   470 Elric      (238.50,53.00,672.50) yaw 0.02 want 0.00 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 7.9 | getting up and dressed
+    [trace]   480 Elric      (238.50,53.00,672.50) yaw -0.05 want -0.07 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 8.0 | getting up and dressed
+    [trace]   490 Elric      (238.50,53.00,672.50) yaw -0.12 want -0.13 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 8.2 | getting up and dressed
+    [trace]   500 Elric      (238.50,53.00,672.50) yaw -0.18 want -0.20 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 8.4 | getting up and dressed
+    [trace]   510 Elric      (238.50,53.00,672.50) yaw -0.25 want -0.25 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 8.5 | getting up and dressed
+    [trace]   520 Elric      (238.50,53.00,672.50) yaw -0.28 want -0.29 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 8.7 | getting up and dressed
+    [trace]   530 Elric      (238.50,53.00,672.50) yaw -0.31 want -0.33 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 8.9 | getting up and dressed
+    [trace]   540 Elric      (238.50,53.00,672.50) yaw -0.34 want -0.34 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 9.0 | getting up and dressed
+    [trace]   550 Elric      (238.50,53.00,672.50) yaw -0.34 want -0.35 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 9.2 | getting up and dressed
+    [trace]   560 Elric      (238.50,53.00,672.50) yaw -0.34 want -0.34 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 9.4 | getting up and dressed
+    [trace]   570 Elric      (238.50,53.00,672.50) yaw -0.34 want -0.32 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 9.5 | getting up and dressed
+    [trace]   580 Elric      (238.50,53.00,672.50) yaw -0.31 want -0.28 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 9.7 | getting up and dressed
+    [trace]   590 Elric      (238.50,53.00,672.50) yaw -0.25 want -0.24 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 9.9 | getting up and dressed
+    [trace]   600 Elric      (238.50,53.00,672.50) yaw -0.18 want -0.18 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 10.0 | getting up and dressed
+    [trace]   610 Elric      (238.50,53.00,672.50) yaw -0.12 want -0.12 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 10.2 | getting up and dressed
+    [trace]   620 Elric      (238.50,53.00,672.50) yaw -0.05 want -0.05 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 10.4 | getting up and dressed
+    [trace]   630 Elric      (238.50,53.00,672.50) yaw 0.02 want 0.02 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 10.5 | getting up and dressed
+    [trace]   640 Elric      (238.50,53.00,672.50) yaw 0.09 want 0.09 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 10.7 | getting up and dressed
+    [trace]   650 Elric      (238.50,53.00,672.50) yaw 0.15 want 0.15 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 10.9 | getting up and dressed
+    [trace]   660 Elric      (238.50,53.00,672.50) yaw 0.18 want 0.21 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 11.0 | getting up and dressed
+    [trace]   670 Elric      (238.50,53.00,672.50) yaw 0.25 want 0.26 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 11.2 | getting up and dressed
+    [trace]   680 Elric      (238.50,53.00,672.50) yaw 0.28 want 0.30 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 11.4 | getting up and dressed
+    [trace]   690 Elric      (238.50,53.00,672.50) yaw 0.31 want 0.33 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 11.5 | getting up and dressed
+    [trace]   700 Elric      (238.50,53.00,672.50) yaw 0.34 want 0.35 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 11.7 | getting up and dressed
+    [trace]   710 Elric      (238.50,53.00,672.50) yaw 0.34 want 0.35 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 11.9 | getting up and dressed
+    [trace]   720 Elric      (238.50,53.00,672.50) yaw 0.34 want 0.34 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 12.0 | getting up and dressed
+    [trace]   730 Elric      (238.50,53.00,672.50) yaw 0.31 want 0.31 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 12.2 | getting up and dressed
+    [trace]   740 Elric      (238.50,53.00,672.50) yaw 0.28 want 0.27 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 12.4 | getting up and dressed
+    [trace]   750 Elric      (238.50,53.00,672.50) yaw 0.25 want 0.22 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 12.5 | getting up and dressed
+    [trace]   760 Elric      (238.50,53.00,672.50) yaw 0.18 want 0.16 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 12.7 | getting up and dressed
+    [trace]   770 Elric      (238.50,53.00,672.50) yaw 0.12 want 0.10 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 12.9 | getting up and dressed
+    [trace]   780 Elric      (238.50,53.00,672.50) yaw 0.05 want 0.03 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 13.0 | getting up and dressed
+    [trace]   790 Elric      (238.50,53.00,672.50) yaw -0.02 want -0.04 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 13.2 | getting up and dressed
+    [trace]   800 Elric      (238.50,53.00,672.50) yaw -0.09 want -0.11 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 13.4 | getting up and dressed
+    [trace]   810 Elric      (238.50,53.00,672.50) yaw -0.15 want -0.17 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 13.5 | getting up and dressed
+    [trace]   820 Elric      (238.50,53.00,672.50) yaw -0.22 want -0.23 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 0.0 na 0.0 t 13.7 | getting up and dressed
+    [trace]   830 Elric      (238.50,53.00,672.50) yaw -0.25 want -0.27 v 0.00,0.00 goal SOCIALIZE(lonely (64%), Tovin nearby) act hold/face working null gp true 240.5,53.0,672.5 legs 0/1 st 0 nu 0 ss 13.9 na 0.0 t 13.9 | postponed a conversation; no safe route to the partner
+    [trace]   840 Elric      (238.50,53.00,672.50) yaw -0.29 want -0.31 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 13.9 na 0.0 t 14.0 | getting up and dressed
+    [trace]   850 Elric      (238.50,53.00,672.50) yaw -0.32 want -0.34 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 13.9 na 0.0 t 14.2 | getting up and dressed
+    [trace]   860 Elric      (238.50,53.00,672.50) yaw -0.35 want -0.35 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 13.9 na 0.0 t 14.4 | getting up and dressed
+    [trace]   870 Elric      (238.50,53.00,672.50) yaw -0.35 want -0.35 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 13.9 na 0.0 t 14.5 | getting up and dressed
+    [trace]   880 Elric      (238.50,53.00,672.50) yaw -0.35 want -0.33 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 13.9 na 0.0 t 14.7 | getting up and dressed
+    [trace]   890 Elric      (238.50,53.00,672.50) yaw -0.32 want -0.30 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 230.0,53.0,682.0 legs - st 0 nu 0 ss 13.9 na 0.0 t 14.9 | getting up and dressed
+    [life] stop 232,676 done (22 people seen so far)
+
+    [life] 1 stops of 900 frames; 22 people seen
+      Haskel           MINER        seen   130 spins   0 blocked    11 still     0
+          last (204.5,59.0,591.5) SLEEP: paused to reconsider a blocked route
+      never in play: Ealdra MERCHANT home (309,974)
+      never in play: Torren LAWMAN home (287,1035)
+      never in play: Aldric GUARD home (278,1028)
+      never in play: Oswin WORKER home (352,949)
+      never in play: Tam CRAFTSMAN home (333,884)
+      never in play: Brannoc THIEF home (628,948)
+      never in play: Mara MERCHANT home (162,819)
+      never in play: Lucan LAWMAN home (143,749)
+      never in play: Ferrick CARTER home (240,1021)
+      never in play: Garvin QUEST_GIVER home (259,945)
+      never in play: Kettil CONTACT home (647,924)
+      never in play: Wynn FARMER home (252,1018)
+      never in play: Father Wulfric UNDERTAKER home (227,928)
+      never in play: Skarn FENCE home (628,1074)
+      never in play: Bram GUARD home (285,1026)
+      never in play: Bilal BEGGAR home (956,908)
+      never in play: Ysolde PRIEST home (231,1011)
+      never in play: Father Gregory PRIEST home (260,942)
+      never in play: Rafe HUNTER home (403,849)
+      never in play: Bryn FISHERMAN home (619,641)
+      never in play: Brokk MINER home (247,482)
+      never in play: Fred CRAFTSMAN home (289,965)
+      never in play: Sir Andrew KNIGHT home (269,944)
+      never in play: Hakon HUNTER home (144,624)
+      never in play: Hadwin CIVIC home (312,1004)
+      never in play: Danek CRAFTSMAN home (183,825)
+      never in play: Dawud MINER home (995,926)
+      never in play: Sir Hedric KNIGHT home (407,796)
+      never in play: Gudrik FISHERMAN home (650,1068)
+      never in play: Vesna FISHERMAN home (152,821)
+      never in play: King Leonidas CIVIC home (617,134)
+      never in play: Baron Photios LAWMAN home (644,155)
+      never in play: Leontios GUARD home (643,160)
+      never in play: Anwar GUARD home (926,928)
+      never in play: Brand GUARD home (430,429)
+      never in play: Baroness Guinevere CIVIC home (865,415)
+      never in play: Zoe MERCHANT home (528,165)
+      never in play: Father Paul PRIEST home (925,101)
+      never in play: Father Eirik PRIEST home (399,436)
+      never in play: Aristides SCHOLAR home (659,199)
+      never in play: Polyxena MINER home (925,177)
+      never in play: Tolis BEGGAR home (534,109)
+      never in play: Yrsa CIVIC home (432,466)
+      never in play: King Fahad CIVIC home (954,943)
+      never in play: Cerys CRAFTSMAN home (862,468)
+      never in play: Wat FISHERMAN home (230,1010)
+      never in play: Tauron HUNTER home (908,557)
+      never in play: Bera CIVIC home (435,489)
+      never in play: Duke Torkell CIVIC home (434,426)
+      never in play: King Arthur CIVIC home (865,419)
+      never in play: Sir Lancelot KNIGHT home (857,420)
+      never in play: Sir Gawain KNIGHT home (890,392)
+      never in play: Viggo HUNTER home (471,456)
+      never in play: Torvik MINER home (242,487)
+      never in play: Merlin SCHOLAR home (827,423)
+      never in play: Dunstan CRAFTSMAN home (352,952)
+      never in play: Olek CRAFTSMAN home (146,791)
+      never in play: Sten CRAFTSMAN home (404,474)
+      never in play: Alexios CRAFTSMAN home (510,82)
+      never in play: Cenric WORKER home (351,944)
+      never in play: Radek WORKER home (136,817)
+      never in play: Merek MINER home (140,612)
+      never in play: Meriwyn MERCHANT home (647,919)
+      never in play: Damaris MERCHANT home (528,167)
+      never in play: Cuthmar FARMER home (297,946)
+      never in play: Baron Osric CIVIC home (292,902)
+      never in play: Kyra FARMER home (262,338)
+      never in play: Marinos FARMER home (264,331)
+      never in play: Berthild CIVIC home (320,992)
+      never in play: Maddoc MERCHANT home (324,994)
+      never in play: Karlon CRAFTSMAN home (327,993)
+      never in play: Melitta CIVIC home (585,239)
+      never in play: Basil MERCHANT home (593,239)
+      never in play: Lazaros CRAFTSMAN home (580,239)
+      never in play: Aldred CIVIC home (361,964)
+      never in play: Layla CRAFTSMAN home (942,880)
+      never in play: Zainab CRAFTSMAN home (943,876)
+      never in play: Baron Jalal CIVIC home (893,924)
+      never in play: Ziad CRAFTSMAN home (940,877)
+      never in play: Murad CRAFTSMAN home (940,881)
+      never in play: Ilva FARMER home (203,806)
+      never in play: Ioanna CIVIC home (517,260)
+      never in play: Petros FISHERMAN home (513,84)
+      never in play: Sabine SCHOLAR home (260,1041)
+      never in play: Yannis FISHERMAN home (510,84)
+      never in play: Count Dracula CIVIC home (140,750)
+      never in play: Sella CIVIC home (188,825)
+      never in play: Leofric CRAFTSMAN home (346,944)
+      never in play: Siv FARMER home (391,451)
+      never in play: Hurk BANDIT home (878,741)
+      never in play: Sigrun BANDIT home (875,742)
+      never in play: Garmund BRUTE home (876,740)
+      never in play: King Richard CIVIC home (274,1025)
+      never in play: Duke Donald CIVIC home (275,1031)
+      never in play: Count William CIVIC home (346,932)
+      never in play: Alaric PRIEST home (263,944)
+      never in play: Maeve CRAFTSMAN home (282,1029)
+      never in play: Hob GUARD home (407,790)
+      never in play: Eadmund CRAFTSMAN home (346,950)
+      never in play: Beric HUNTER home (404,844)
+      never in play: Duke Bashir CIVIC home (951,947)
+      never in play: Count Awhad CIVIC home (905,913)
+      never in play: Sir Faris-ul-Azhar KNIGHT home (954,931)
+      never in play: Hassan SCHOLAR home (954,936)
+      never in play: Idris SCHOLAR home (954,928)
+      never in play: Father Rafiq PRIEST home (962,907)
+      never in play: Yusuf PRIEST home (959,908)
+      never in play: Tariq CIVIC home (892,968)
+      never in play: Zafir CRAFTSMAN home (852,958)
+      never in play: Osama CRAFTSMAN home (985,899)
+      never in play: Marwan CRAFTSMAN home (1004,871)
+      never in play: Karim CRAFTSMAN home (878,885)
+      never in play: Mohamed MERCHANT home (864,911)
+      never in play: Rashid MERCHANT home (909,913)
+      never in play: Munir CARTER home (876,883)
+      never in play: Hakim CARTER home (951,925)
+      never in play: Hamid CRAFTSMAN home (985,946)
+      never in play: Nabil CRAFTSMAN home (989,944)
+      never in play: Salim CRAFTSMAN home (994,928)
+      never in play: Kamal CRAFTSMAN home (996,928)
+      never in play: Qasim WORKER home (987,928)
+      never in play: Fadi MINER home (921,834)
+      never in play: Jamila FARMER home (817,1033)
+      never in play: Samira FARMER home (814,1033)
+      never in play: Zaid GUARD home (939,949)
+      never in play: Sabir GUARD home (947,949)
+      never in play: Baron Nuri CIVIC home (945,923)
+      never in play: Duke Artemios CIVIC home (601,134)
+      never in play: Count Constantine CIVIC home (545,101)
+      never in play: Sir Nicholas KNIGHT home (640,155)
+      never in play: Sir Kosmas KNIGHT home (638,155)
+      never in play: Baroness Eudokia CIVIC home (653,198)
+      never in play: Father Khalid PRIEST home (532,160)
+      never in play: Ione PRIEST home (498,82)
+      never in play: Stavros CIVIC home (479,263)
+      never in play: Demetrios CRAFTSMAN home (495,244)
+      never in play: Irene SCHOLAR home (589,134)
+      never in play: Theodora CRAFTSMAN home (496,221)
+      never in play: Xenia CRAFTSMAN home (638,164)
+      never in play: Eleni CRAFTSMAN home (497,221)
+      never in play: Theron MERCHANT home (530,161)
+      never in play: Pavlos FENCE home (528,160)
+      never in play: Melina FISHERMAN home (516,84)
+      never in play: Spiros WORKER home (510,84)
+      never in play: Timon WORKER home (512,87)
+      never in play: Damon WORKER home (516,82)
+      never in play: Alkis CARTER home (529,166)
+      never in play: Andreas CRAFTSMAN home (472,200)
+      never in play: Nikos CRAFTSMAN home (470,200)
+      never in play: Kallias CRAFTSMAN home (472,205)
+      never in play: Isidoros CRAFTSMAN home (476,205)
+      never in play: Orestes WORKER home (228,179)
+      never in play: Myron GUARD home (638,162)
+      never in play: Perikles GUARD home (641,167)
+      never in play: Zenon GUARD home (639,167)
+      never in play: Argyros GUARD home (638,159)
+      never in play: Gorgias GUARD home (643,163)
+      never in play: Kleon GUARD home (643,158)
+      never in play: Kyros THIEF home (470,201)
+      never in play: Mimis BEGGAR home (531,109)
+      never in play: Argus THIEF home (474,200)
+      never in play: Phaedra CARTER home (642,155)
+      never in play: Leandros BEGGAR home (518,82)
+      never in play: Sabeen BEGGAR home (518,84)
+      never in play: Soren SCHOLAR home (400,440)
+      never in play: Halvar CRAFTSMAN home (448,449)
+      never in play: Runa CARTER home (454,447)
+      never in play: Ulven CRAFTSMAN home (433,486)
+      never in play: Nessa MERCHANT home (439,480)
+      never in play: Einar WORKER home (404,484)
+      never in play: Varek SCHOLAR home (137,754)
+      never in play: Father Odran PRIEST home (198,772)
+      never in play: Mother Mirel PRIEST home (156,787)
+      never in play: Borin FARMER home (202,836)
+      never in play: Sir Bedivere KNIGHT home (910,435)
+      never in play: Father Cadren PRIEST home (831,422)
+      never in play: Elian PRIEST home (889,395)
+      never in play: Baron Aldren CIVIC home (845,432)
+      never in play: Wystan CRAFTSMAN home (863,464)
+      never in play: Perrin CRAFTSMAN home (862,465)
+      never in play: Rowena MERCHANT home (877,471)
+      never in play: Huw FARMER home (918,433)
+      never in play: Edric GUARD home (918,436)
+      never in play: Vark BANDIT home (879,740)
+      never in play: Dolgrin MINER home (249,482)
+      never in play: Pell WORKER home (913,626)
+      never in play: Ysmay WORKER home (1032,439)
+      never in play: Hask HUNTER home (768,529)
+      never in play: Orrin CRAFTSMAN home (417,702)
+      never in play: Corvane HUNTER home (633,937)
+      never in play: Bogdan GUARD home (148,837)
+      never in play: Gunnar GUARD home (447,482)
+      never in play: Astrid UNDERTAKER home (409,423)
+      never in play: Nadim GUARD home (971,1019)
+      never in play: Samir UNDERTAKER home (878,843)
+      never in play: Emrys GUARD home (892,435)
+      never in play: Rhiannon CIVIC home (868,437)
+      never in play: Rask BANDIT home (874,741)
+      never in play: Wenna BANDIT home (880,741)
+      never in play: Hullen BANDIT home (872,740)
+      never in play: Grisel BANDIT home (882,741)
+      never in play: Tamsin MINER home (147,611)
+      never in play: Osk MINER home (248,487)
+      never in play: Mabry WORKER home (226,179)
+      never in play: Edvin WORKER home (220,179)
+      never in play: Corra WORKER home (916,625)
+      never in play: Grimbold UNDERTAKER home (233,967)
+      never in play: Odo UNDERTAKER home (148,808)
+      never in play: Kyrillos UNDERTAKER home (478,187)
+      never in play: Elidor UNDERTAKER home (853,442)
+      never in play: Gwenna UNDERTAKER home (839,461)
+      never in play: Nasira SCHOLAR home (916,845)
+      never in play: Merrin SCHOLAR home (892,466)
+      never in play: Hrodna CIVIC home (479,475)
+    [life] 1 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 51.268 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 55s
+9 actionable tasks: 1 executed, 8 up-to-date

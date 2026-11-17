@@ -46,9 +46,17 @@ public final class Foliage {
         Patch(long id,Kind kind,int seed,int chunk,float x,float y,float z,float facing) {
             super(id,"foliage",kind.name().replace('_',' ').toLowerCase(java.util.Locale.ROOT),x,y,z);this.kind=kind;this.seed=seed;this.chunk=chunk;this.facing=facing;
         }
-        @Override public List<Option> options(Rpg g,Actor actor){return List.of();}
+        /** (0.4.8, gamefixes: a torch did not light foliage on fire) a burning torch held to a plant sets it alight. */
+        @Override public List<Option> options(Rpg g,Actor actor){
+            if(actor==null || !actor.torchInHand() || kind==Kind.MOSS || kind==Kind.MUSHROOM)return List.of();
+            return List.of(Option.when(actor.torchLit,"burn","Set alight",6,"Your torch is not lit.",2.2f));
+        }
         @Override public Result perform(Rpg g,Actor actor,String action,long request) {
-            return Result.no("You cannot do that.");
+            if(!"burn".equals(action))return Result.no("You cannot do that.");
+            if(actor==null || !actor.torchInHand() || !actor.torchLit)return Result.no("Your torch is not lit.");
+            if(removed)return Result.no("There is nothing left to burn.");
+            g.foliage.kindle(actor,this,true);
+            return Result.ok();
         }
     }
     /** Where a body pushed through the plants a moment ago: the renderer bends them there, less as they recover. */
@@ -81,6 +89,9 @@ public final class Foliage {
             if(Blocks.isTreeLog(g.vox.block(x+dx,y,z+dz)) || g.vox.block(x+dx,y,z+dz)==Blocks.STUMP)return false;
         int soil=g.vox.block(x,y-1,z);boolean earth=soil==Blocks.GRASS || soil==Blocks.DIRT || soil==Blocks.BARE_PATCH || soil==Blocks.HEATH || soil==Blocks.PODZOL || soil==Blocks.DRY_GRASS;
         float sky=g.vox.skyLight(x,y+1,z);
+        // (0.4.7, gamefixes: foliage grew in interiors - ivy and moss up a church's inner walls) nothing grows under a
+        // built roof on a laid floor, nor in the dark under any roof; a tree's canopy is no roof
+        if((sky<0.5f || !earth) && roofed(x,y,z))return false;   // the roof looked for only where it could matter
         if(kind==Kind.IVY || kind==Kind.MOSS) {
             return backing(kind,x,y,z)!=null && (kind==Kind.IVY || sky<0.7f);
         }
@@ -94,6 +105,13 @@ public final class Foliage {
             case BRAMBLE,SAPLING,SHRUB,BUSH->sky>0.3f && g.vox.block(x,y+2,z)==Blocks.AIR;
             default->sky>0.35f;
         };
+    }
+    /** (0.4.7) How far up a built roof is looked for over a plant's cell. */
+    private static final int ROOF_REACH=rpg.Tuning.i("foliage.roofReach",24);
+    /** (0.4.7) Whether something built (not leaves, logs or growth) closes the sky over the cell, within ROOF_REACH. */
+    private boolean roofed(int x,int y,int z) {
+        for(int yy=y+1;yy<=y+ROOF_REACH;yy++){int b=g.vox.block(x,yy,z);if(b==Blocks.AIR || b==Blocks.WATER || Blocks.isLeaves(b) || Blocks.isTreeLog(b) || Blocks.plant(b))continue;return true;}
+        return false;
     }
     /** A wall ivy and moss can climb: stone, brick or wood of any kind. */
     private static boolean climbable(int block){var m=Blocks.material(block);return block!=Blocks.GLASS && (m==Blocks.Material.STONE || m==Blocks.Material.WOOD) && Blocks.traversable(block);}
@@ -356,6 +374,23 @@ public final class Foliage {
         if(flaredAt.size()>512)flaredAt.entrySet().removeIf(e->g.time>e.getValue()+5);
         if((sensor.state()&CHEM_BURNT)==0)return;
         var object=g.objects.get(sensor.id());if(object instanceof Patch patch && !patch.removed)remove(patch,"burned");
+    }
+    /**
+     * (0.4.8) Flame put to a plant (a torch held to it, swung through it or brushed against it): a tongue of fire at the
+     * plant's own height, strong enough to catch dry growth at once (wet growth and rain hold it back, as the chemistry has it).
+     */
+    public void kindle(Actor by,Patch plant,boolean held) {
+        if(plant==null || plant.removed || g.chemistry==null)return;
+        float h=Math.max(0.2f,plant.kind.height*0.6f);
+        g.chemistry.emit(by,CHEM_FIRE,plant.x,plant.y+h,plant.z,Math.max(0.5f,plant.kind.radius+0.25f),held?4f:3f,held?0.8f:0.45f);
+        if(held)g.state.commit("FoliageKindled",by==null?0:by.id,plant.id,plant.jurisdiction(),0,plant.kind.name());
+    }
+    /** The live plant whose growth reaches a point (x, y, z): its spread about it and its height over its root. */
+    public Patch reaching(float x,float y,float z,float reach) {
+        Patch p=plantAt(x,z,reach+0.6f);
+        if(p==null)return null;
+        float d=(float)Math.hypot(p.x-x,p.z-z);
+        return d<=p.kind.radius+reach && y>=p.y-0.2f && y<=p.y+p.kind.height+0.15f?p:null;
     }
     public void remove(Patch plant,String why) {
         if(plant.removed)return;plant.removed=true;depleted.put(plant.id,g.state.minutes+60);chunks.get(plant.chunk).version++;

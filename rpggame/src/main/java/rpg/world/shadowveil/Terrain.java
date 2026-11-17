@@ -55,6 +55,11 @@ public final class Terrain {
      * removed one is checked against the cells when they are read).
      */
     public final List<int[]> lampCells = new ArrayList<>(), stainedCells = new ArrayList<>();
+    /** (0.4.7) The volcanoes' lava lakes: {x, z, radius} (cells), and where each one's melt lies {x, floorY, z} once laid. */
+    public final List<double[]> craters = new ArrayList<>();
+    public final List<int[]> lavaCells = new ArrayList<>();
+    /** (0.4.7) The dungeons' levels under the map, as planned and carved (rpg.dungeon.Underground). */
+    public List<rpg.world.DungeonLayout> dungeonLevels = List.of();
     /**
      * (0.4.3, gamefixes: invisible blocks in a ring round the farm) the heights fences stand at in each chunk (key
      * cx + cz * 1024: {lowest, highest}) - a fence is drawn as a model, so the renderer must know where to look for them
@@ -131,10 +136,30 @@ public final class Terrain {
             t.outcrops(); at = t.stage("outcrops", at);
             // (0.4.3) the ways walked clear of litter, last of all
             if (t.arch != null) { t.arch.clearWays(); t.arch.doorSteps(); at = t.stage("ways", at); }
+            // (0.4.7, gamefixes: Ashmaw more impressive) the crater's floor a lake of lava
+            t.lava(); at = t.stage("lava", at);
+            // (0.4.7, gamefixes: the dungeon system on ShadowVeil) the dungeons' levels cut under the map, and their stairs
+            if (t.arch != null) { rpg.dungeon.DungeonSites.bind(t.arch); t.dungeonLevels = rpg.dungeon.Underground.plan(t); rpg.dungeon.Underground.carve(t, t.dungeonLevels); at = t.stage("dungeons", at); }
+            // (0.4.8) every other stair down's cellars cut and fitted beyond its door
+            if (t.arch != null) { Cellars.cutAll(t); at = t.stage("cellars", at); }
+            // (0.4.7, gamefixes: floating blocks - a street lamp left in the air when the souq's stalls took its post)
+            t.floating(); at = t.stage("floating", at);
         } else { t.plantTrees(false); t.outcrops(); at = t.stage("trees", at); }
         return t;
     }
-    private long stage(String name, long since) { long now = System.nanoTime(); timings.put(name, (now - since) / 1_000_000); return now; }
+    private long stage(String name, long since) {
+        long now = System.nanoTime(); timings.put(name, (now - since) / 1_000_000);
+        // (0.4.8) RPG_CELL_WATCH="x,y,z;..." prints those cells after every stage: which stage made or unmade a block
+        if (WATCH != null && cells != null) for (int[] w : WATCH) if (in(w[0], w[2])) System.out.println("[cellwatch] " + name + " " + w[0] + "," + w[1] + "," + w[2] + " = " + (cells[idx(w[0], w[2]) * H + w[1]] & 0xFF));
+        return now;
+    }
+    private static final int[][] WATCH = watch(System.getenv("RPG_CELL_WATCH"));
+    private static int[][] watch(String v) {
+        if (v == null || v.isBlank()) return null;
+        String[] parts = v.split(";"); int[][] out = new int[parts.length][];
+        for (int i = 0; i < parts.length; i++) { String[] q = parts[i].trim().split("[, ]+"); out[i] = new int[]{Integer.parseInt(q[0]), Integer.parseInt(q[1]), Integer.parseInt(q[2])}; }
+        return out;
+    }
 
     // ------------------------------------------------------------------ helpers
     private static double smooth(double e0, double e1, double v) { double t = Math.max(0, Math.min(1, (v - e0) / (e1 - e0))); return t * t * (3 - 2 * t); }
@@ -293,6 +318,9 @@ public final class Terrain {
             double[] at = Atlas.pt(p.get("at"));
             double cx = atlas.x(at[0]), cz = atlas.z(at[1]), top = Atlas.d(p, "y", 80), R = Atlas.d(p, "radius", 40), pow = Atlas.d(p, "power", 1.4);
             double crater = Atlas.d(p, "crater", 0), craterDepth = Atlas.d(p, "craterDepth", 0), rough = Atlas.d(p, "rough", 0.2);
+            // (0.4.7, gamefixes: Ashmaw more impressive) gullies cut down the cone between ribs of rock, and its crater's lava
+            double gullies = Atlas.d(p, "gullies", 0), gullyDepth = Atlas.d(p, "gullyDepth", 0), lava = Atlas.d(p, "lava", 0);
+            if (!isles && lava > 0 && crater > 0) craters.add(new double[]{cx, cz, crater * lava});
             byte b = biomeId(Atlas.s(p, "biome", "crags"));
             for (int x = (int) Math.max(0, cx - R); x <= Math.min(S - 1, cx + R); x++) for (int z = (int) Math.max(0, cz - R); z <= Math.min(S - 1, cz + R); z++) {
                 double r = Math.hypot(x + 0.5 - cx, z + 0.5 - cz) * (1 + noise.at((x - OX) / 30.0, (z - OX) / 30.0) * rough);
@@ -303,6 +331,11 @@ public final class Terrain {
                 double shape = Math.pow(f, pow) + noise.ridge(x / 36.0, z / 36.0, 3) * rough * f * 0.6;
                 double ph = h[i] + (top - h[i]) * Math.min(1, shape);
                 if (crater > 0 && r < crater) ph -= craterDepth * (1 - (r / crater) * (r / crater));
+                if (gullies > 0 && r > crater + 2) {
+                    double ang = Math.atan2(z + 0.5 - cz, x + 0.5 - cx) + noise.at((x - OX) / 22.0, (z - OX) / 22.0) * 0.35;
+                    double rib = Math.pow(Math.abs(Math.sin(ang * gullies / 2)), 0.5);
+                    ph -= gullyDepth * (1 - rib) * Math.sin(Math.PI * Math.min(1, f));
+                }
                 if (ph > h[i]) {
                     h[i] = (float) ph;
                     // an isle stands out of its water
@@ -911,6 +944,12 @@ public final class Terrain {
             }
             if (up - water[i] < 1) continue;
             falls.add(new int[]{x, water[i], z, up - water[i], dx, dz});
+            // (0.4.7, gamefixes: waterfalls had no water flowing down them) a drop of two or more is poured: a curtain of
+            // water one cell thick down the face, from the pool to the lip; the renderer runs white water down its face
+            if (up - water[i] >= 2 && cells != null) for (int y = water[i] + 1; y <= up; y++) {
+                int at = i * H + y;
+                if (cells[at] == 0) cells[at] = (byte) Blocks.WATER;
+            }
         }
     }
 
@@ -982,7 +1021,9 @@ public final class Terrain {
                 Map<String, Object> d = Atlas.map(Atlas.map(biomeDefs, k), "boulders");
                 return d.isEmpty() ? new int[]{0, 0} : new int[]{block(Atlas.s(d, "block", "stone")), (int) (Atlas.d(d, "share", 0) * 1_000_000)};
             });
-            if (spec[1] <= 0 || Noise.hash(atlas.seed, x - OX, z - OX, 90) * 1_000_000 * 9 >= spec[1] * 9 * 9) continue;
+            // (0.4.8, gamefixes: cobblestone everywhere at 468, 54, 572) the share is each patch's chance of a cluster: the
+            // roll was against nine times it, so the stony moor (0.12) had a cluster on every patch of nine cells
+            if (spec[1] <= 0 || Noise.hash(atlas.seed, x - OX, z - OX, 90) * 1_000_000 >= spec[1]) continue;
             int n = 1 + (int) (Noise.hash(atlas.seed, x - OX, z - OX, 91) * 4);
             for (int k = 0; k < n; k++) {
                 int bx = x + (int) (Noise.hash(atlas.seed, x - OX, z - OX, 92 + k) * 3) - 1, bz = z + (int) (Noise.hash(atlas.seed, x - OX, z - OX, 96 + k) * 3) - 1;
@@ -991,9 +1032,10 @@ public final class Terrain {
                 // (0.4.5, gamefixes: stray blocks against the buildings made a town look terrible) the wild's stones keep
                 // their distance from every lot, yard, square, lane and road: they are the country's, never a street's
                 if (nearSettled(bx, bz, BOULDER_CLEAR)) continue;
-                int y = top[j] + (k == 0 && n > 2 ? 1 : 0);
-                set(bx, top[j] + 1, bz, spec[0], false);
-                if (y > top[j]) set(bx, top[j] + 2, bz, spec[0], false);
+                // most of a cluster lies bedded in the turf, flush with it; its heart stands proud, a second block on it
+                // only in a big cluster - stones in the grass, not dice strewn over it
+                if (k == 0) { set(bx, top[j] + 1, bz, spec[0], false); if (n > 2) set(bx, top[j] + 2, bz, spec[0], false); }
+                else set(bx, top[j], bz, spec[0], true);
             }
         }
     }
@@ -1007,6 +1049,122 @@ public final class Terrain {
         }
         return false;
     }
+    /**
+     * (0.4.7) Built cells left hanging in the air: over the built ground (lots, yards, squares, lanes, roads and a cell
+     * round them) every cell above the ground is flood-filled from what rests on the ground or joins anything outside;
+     * whatever the fill never reaches holds on to nothing and is taken away (a lamp whose post was cleared, a stray
+     * slab). The count is kept in the timings ("floatingRemoved").
+     */
+    /** (0.4.7) Each crater's floor laid with lava out to its lake's radius, the rim's foot left as rock. */
+    private void lava() {
+        for (double[] c : craters) {
+            int r = (int) Math.ceil(c[2]);
+            for (int x = (int) c[0] - r; x <= (int) c[0] + r; x++) for (int z = (int) c[1] - r; z <= (int) c[1] + r; z++) {
+                if (!in(x, z) || Math.hypot(x + 0.5 - c[0], z + 0.5 - c[1]) > c[2] * (0.9 + 0.1 * noise.at(x / 7.0, z / 7.0))) continue;
+                int i = idx(x, z), y = top[i];
+                if (y <= 0 || y >= H) continue;
+                cells[i * H + y] = (byte) Blocks.LAVA;
+                if (y - 1 > 0) cells[i * H + y - 1] = (byte) Blocks.LAVA;
+                lavaCells.add(new int[]{x, y, z});
+            }
+        }
+    }
+
+    private static final boolean FLOAT_DEBUG = System.getenv("RPG_FLOAT_DEBUG") != null;
+    /** (0.4.7) Whether a cell has anything solid beside it (a wall it is part of), not counting leaves or water. */
+    private boolean heldBeside(int x, int y, int z) {
+        for (int[] d : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+            int nx = x + d[0], nz = z + d[1];
+            if (!in(nx, nz)) continue;
+            int nb = cells[idx(nx, nz) * H + y] & 0xFF;
+            if (nb != 0 && nb != Blocks.WATER && !Blocks.isLeaves(nb)) return true;
+        }
+        return false;
+    }
+
+    private void floating() {
+        final int reach = 64, near = BUILT | YARD | SQUARE | LANE | ROAD;
+        boolean[] region = new boolean[S * S];
+        for (int x = 0; x < S; x++) for (int z = 0; z < S; z++) {
+            if ((flags[idx(x, z)] & near) == 0) continue;
+            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) if (in(x + dx, z + dz)) region[idx(x + dx, z + dz)] = true;
+        }
+        // a post (a log) standing a cell or two clear of ground lowered under it is carried down to the ground first
+        int sunk = 0;
+        for (int x = 0; x < S; x++) for (int z = 0; z < S; z++) {
+            int i = idx(x, z);
+            if (!region[i]) continue;
+            for (int y = top[i] + 2; y <= top[i] + 3 && y < H; y++) {
+                int b = cells[i * H + y];
+                if (!Blocks.isTreeLog(b)) continue;
+                // only a lone post: a log with built work beside it is a lintel over a doorway or a beam, held by its wall
+                if (heldBeside(x, y, z)) break;
+                boolean gap = true;
+                for (int yy = top[i] + 1; yy < y; yy++) if (cells[i * H + yy] != 0) gap = false;
+                if (!gap) break;
+                for (int yy = top[i] + 1; yy < y; yy++) { cells[i * H + yy] = (byte) b; sunk++; }
+                break;
+            }
+        }
+        timings.put("postsSunk", (long) sunk);
+        java.util.BitSet seen = new java.util.BitSet();
+        int[] stack = new int[1 << 16]; int sp = 0;
+        java.util.function.IntPredicate full = c -> cells[c] != 0 && cells[c] != Blocks.WATER;
+        // the seeds: cells resting on the ground, and cells beside anything solid outside the region
+        for (int x = 0; x < S; x++) for (int z = 0; z < S; z++) {
+            int i = idx(x, z);
+            if (!region[i]) continue;
+            int y0 = Math.max(1, top[i] + 1), y1 = Math.min(H - 1, top[i] + reach);
+            for (int y = y0; y <= y1; y++) {
+                int c = i * H + y;
+                if (!full.test(c) || seen.get(c)) continue;
+                boolean anchored = y == y0 || full.test(c - 1) && y - 1 <= top[i];
+                for (int[] d : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+                    int ax = x + d[0], az = z + d[1];
+                    if (anchored || !in(ax, az)) continue;
+                    int j = idx(ax, az);
+                    if ((!region[j] || y <= top[j]) && full.test(j * H + y)) anchored = true;
+                }
+                if (!anchored) continue;
+                seen.set(c);
+                if (sp == stack.length) stack = java.util.Arrays.copyOf(stack, sp * 2);
+                stack[sp++] = c;
+                while (sp > 0) {
+                    int q = stack[--sp];
+                    int qi = q / H, qy = q % H, qx = qi / S, qz = qi % S;
+                    // every cell touching, edges and corners too (a stepped roof's courses meet only at their edges)
+                    for (int k = 0; k < 27; k++) {
+                        if (k == 13) continue;
+                        int nx = qx + k / 9 - 1, ny = qy + (k / 3) % 3 - 1, nz = qz + k % 3 - 1;
+                        if (!in(nx, nz) || ny <= 0 || ny >= H) continue;
+                        int ni = idx(nx, nz);
+                        if (!region[ni] || ny <= top[ni] || ny > top[ni] + reach) continue;
+                        int nc = ni * H + ny;
+                        if (seen.get(nc) || !full.test(nc)) continue;
+                        seen.set(nc);
+                        if (sp == stack.length) stack = java.util.Arrays.copyOf(stack, sp * 2);
+                        stack[sp++] = nc;
+                    }
+                }
+            }
+        }
+        int removed = 0;
+        for (int x = 0; x < S; x++) for (int z = 0; z < S; z++) {
+            int i = idx(x, z);
+            if (!region[i]) continue;
+            for (int y = Math.max(1, top[i] + 1), y1 = Math.min(H - 1, top[i] + reach); y <= y1; y++) {
+                int c = i * H + y;
+                if (!full.test(c) || seen.get(c)) continue;
+                if (FLOAT_DEBUG && removed < 200) System.out.println("[floating] " + x + "," + y + "," + z + " block " + cells[c] + " (top " + top[i] + ", " + (arch == null || arch.at(x, z) == null ? "-" : arch.at(x, z).id) + ")");
+                cells[c] = 0; removed++;
+                final int fx = x, fy = y, fz = z;
+                lampCells.removeIf(l -> l[0] == fx && l[1] == fy && l[2] == fz);
+                stainedCells.removeIf(l -> l[0] == fx && l[1] == fy && l[2] == fz);
+            }
+        }
+        timings.put("floatingRemoved", (long) removed);
+    }
+
     private void set(int x, int y, int z, int b, boolean overwrite) {
         if (x < 0 || z < 0 || x >= S || z >= S || y < 0 || y >= H) return;
         int at = (x * S + z) * H + y;

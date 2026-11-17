@@ -59,7 +59,7 @@ public final class Dialogue {
             }
             case QUEST_GIVER -> { if(n.working()) questGiver(n, d); }
             case CONTACT -> {
-                if (g.quests.courier == Quests.State.ACTIVE && g.player.has(Items.SEALED_LETTER, 1)) d.choice("I have a letter for you from Jun.", g.quests::deliver);
+                if (g.quests.courier == Quests.State.ACTIVE && g.player.has(Items.SEALED_LETTER, 1)) d.choice("I have a letter for you from " + g.nameOf(Ids.QUEST_GIVER) + ".", g.quests::deliver);
             }
             case FENCE -> {
                 if (!n.working()) break;
@@ -80,7 +80,7 @@ public final class Dialogue {
             }
             case HEALER -> tip = tip(n, "Where can I find supplies?", "A good meal mends more than you'd think - bread, a cooked fish, anything hot. I carry what I can for the hurt, but it never stretches far. If you come across herbs or berries, the store will pay for them, and I'd thank you for any you spare.");
             case PRIEST -> tip = tip(n, "Who tends the dead?", "The watch carries the fallen to these stones. The undertaker keeps the belongings safe. Even a criminal deserves a name and a resting place.");
-            case SCHOLAR -> tip = tip(n, "Where can I sell questionable goods?", "Silas keeps a quiet nook behind Store B, in DevTown. He buys stolen goods, at a price. I would keep that conversation away from the watch.");
+            case SCHOLAR -> tip = tip(n, "Where can I sell questionable goods?", g.nameOf(Ids.FENCE) + " keeps a quiet nook near " + g.econ.shopB.name + ", in " + g.econ.fence.jurisdiction + ". They buy stolen goods, at a price. I would keep that conversation away from the watch.");
             case HUNTER -> tip = tip(n, "Any advice for the wilderness?", "Keep clear of a predator's kill. Feed brings the herd together, and blood brings the scavengers. A horse won't pick a fight unless you hurt it.");
             case CIVIC -> { if (g.bank.isTeller(n)) g.bank.choices(n, d); }
             case THIEF -> tip = tip(n, "Got anything for me?", "Psst. Stalls are easy when nobody's looking. The trick is that nobody's looking.");
@@ -357,13 +357,13 @@ public final class Dialogue {
         switch (g.quests.courier) {
             case NOT_STARTED -> {
                 Npc kit = (Npc) g.actor(Ids.CONTACT);
-                if (kit != null && kit.alive) d.choice("Do you have a job for me?", () -> g.ui.dialog(new Dialog(n.name, "Take this sealed letter to Kit - east of Store B, in DevTown. Don't open it.")
+                if (kit != null && kit.alive) d.choice("Do you have a job for me?", () -> g.ui.dialog(new Dialog(n.name, "Take this sealed letter to " + g.nameOf(Ids.CONTACT) + " - " + g.quests.kitWhere() + ". Don't open it.")
                         .choice("I'll do it.", g.quests::start).choice("Not now.", () -> { })));
-                else d.choice("Do you have a job for me?", () -> g.ui.dialog(new Dialog(n.name, "I did... but Kit is dead. There's no one left to take it to.")));
+                else d.choice("Do you have a job for me?", () -> g.ui.dialog(new Dialog(n.name, "I did... but " + g.nameOf(Ids.CONTACT) + " is dead. There's no one left to take it to.")));
             }
-            case ACTIVE -> d.choice("About the letter...", () -> g.ui.dialog(new Dialog(n.name, "Kit's waiting for it, east of Store B.")));
-            case COMPLETED -> d.choice("About the letter...", () -> g.ui.dialog(new Dialog(n.name, "Kit got it. Thank you.")));
-            case FAILED -> d.choice("About the letter...", () -> g.ui.dialog(new Dialog(n.name, "Kit is dead. That letter will never be delivered now.")));
+            case ACTIVE -> d.choice("About the letter...", () -> g.ui.dialog(new Dialog(n.name, "" + g.nameOf(Ids.CONTACT) + "'s waiting for it, " + g.quests.kitWhere() + ".")));
+            case COMPLETED -> d.choice("About the letter...", () -> g.ui.dialog(new Dialog(n.name, "" + g.nameOf(Ids.CONTACT) + " got it. Thank you.")));
+            case FAILED -> d.choice("About the letter...", () -> g.ui.dialog(new Dialog(n.name, "" + g.nameOf(Ids.CONTACT) + " is dead. That letter will never be delivered now.")));
         }
     }
 
@@ -385,7 +385,12 @@ public final class Dialogue {
         // DevPalace's people talk of their own city; a second word the same day is met as one
         String doing = doing(n);
         if (doing != null) line = doing;
-        else if (rpg.world.DevMap.PALACE.equals(n.homeJurisdiction) && Math.floorMod(n.conversations + n.id, 3) == 0) line = palace(n);
+        else if (Math.floorMod(n.conversations + n.id, 3) == 0) {
+            // (0.4.7, gamefixes: dialogue still spoke of the devmap) ShadowVeil's people talk of their own kingdom from the
+            // map's data (townTalk); only the devmap's DevPalace keeps its own city's lines
+            String town = rpg.world.WorldMap.shadowveil() ? townTalk(n) : rpg.world.DevMap.PALACE.equals(n.homeJurisdiction) ? palace(n) : null;
+            if (town != null) line = town;
+        }
         if (n.talkedDay == (int) (g.state.minutes / 1440) && n.conversations > 1 && doing == null)
             line = pick(n, "You again. ", "Back so soon? ", "Still here, then. ", "Twice in a day - you must want something. ") + line;
         n.talkedDay = (int) (g.state.minutes / 1440);
@@ -459,6 +464,17 @@ public final class Dialogue {
             case BANK -> pick(n, "I'm off to the bank. Coin doesn't keep itself.", "Errands. The bank won't wait.");
             default -> null;
         };
+    }
+
+    /** (0.4.7) A line of the person's own kingdom from shadowveil.json's townTalk: their role's lines and the realm's common ones. */
+    private String townTalk(Npc n) {
+        var talk = rpg.world.shadowveil.Atlas.get().map("townTalk");
+        Object found = talk.get(n.homeJurisdiction == null ? "Wilds" : n.homeJurisdiction);
+        if (!(found instanceof java.util.Map<?, ?>)) found = talk.get("Wilds");
+        if (!(found instanceof java.util.Map<?, ?> realm)) return null;
+        java.util.List<String> lines = new java.util.ArrayList<>();
+        for (Object key : new Object[]{n.role.name(), "default"}) if (realm.get(key) instanceof java.util.List<?> l) for (Object o : l) lines.add(String.valueOf(o));
+        return lines.isEmpty() ? null : pick(n, lines.toArray(new String[0]));
     }
 
     /** DevPalace's people on their own city: what stands in it and who rules it. */
@@ -642,6 +658,12 @@ public final class Dialogue {
             case TROLL -> "A troll, they say. Fire's the only thing that stops one mending.";
             case ORC -> "Orc warbands on the move. Keep your gate barred.";
             case DRAGON -> "A dragon. A real one. Gods help us all.";
+            // (0.4.8) the new kinds
+            case ICE_TROLL -> pick(n, "There's an ice troll come down off the heights. A blade just skids off it.", "Ice troll on the high road. Fire, they say. Lots of fire.");
+            case RIVER_TROLL -> pick(n, "Don't cross the water at dusk. Something lives under it.", "A troll down by the water. Long arms, all weed and teeth.");
+            case SMALL_SCORPION, LARGE_SCORPION -> bold ? "Scorpions in the sands. Mind the tail, not the claws." : pick(n, "Shake your boots out in the morning. Scorpions.", "If one gets hold of you with its claw, the tail's coming next.");
+            case LESSER_DEMON -> "Red things, horned, out of the burning ground. They don't stop till you do.";
+            case GREATER_DEMON -> "Wings like a burning sail. If you can see it, you're already too close.";
         };
     }
 

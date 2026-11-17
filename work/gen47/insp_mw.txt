@@ -1,0 +1,238 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldInspectProbeTest > inspect() STANDARD_OUT
+    [Load] ShadowVeil grown in 20.41s ({regions=839, overlays=471, variants=479, scarp=46, coast=467, erosion=381, peaks=80, lakes=55, isles=1, rivers=1193, wadis=13, ground=35, roads=620, causeways=3, architecture=1272, pitsFilled=1396, pits=406, banks=74, clamp=15, cliffs=56, columns=1137, falls=18, raise=10971, trees=307, outcrops=0, ways=516, lava=0, dungeons=92, postsSunk=28, floatingRemoved=59, floating=810}), made and lit in 2.24s
+    [water] flow field grown in 2144 ms: 39016 columns moving
+    [gathering] 757 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+
+    ================ 345, 40, 948  law Loxford  stand Y 40.0
+    structure here: millwood_lodge Millwood Lodge (hall) lot 344,942 - 353,961 floor 39
+      near earl_manor                 Earl William's Manor                     building       18 m lot 334,924-349,935 floor 39
+      near millwood_yard              Millwood wood yard                       yard           19 m lot 352,926-361,939 floor 39
+      near loxford_cottages_1         Cottage                                  building       40 m lot 307,964-312,969 floor 39
+      near loxford_cottages_3         Cottage                                  building       24 m lot 318,949-323,954 floor 38
+      near loxford_cottages_4         Cottage                                  building       34 m lot 309,935-314,940 floor 38
+      near loxford_cottages_5         Cottage                                  building       19 m lot 323,941-329,946 floor 39
+      near loxford_cottages_6         Cottage                                  building       34 m lot 313,927-318,933 floor 38
+      near loxford_cottages_7         Cottage                                  building       35 m lot 318,920-323,925 floor 38
+      near loxford_cottages_8         Cottage                                  building       29 m lot 337,916-342,921 floor 39
+      near loxford_cottages_9         Cottage                                  building       30 m lot 336,974-341,979 floor 39
+      near loxford_cottages_10        Cottage                                  building       27 m lot 343,972-348,977 floor 39
+      near loxford_cottages_13        Cottage                                  building       32 m lot 352,975-357,980 floor 39
+      near loxford_cottages_15        Cottage                                  building       35 m lot 360,975-366,980 floor 40
+      near loxford_cottages_16        Cottage                                  building       38 m lot 368,973-373,978 floor 40
+      near foresters_guild            Foresters' Guild Hall                    building       24 m lot 358,956-371,966 floor 40
+      object Furniture              Leofric's bed                  (346.0, 44.5, 943.5)
+      object Furniture              Bedside table                  (351.5, 44.5, 943.5)
+      object Furniture              Kitchen dresser                (351.5, 41.0, 943.5)
+      object Furniture              Candelabrum                    (345.5, 40.5, 943.5)
+      object Node                   Oak tree                       (339.5, 41.2, 947.5)
+      object Door                   Millwood Lodge door            (344.5, 41.2, 952.0)
+      object Furniture              Eadmund's bed                  (346.0, 44.5, 949.5)
+      object Furniture              Bedside table                  (345.5, 44.5, 948.5)
+      object Furniture              Cenric's bed                   (350.5, 44.5, 944.0)
+      object Furniture              Table                          (348.5, 40.5, 954.5)
+      object Furniture              Bench                          (347.5, 40.5, 954.5)
+      object Furniture              Bench                          (349.5, 40.5, 954.5)
+      object Furniture              Sideboard                      (349.0, 40.5, 948.5)
+      object Furniture              Armchair                       (345.5, 40.5, 954.5)
+      object Furniture              Tapestry                       (345.5, 41.0, 950.0)
+      object Furniture              Tapestry                       (347.0, 41.0, 948.5)
+      object Furniture              Weapon trophy                  (345.5, 41.0, 953.5)
+      object Furniture              Rug                            (349.0, 40.5, 954.5)
+      object Furniture              Table                          (349.0, 40.5, 945.5)
+      object Furniture              Stool                          (348.5, 40.5, 946.5)
+      object Furniture              Stool                          (349.5, 40.5, 946.5)
+      object Furniture              Stool                          (348.5, 40.5, 944.5)
+      object Furniture              Stool                          (349.5, 40.5, 944.5)
+      object Furniture              Pantry shelves                 (346.5, 41.0, 946.5)
+      object Furniture              Table                          (348.5, 44.5, 952.5)
+      object Furniture              Stool                          (347.5, 44.5, 952.5)
+      object Furniture              Stool                          (349.5, 44.5, 952.5)
+      object Container              Chest                          (345.5, 44.4, 954.5)
+      object Furniture              Pot rack                       (352.5, 41.0, 943.5)
+      object Furniture              Candelabrum                    (352.5, 40.5, 943.5)
+      object Furniture              Candelabrum                    (352.5, 44.5, 943.5)
+      object Door                   Millwood Lodge back door       (353.5, 41.2, 952.0)
+      object Furniture              Dunstan's bed                  (352.0, 44.5, 951.5)
+      object Furniture              Bedside table                  (352.5, 44.5, 952.5)
+      object Furniture              Oswin's bed                    (352.0, 44.5, 948.5)
+      object Furniture              Bedside table                  (352.5, 44.5, 949.5)
+      object Furniture              Fireplace                      (352.5, 41.0, 955.0)
+      object Furniture              Candelabrum                    (352.5, 40.5, 948.5)
+      object Station                Range                          (352.5, 40.6, 945.5)
+      object Container              Chest                          (352.5, 44.4, 954.5)
+      npc Oswin        WORKER         (342.5, 40.0, 951.5) goal IDLE
+      npc Dunstan      CRAFTSMAN      (347.5, 40.0, 959.5) goal IDLE
+      npc Cenric       WORKER         (341.5, 40.0, 949.5) goal IDLE
+      npc Aldred       CIVIC          (370.5, 41.0, 959.5) goal IDLE
+      npc Leofric      CRAFTSMAN      (349.5, 40.0, 958.5) goal IDLE
+      npc Count William CIVIC          (336.5, 44.0, 926.5) goal IDLE
+      npc Eadmund      CRAFTSMAN      (351.5, 40.0, 945.5) goal WORK
+      layer Y38 (x 336..354 across, z down; * the point)
+       aaaaaaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaaaaaa
+       aaaaaaaaa*aaaaaaaaa
+       aaaaaaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaaaaaa
+      layer Y39 (x 336..354 across, z down; * the point)
+       bbbbbbbbbbbbbbbbccc
+       bbbbbbbbbbbbbbbbbbb
+       bbbbbbbbbbbbbbbbbbb
+       bbbbbbbbddddddddddb
+       bbbbbbbbdeeeeeeeedb
+       bbbbbbbbdeeeeeeeedb
+       bbbbbbbbdeeeeeeeedb
+       bbbbbbbbdeeeeeeeedb
+       bbbbbbbbdeeeeeeeedb
+       bbbbbbbbd*eeeeeeedb
+       bbbbbbbbdeeeeeeeedb
+       bbbbbbbbdeeeeeeeedb
+       bbbbbccceeeeeeeeedb
+       bbbbbccceeeeeeeeedb
+       bbbbbbbbdeeeeeeeedb
+       bbbbbbbbdeeeeeeeedb
+       bbbbbbbbdeeeeeeeedb
+       bbbbbbbbdeeeeeeeedb
+       bbbbbbbbdeeeeeeeedb
+      layer Y40 (x 336..354 across, z down; * the point)
+       ................fff
+       ...................
+       ...................
+       ........gddddddddg.
+       ........dh.....hhd.
+       ........d...ii...d.
+       ........d...hh..jd.
+       ........d.h.ii...d.
+       ...k....dggggggggd.
+       ........d*..hh..hd.
+       ......g.d........d.
+       ........g........d.
+       ........l........l.
+       ........l........l.
+       ........g..ihi...d.
+       ......g.di.ihi..md.
+       ........d..ihi..md.
+       ........d........d.
+       ........d.......nd.
+      layer Y41 (x 336..354 across, z down; * the point)
+       ...................
+       ...................
+       ...................
+       ........ggoggogggg.
+       ........g......h.g.
+       ........o........o.
+       ........g........g.
+       ........g.h......g.
+       ...k....oggggggggo.
+       ........g*.......g.
+       ......g.g........g.
+       ........g........o.
+       ........l........l.
+       ........l........l.
+       ........g........g.
+       ......g.g.......mg.
+       ........g.......mg.
+       ........o........o.
+       ........g........g.
+      layer Y42 (x 336..354 across, z down; * the point)
+       ...................
+       ...................
+       ...................
+       ........ggoggogggg.
+       ........g........g.
+       ........o........o.
+       ........g........g.
+       ........g........g.
+       ...k....oggggggggo.
+       ........g*.......g.
+       ......g.g........g.
+       ........g........o.
+       ........p........g.
+       ........p........g.
+       .......qg........g.
+       ......g.g........g.
+       ........g........g.
+       ........o........o.
+       ........g........g.
+      layer Y43 (x 336..354 across, z down; * the point)
+       ...................
+       ...................
+       ...................
+       ........pppppppppp.
+       ........peeeeeeeep.
+       r.......peeeeeeeep.
+       ........peeeeeeeep.
+       ...ss...peeeeeeeep.
+       ..sks...peeeeeeeep.
+       ..sss...p*eeeeeeep.
+       ......q.peeeeeeeep.
+       ........peeeeeeeep.
+       ........peeeeeeeep.
+       ........peeeeeeeep.
+       ........peeeeeeeep.
+       ......q.peeeeeeeep.
+       ........peeeeeeeep.
+       ........peeeeeeeep.
+       ........peeeeeee.p.
+      layer Y44 (x 336..354 across, z down; * the point)
+       ...................
+       ...................
+       ...................
+       ........gggggggggg.
+       r.......gtt...thhg.
+       r.......g.....t..g.
+       rr.ss...g........g.
+       .ssss...g........g.
+       .sskss..g........g.
+       .sssss..g*.....ttg.
+       ..sss...gtt.....hg.
+       ........g........g.
+       ........g......ttg.
+       ........g..ihi..hg.
+       ........g........g.
+       ........gu......ug.
+       ........g........g.
+       ........g......ffg.
+       ........g......f.g.
+      legend: a=dirt b=grass c=gravel d=cobble e=planks f=fence g=spruce_log h=table i=seat j=range k=oak_log l=door m=headstone n=stairs o=glass p=dark_planks q=lamp r=leaves s=oak_leaves t=bed u=crate
+  slow: rpg.probe.WorldInspectProbeTest.inspect() 36.307 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 42s
+9 actionable tasks: 1 executed, 8 up-to-date

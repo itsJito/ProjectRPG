@@ -1,0 +1,258 @@
+    [cellars] loxford_castle undercroft: 5 rooms, 91 cells, door at 266,30,1017, rooms at Y30
+    [cellars] duck_cellar cellar_shortcut: 5 rooms, 89 cells, door at 337,32,1002, rooms at Y32
+    [cellars] valgard_keep undercroft: 6 rooms, 112 cells, door at 207,45,671, rooms at Y45
+    [cellars] museum_vault museum_vault: 6 rooms, 56 cells, door at 686,26,198, rooms at Y26
+    [cellars] unlit_lantern lantern_cellars: 5 rooms, 35 cells, door at 645,40,553, rooms at Y35, turning right
+    ================ 645, 36, 553  law WILDS  stand Y 45.0
+      object Furniture              Bed                            (633.0, 82.5, 556.5)
+      object Furniture              Bed                            (635.0, 88.5, 550.5)
+      object Furniture              Bedside table                  (635.5, 88.5, 551.5)
+      object Furniture              Weapon trophy                  (632.5, 53.0, 550.5)
+      object Furniture              Weapon trophy                  (636.5, 53.0, 552.5)
+      object Furniture              Suit of armour                 (633.5, 53.0, 548.5)
+      object Furniture              Bench                          (632.0, 52.5, 556.5)
+      object Furniture              Candelabrum                    (636.5, 52.5, 553.5)
+      object Furniture              Candelabrum                    (631.5, 52.5, 548.5)
+      object Furniture              Candelabrum                    (633.5, 52.5, 556.5)
+      object Furniture              Weapon trophy                  (632.5, 59.0, 548.5)
+      object Furniture              Candelabrum                    (636.5, 58.5, 551.5)
+      object Furniture              Candelabrum                    (633.5, 58.5, 548.5)
+      object Furniture              Candelabrum                    (631.5, 58.5, 548.5)
+      object Furniture              Crate                          (633.5, 64.5, 548.5)
+      object Furniture              Crate                          (634.5, 64.5, 549.5)
+      object Furniture              Candelabrum                    (631.5, 64.5, 548.5)
+      object Furniture              Candelabrum                    (636.5, 64.5, 551.5)
+      object Furniture              Chair                          (631.5, 70.5, 556.5)
+      object Furniture              Bookcase                       (633.5, 71.0, 556.5)
+      object Furniture              Painting                       (631.5, 71.0, 548.5)
+      object Furniture              Rug                            (632.5, 70.5, 553.0)
+      object Furniture              Candelabrum                    (631.5, 70.5, 548.5)
+      object Furniture              Candelabrum                    (633.5, 70.5, 548.5)
+      object Furniture              Suit of armour                 (631.5, 77.0, 556.5)
+      object Furniture              Weapon trophy                  (632.5, 77.0, 548.5)
+      object Furniture              Weapon trophy                  (631.5, 77.0, 548.5)
+      object Furniture              Crate                          (633.5, 76.5, 556.5)
+      object Furniture              Crate                          (633.5, 76.5, 548.5)
+      object Furniture              Wardrobe                       (636.5, 83.0, 553.5)
+      object Furniture              Chest of drawers               (636.5, 82.5, 551.5)
+      object Furniture              Washstand                      (635.5, 82.5, 554.5)
+      object Furniture              Mirror                         (635.5, 83.0, 550.5)
+      object Furniture              Candelabrum                    (631.5, 82.5, 556.5)
+      object Furniture              Candelabrum                    (631.5, 88.5, 556.5)
+      object Furniture              Candelabrum                    (636.5, 88.5, 551.5)
+      object Container              Store chest                    (636.5, 64.4, 553.5)
+      object Container              Arms chest                     (634.5, 76.4, 555.5)
+      object Container              Chest                          (633.5, 88.4, 556.5)
+      object Furniture              Wall sconce                    (649.5, 36.0, 544.5)
+      object Furniture              Wine rack                      (649.5, 36.0, 550.5)
+      object Furniture              Pantry shelves                 (650.5, 36.0, 547.5)
+      object Furniture              Crate                          (650.5, 35.5, 550.5)
+      object Furniture              Pot rack                       (650.5, 36.0, 548.5)
+      object Furniture              Wall sconce                    (647.5, 36.0, 550.5)
+      object Door                   The Unlit Lantern cellars door (645.5, 41.2, 553.0)
+       aaaaaaaaaaaaaaaaaaaaaaaabbbbb
+       aaaaaaaaaaaaaaaaaaaaaaaabbbbb
+       aaaaaaaaaaaaaaaaaaaaaaaaabbbb
+       aaaaaaaaaaaaaaaaaaaaaaaaaabbb
+       aaaaaaaaaaaaaaaaacccaaaaaaabb
+       aaaaaaaaaaaaaaaaacdcaaaaaaaab
+       aaaaaaaaaaaaaaaaacdcaaaaaaaab
+       aaaaaaaaaaaaaaccccdccaaaaaaaa
+       aaaaaaaaaaaaaacddcddcaaaaaaaa
+       aaaaaaaaaaaaaacddcddcaaaaaaaa
+       aaaaaaaaaaaaaacddddcccaaaaaaa
+       aaaaaaaaaaaaaacddcdddcaaaaaab
+       aaaaaaaaaaaaaaccccdddcaaaaaab
+       aaaaaaaaaaaaaaaccccedcaaaaaab
+       aaaaaaaaaaaaaa*ccccedcaaaaaab
+       aaaaaaaaaaaaaaaaaaccccaaaaabb
+       aaaaaaaaaaaaaaaaaaaaaaaaaaabb
+       aaaaaaaaaaaaaaaaaaaaaaaaaaabb
+       aaaaaaaaaaaaaaaaaaaaaaaaaabbb
+       aaaaaaaaaaaaaaaaaaaaaaaaaabbb
+       aaaaaaaaaaaaaaaaaaaaaaaaaabbb
+       aaaaaaaaaaaaaaaaaaaaaaaaabbbb
+       aaaaaaaaaaaaaaaaaaaaaaaaabbbb
+       aaaaaaaaaaaaaaaaaaaaaaaabbbbb
+       aaaaaaaaaaaaaaaaaaaaaaabbbbbb
+       aaaaaaaaaaaaaaaaaaaaaabbbbbbb
+       aaaaaaaaaaaaaaaaaaaaaabbbbbbb
+       aaaaaaaaaaaaaaaaaaaaabbbbbbbb
+       aaaaaaaaaaaaaaaaaaaabbbbbbbbb
+      layer Y35 (x 631..659 across, z down; * the point, which is stone)
+       aaaaaaaaaaaaaaaaaaaaabbbbbbbb
+       aaaaaaaaaaaaaaaaaaaaabbbbbbbb
+       aaaaaaaaaaaaaaaaaaaaaabbbbbbb
+       aaaaaaaaaaaaaaaaaaaaaabbbbbbb
+       aaaaaaaaaaaaaaaaacccaaabbbbbb
+       aaaaaaaaaaaaaaaaac.caaaabbbbb
+       aaaaaaaaaaaaaaaaac.caaaabbbbb
+       aaaaaaaaaaaaaacccc.ccaaaabbbb
+       aaaaaaaaaaaaaac..c..caaaabbbb
+       aaaaaaaaaaaaaac..c..caaaabbbb
+       aaaaaaaaaaaaaac....cccaaabbbb
+       aaaaaaaaaaaaaac..c...caaabbbb
+       aaaaaaaaaaaaaacccc...caaabbbb
+       aaaaaaaaaaaaaaaccce..caaabbbb
+       aaaaaaaaaaaaaa*ccce..caaabbbb
+       aaaaaaaaaaaaaaaaacccccaaabbbb
+       aaaaaaaaaaaaaaaaaaaaaaaaabbbb
+       aaaaaaaaaaaaaaaaaaaaaaaabbbbb
+       aaaaaaaaaaaaaaaaaaaaaaaabbbbb
+       aaaaaaaaaaaaaaaaaaaaaaaabbbbb
+       aaaaaaaaaaaaaaaaaaaaaaabbbbbb
+       aaaaaaaaaaaaaaaaaaaaaaabbbbbb
+       aaaaaaaaaaaaaaaaaaaaaabbbbbbb
+       aaaaaaaaaaaaaaaaaaaaaabbbbbbb
+       aaaaaaaaaaaaaaaaaaaaabbbbbbbb
+       aaaaaaaaaaaaaaaaaaaabbbbbbbbb
+       aaaaaaaaaaaaaaaaaaabbbbbbbbbf
+       aaaaaaaaaaaaaaaaaabbbbbbbbbff
+       aaaaaaaaaaaaaaaaabbbbbbbbbfff
+      layer Y36 (x 631..659 across, z down; * the point, which is mossy_bricks)
+       aaaaaaaaaaaaaaaaaaabbbbbbbbff
+       aaaaaaaaaaaaaaaaaaabbbbbbbbbf
+       aaaaaaaaaaaaaaaaaaaabbbbbbbbb
+       aaaaaaaaaaaaaaaaaaaabbbbbbbbb
+       aaaaaaaaaaaaaaaaacccabbbbbbbb
+       aaaaaaaaaaaaaaaaac.cabbbbbbbb
+       aaaaaaaaaaaaaaaaac.cabbbbbbbb
+       aaaaaaaaaaaaaacccc.ccabbbbbbb
+       aaaaaaaaaaaaaac..c..cabbbbbbb
+       aaaaaaaaaaaaaac..c..cabbbbbbb
+       aaaaaaaaaaaaaac....cccabbbbbb
+       aaaaaaaaaaaaaac..c...cabbbbbb
+       aaaaaaaaaaaaaacccc...cabbbbbb
+       aaaaaaaaaaaaaaccce...cabbbbbb
+       aaaaaaaaaaaaaa*cce...cabbbbbb
+       aaaaaaaaaaaaaacaccccccabbbbbb
+       aaaaaaaaaaaaaaaaaaaaaaabbbbbb
+       aaaaaaaaaaaaaaaaaaaaaaabbbbbb
+       aaaaaaaaaaaaaaaaaaaaaabbbbbbb
+       aaaaaaaaaaaaaaaaaaaaaabbbbbbb
+       aaaaaaaaaaaaaaaaaaaaaabbbbbbb
+       aaaaaaaaaaaaaaaaaaaaabbbbbbbf
+       aaaaaaaaaaaaaaaaaaaabbbbbbbbf
+       aaaaaaaaaaaaaaaaaaaabbbbbbbff
+       aaaaaaaaaaaaaaaaaaabbbbbbbfff
+       aaaaaaaaaaaaaaaaaabbbbbbbffff
+       aaaaaaaaaaaaaaaaabbbbbbbffff~
+       aaaaaaaaaaaaaaaabbbbbbbffff~~
+       aaaaaaaaaaaaaaabbbbbbbffff~~~
+       aaaaaaaaaaaaaaaabbbbbbbbfff~~
+       aaaaaaaaaaaaaaaaabbbbbbbffff~
+       aaaaaaaaaaaaaaaaaabbbbbbbffff
+       aaaaaaaaaaaaaaaaaabbbbbbbbfff
+       aaaaaaaaaaaaaaaaacccbbbbbbbff
+       aaaaaaaaaaaaaaaaac.cbbbbbbbbf
+       aaaaaaaaaaaaaaaaac.cbbbbbbbbf
+       aaaaaaaaaaaaaacccc.ccbbbbbbbb
+       aaaaaaaaaaaaaac..c..cbbbbbbbb
+       aaaaaaaaaaaaaac..c..cbbbbbbbb
+       aaaaaaaaaaaaaac..c.cccbbbbbbb
+       aaaaaaaaaaaaaac..c...cbbbbbbf
+       aaaaaaaaaaaaaccccc...cbbbbbbf
+       aaaaaaaaaaaaacace....cbbbbbbf
+       aaaaaaaaaaaaac*ce....cbbbbbbf
+       aaaaaaaaaaaaacccccccccbbbbbff
+       aaaaaaaaaaaaaaaaaaaaabbbbbbff
+       aaaaaaaaaaaaaaaaaaaaabbbbbbff
+       aaaaaaaaaaaaaaaaaaaabbbbbbfff
+       aaaaaaaaaaaaaaaaaaaabbbbbbfff
+       aaaaaaaaaaaaaaaaaaaabbbbbbfff
+       aaaaaaaaaaaaaaaaaaabbbbbbfff~
+       aaaaaaaaaaaaaaaaaabbbbbbbfff~
+       aaaaaaaaaaaaaaaaaabbbbbbfff~~
+       aaaaaaaaaaaaaaaaabbbbbbfff~~~
+       aaaaaaaaaaaaaaaabbbbbbfff~~~~
+       aaaaaaaaaaaaaaabbbbbbbff~~~~~
+       aaaaaaaaaaaaabbbbbbbbff~~~~~~
+       aaaaaaaaaaabbbbbbbbbff~~~~~~~
+       aaaaaaaaaaaaaabbbbbbbfff~~~~~
+       aaaaaaaaaaaaaaabbbbbbfff~~~~~
+       aaaaaaaaaaaaaaaabbbbbbfff~~~~
+       aaaaaaaaaaaaaaaabbbbbbffff~~~
+       aaaaaaaaaaaaaaaaacccbbbffff~~
+       aaaaaaaaaaaaaaaaacccbbbbffff~
+       aaaaaaaaaaaaaaaaacccbbbbffff~
+       aaaaaaaaaaaaaacccccccbbbbffff
+       aaaaaaaaaaaaaacccccccbbbbffff
+       aaaaaaaaaaaaaacccccccbbbbffff
+       aaaaaaaaaaaaaacccaccccbbbffff
+       aaaaaaaaaaaaaaccccccccbbbfff~
+       aaaaaaaaaaaaccccccccccbbbfff~
+       aaaaaaaaaaaacace.....cbbbfff~
+       aaaaaaaaaaaaca*e.....cbbbfff~
+       aaaaaaaaaaaaccccccccccbbbff~~
+       aaaaaaaaaaaaaaaaaaabbbbbbff~~
+       aaaaaaaaaaaaaaaaaaabbbbbfff~~
+       aaaaaaaaaaaaaaaaaaabbbbbff~~~
+       aaaaaaaaaaaaaaaaaabbbbbbff~~~
+       aaaaaaaaaaaaaaaaaabbbbbfff~~~
+       aaaaaaaaaaaaaaaaabbbbbbff~~~~
+       aaaaaaaaaaaaaaaabbbbbbfff~~~~
+       aaaaaaaaaaaaaaabbbbbbbff~~~~~
+       aaaaaaaaaaaaaabbbbbbbff~~~~~~
+       aaaaaaaaaaaaabbbbbbbff~~~~~~~
+       aaaaaaaaaaaabbbbbbbfff~~~~~~~
+       aaaaaaaaabbbbbbbbbfff~~~~~~~~
+       aaaaaaabbbbbbbbbbfff~~~~~~~~~
+       aaaaaaaaaaaabbbbbbbff~~~~~~~~
+       aaaaaaaaaaaaabbbbbbff~~~~~~~~
+       aaaaaaaaaaaaaabbbbbbff~~~~~~~
+       aaaaaaaaaaaaaabbbbbbff~~~~~~~
+       aaaaaaaaaaaaaaabbbbbbff~~~~~~
+       aaaaaaaaaaaaaaabbbbbbfff~~~~~
+       aaaaaaaaaaaaaaaabbbbbfff~~~~~
+       aaaaaaaaaaaaaaaabbbbbbfff~~~~
+       aaaaaaaaaaaaaaaabbbbbbfff~~~~
+       aaaaaaaaaaaaaaaaabbbbbfff~~~~
+       aaaaaaaaaaaaaaaaabbbbbbff~~~~
+       aaaaaaaaaaaaaaaaabbbbbbff~~~~
+       aaaaaaaaaaacccccccbbbcbff~~~~
+       aaaaaaaaaaacccc......cbff~~~~
+       aaaaaaaaaaaccc*......cbff~~~~
+       aaaaaaaaaaacccccccccccbff~~~~
+       aaaaaaaaaaaaaaaaabbbbbbff~~~~
+       aaaaaaaaaaaaaaaaabbbbbbf~~~~~
+       aaaaaaaaaaaaaaaaabbbbbff~~~~~
+       aaaaaaaaaaaaaaaabbbbbbff~~~~~
+       aaaaaaaaaaaaaaaabbbbbbf~~~~~~
+       aaaaaaaaaaaaaaabbbbbbff~~~~~~
+       aaaaaaaaaaaaaabbbbbbff~~~~~~~
+       aaaaaaaaaaaaabbbbbbbff~~~~~~~
+       aaaaaaaaaaaabbbbbbbff~~~~~~~~
+       aaaaaaaaaabbbbbbbbff~~~~~~~~~
+       aaaaaaaabbbbbbbbbff~~~~~~~~~~
+       aaaaabbbbbbbbbbbff~~~~~~~~~~~
+       bbbbbbbbbbbbbbbff~~~~~~~~~~~~
+       aaaaaaaaabbbbbbbfff~~~~~~~~~~
+       aaaaaaaaaabbbbbbbff~~~~~~~~~~
+       aaaaaaaaaaaabbbbbbff~~~~~~~~~
+       aaaaaaaaaaaabbbbbbff~~~~~~~~~
+       aaaaaaaaaaaaabbbbbfff~~~~~~~~
+       aaaaaaaaaaaaaabbbbbff~~~~~~~~
+       aaaaaaaaaaaaaabbbbbff~~~~~~~~
+       aaaaaaaaaaaaaaabbbbbff~~~~~~~
+       aaaaaaaaaaaaaaabbbbbff~~~~~~~
+       aaaaaaaaaaaaaaabbbbbff~~~~~~~
+       aaaaaaaaaaaaaaabbbbbfff~~~~~~
+       aaaaaaaaaaaaaaaabbbbbff~~~~~~
+       aaaaaaaaaaccccccccbbbcf~~~~~~
+       aaaaaaaaaace..g......cf~~~~~~
+       aaaaaaaaaace..*......cf~~~~~~
+       aaaaaaaaaaccccccccccccf~~~~~~
+       aaaaaaaaaaaaaaabbbbbbff~~~~~~
+       aaaaaaaaaaaaaaabbbbbbff~~~~~~
+       aaaaaaaaaaaaaaabbbbbff~~~~~~~
+       aaaaaaaaaaaaaabbbbbbff~~~~~~~
+       aaaaaaaaaaaaaabbbbbbff~~~~~~~
+       aaaaaaaaaaaaabbbbbbff~~~~~~~~
+       aaaaaaaaaaaabbbbbbff~~~~~~~~~
+       aaaaaaaaaaabbbbbbbff~~~~~~~~~
+       aaaaaaaaabbbbbbbbff~~~~~~~~~~
+       aaaaaaabbbbbbbbbff~~~~~~~~~~~
+       aaaabbbbbbbbbbbff~~~~~~~~~~~~
+       bbbbbbbbbbbbbfff~~~~~~~~~~~~~
+       bbbbbbbbbbbffff~~~~~~~~~~~~~~
+      legend: a=stone b=dirt c=mossy_bricks d=flagstone e=stairs f=mud g=door

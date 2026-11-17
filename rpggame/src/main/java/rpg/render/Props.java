@@ -324,6 +324,22 @@ public final class Props {
             case ARMOR_STAND -> Furnishings.armorStand(seed);
             case PLANTER -> Furnishings.planter(seed);
             case BUST -> Furnishings.bust(seed);
+            case SCONCE -> Furnishings.sconce();
+            case BARREL -> Furnishings.barrel(seed);
+            case KEG -> Furnishings.keg(seed);
+            case LECTERN -> Furnishings.lectern(seed);
+            case SPINNING_WHEEL -> Furnishings.spinningWheel(seed);
+            case SCROLL_RACK -> Furnishings.scrollRack(w, h, seed);
+            case THRONE -> Furnishings.throne(seed);
+            case CRADLE -> Furnishings.cradle(seed);
+            case COAT_RACK -> Furnishings.coatRack(seed);
+            case BUTTER_CHURN -> Furnishings.butterChurn(seed);
+            case GLOBE -> Furnishings.globe(seed);
+            case TOOL_RACK -> Furnishings.toolRack(w, seed);
+            case MAP_TABLE -> Furnishings.mapTable(w, d, seed);
+            case DISPLAY_CABINET -> Furnishings.displayCabinet(w, h, seed);
+            case FOLDING_SCREEN -> Furnishings.foldingScreen(w, seed);
+            case SACKS -> Furnishings.sacks(w, seed);
         };
     }
 
@@ -649,9 +665,15 @@ public final class Props {
         return new Layer[]{wood(w), metal(m)};
     }
 
-    public static Layer[] doorLeaf(float height, boolean locked) {
+    public static Layer[] doorLeaf(float height, boolean locked) { return doorLeaf(height, locked, false); }
+    /**
+     * (0.4.7, gamefixes: double doors did not touch, a gap down the middle) a leaf of a pair runs right to its free edge,
+     * with a meeting stile lapped over its partner's, so the two shut flush.
+     */
+    public static Layer[] doorLeaf(float height, boolean locked, boolean paired) {
         Meshes.Boxes w = new Meshes.Boxes(), m = new Meshes.Boxes();
-        w.span(0.02f, 0, -0.05f, 0.98f, height - 0.02f, 0.05f, 0x8A5E34);
+        w.span(0.02f, 0, -0.05f, paired ? 1.0f : 0.98f, height - 0.02f, 0.05f, 0x8A5E34);
+        if (paired) w.span(0.97f, 0.02f, -0.058f, 1.012f, height - 0.04f, -0.05f, 0x6A4426);
         for (float x = 0.25f; x < 0.95f; x += 0.24f) { w.span(x, 0.02f, -0.052f, x + 0.012f, height - 0.04f, -0.05f, 0x6A4426); w.span(x, 0.02f, 0.05f, x + 0.012f, height - 0.04f, 0.052f, 0x6A4426); }
         int band = locked ? 0x3A3A40 : 0x4A4A50;
         for (float y : new float[]{0.25f, height - 0.35f}) { m.span(0.02f, y, -0.058f, 0.9f, y + (locked ? 0.1f : 0.06f), -0.05f, band); m.span(0.02f, y, 0.05f, 0.9f, y + (locked ? 0.1f : 0.06f), 0.058f, band); }

@@ -365,7 +365,7 @@ public final class Rig {
         // words and a sway of the shoulders; at rest, a stance of their own - arms folded, hands behind the back or on the
         // hips, the weight shifted from foot to foot - changing now and then
         rpg.ai.Npc who = a instanceof rpg.ai.Npc nn ? nn : null;
-        float prayWant = who != null && who.goal == rpg.ai.Brain.Goal.PRAY && who.lastOutcome != null && who.lastOutcome.startsWith("praying") ? 1 : 0;
+        float prayWant = who != null && (who.goal == rpg.ai.Brain.Goal.PRAY && who.lastOutcome != null && who.lastOutcome.startsWith("praying") || who.kneeling && who.encounter != null && Math.hypot(vx, vz) < 0.15f) ? 1 : 0;
         st.pray += (prayWant - st.pray) * (1 - (float) Math.exp(-3.5f * dt));
         boolean idleHere = Math.hypot(vx, vz) < 0.15f && grounded && a.working == null && c.phase == Phase.IDLE && a.carryBody == 0;
         float talkWant = who != null && idleHere && who.speech != null && who.speechUntil > time ? 1 : 0;
@@ -378,6 +378,14 @@ public final class Rig {
             if (st.pray > 0.001f) { crouch += 7.2f * st.pray; extraLean += 0.18f * st.pray; }
             if (st.talk > 0.001f) { extraTwist += st.talk * 0.06f * (float) Math.sin(time * 2.3 + (who == null ? 0 : who.id)); extraLean += st.talk * 0.03f * (float) Math.sin(time * 3.1); }
             if (st.rest > 0.001f) roll += st.rest * 0.035f * (float) Math.sin(time * 0.45 + (who == null ? 0 : who.id * 1.7));
+        }
+        float[] hw = firstPerson ? null : handWork(a);
+        if (hw != null) {
+            float k = smooth(clamp01(a.working.t / 0.35f)) * smooth(clamp01((a.working.duration - a.working.t) / 0.3f));
+            float beat = (float) Math.sin(a.working.t * hw[2]);
+            crouch += k * (hw[0] + 0.35f * Math.abs(hw[0]) * 0.15f * beat);
+            extraLean += k * (hw[1] + 0.04f * beat);
+            extraTwist += k * 0.05f * (float) Math.sin(a.working.t * hw[2] * 0.5f);
         }
         if (a.working != null && a.working.action.equals("fill") && !firstPerson) {
             float k = smooth(clamp01(a.working.t / 0.4f)) * smooth(clamp01((a.working.duration - a.working.t) / 0.35f));
@@ -1028,6 +1036,22 @@ public final class Rig {
                 float[] mouth = torsoPoint(shoulder, -side * 1.6f, 3.2f, -2.8f), low = torsoPoint(shoulder, -side * 1.0f, -2.0f, -4.4f);
                 target = lerp(rest, lerp(low, mouth, toMouth), eatK);
                 dir = norm(lerp(dir, torsoDir(-side * 0.6f, 0.9f, -0.2f), eatK));
+            } else if (handWork(a) != null && !firstPerson) {
+                // (0.4.7) the hands at the work: on the udder, the fleece, the carcass, the furrow, the bough, the grave,
+                // the kindling, the purse - each stroke in its rhythm, hand after hand or the two together
+                var w = a.working;
+                float[] spec = handWork(a), at = handWorkAt(a, spec);
+                float hk = smooth(clamp01(w.t / 0.35f)) * smooth(clamp01((w.duration - w.t) / 0.3f));
+                float stroke = (float) Math.sin(w.t * spec[2] + (spec[5] > 0 ? side * Math.PI / 2 : 0));
+                // overhead the hands go up over the shoulders (beside the head, not before the face); lower they work close together
+                float spread = spec[4] > 1.2f ? 0.34f : 0.14f;
+                float[] spot = toFigure(a, at[0] + (float) Math.cos(a.yaw) * side * spread, at[1], at[2] - (float) Math.sin(a.yaw) * side * spread);
+                spot = add(spot, torsoUp, stroke * spec[3]);
+                float[] hoff = sub(spot, shoulder);
+                float reach = (L_ARM1 + L_ARM2) * 0.97f, len = (float) Math.sqrt(hoff[0] * hoff[0] + hoff[1] * hoff[1] + hoff[2] * hoff[2]);
+                if (len > reach) spot = add(shoulder, hoff, reach / len);
+                target = lerp(rest, spot, hk * (isMain || spec[5] > 0 || spec[3] > 1.5f ? 1 : 0.55f));
+                dir = norm(lerp(dir, spec[4] > 1.2f ? new float[]{0, 0.6f, -1} : new float[]{0, -1, -0.35f}, hk));
             } else if (a.working != null && a.working.action.equals("fill")) {
                 // a hand dipped down to the water ahead, held there while it fills
                 var w = a.working;
@@ -1240,6 +1264,46 @@ public final class Rig {
     /** What is being cooked while cooking is under way at a range or a fire (gamefixes: cooking is animated), or null. */
     public static boolean repairing(Actor a){return a.working!=null && a.working.action.equals("repair");}
 
+    /**
+     * (0.4.7, gamefixes: every NPC interaction animated) the works done with the hands - milking, shearing, butchering,
+     * sowing, harvesting, picking, gathering by hand, burying, lighting a fire, stealing, lifting a purse: how the body
+     * takes to each, {crouch, lean, rhythm (rad/s), the hands' stroke (px), the hands' height above the feet (m),
+     * alternate hands (1) or together (0)}; null for any other work (a swing, a station, a meal have their own).
+     */
+    static final java.util.Map<String, float[]> HAND_WORK = java.util.Map.ofEntries(
+            java.util.Map.entry("milk", new float[]{6.8f, 0.22f, 7.5f, 1.4f, 0.45f, 1}),
+            java.util.Map.entry("shear", new float[]{3.2f, 0.42f, 5.0f, 2.2f, 0.75f, 0}),
+            java.util.Map.entry("butcher", new float[]{6.0f, 0.38f, 4.2f, 2.6f, 0.3f, 0}),
+            java.util.Map.entry("sow", new float[]{2.4f, 0.48f, 3.6f, 1.6f, 0.15f, 1}),
+            java.util.Map.entry("harvest", new float[]{4.5f, 0.5f, 4.0f, 2.0f, 0.25f, 1}),
+            java.util.Map.entry("pick", new float[]{0f, -0.2f, 3.0f, 3.2f, 2.2f, 1}),
+            java.util.Map.entry("gather", new float[]{4.0f, 0.45f, 4.4f, 1.8f, 0.3f, 1}),
+            java.util.Map.entry("bury", new float[]{7.0f, 0.3f, 3.2f, 1.8f, 0.05f, 0}),
+            java.util.Map.entry("light", new float[]{7.2f, 0.34f, 9.0f, 0.9f, 0.15f, 0}),
+            java.util.Map.entry("steal", new float[]{1.0f, 0.2f, 2.0f, 0.8f, 0.95f, 0}),
+            java.util.Map.entry("pickpocket", new float[]{1.2f, 0.12f, 2.5f, 0.6f, 0.95f, 0}));
+    static float[] handWork(Actor a) {
+        var w = a.working;
+        if (w == null) return null;
+        String act = w.action.startsWith("sow_") ? "sow" : w.action;
+        float[] spec = HAND_WORK.get(act);
+        if (spec == null || act.equals("gather") && w.target instanceof rpg.objects.Node n && n.kind == rpg.objects.Node.Kind.FISH) return null;
+        return spec;
+    }
+    /** (0.4.7) Where the hands work: the thing worked on, or (on oneself: a grave, a fire) the ground just ahead. */
+    static float[] handWorkAt(Actor a, float[] spec) {
+        var w = a.working;
+        float fx = (float) -Math.sin(a.yaw), fz = (float) -Math.cos(a.yaw);
+        boolean self = w.target == null || w.target.id() == a.id;
+        float x = self ? a.x + fx * 0.6f : w.target.ax(), z = self ? a.z + fz * 0.6f : w.target.az();
+        float d = (float) Math.hypot(x - a.x, z - a.z);
+        // no further than an arm's length ahead, whatever the target's middle is (a cow's, a tree's)
+        // (overhead, into a bough, the hands go up nearly straight: an arm cannot reach far ahead and high at once)
+        float most = spec[4] > 1.2f ? 0.12f : 0.7f;
+        if (d > most) { x = a.x + (x - a.x) / d * most; z = a.z + (z - a.z) / d * most; }
+        return new float[]{x, a.y + spec[4], z};
+    }
+
     /** (0.3.5) The station someone is at work on (not a range, which cooking draws), or null. */
     static rpg.objects.Station stationWork(Actor a) {
         var w = a.working;
@@ -1447,7 +1511,7 @@ public final class Rig {
     private static void plant(Actor a, State st, int k) {
         // (0.4.6, gamefixes: footsteps in time with the actual steps of the feet) the figure's foot is down: counted, for the
         // footfall's sound (heard when the game next looks: Actor.footPlants)
-        if (!st.stance[k]) { a.footPlants++; a.footPlantSeen = System.nanoTime(); }
+        if (!st.stance[k]) { a.footPlants++; a.footPlantSeen = System.nanoTime(); if (a.grounded && a.swimMode == 0) Prints.push(st.to[k][0], a.y, st.to[k][2], a.yaw, false); }
         st.stance[k] = true;
         st.swing[k] = 0;
         System.arraycopy(st.to[k], 0, st.foot[k], 0, 3);

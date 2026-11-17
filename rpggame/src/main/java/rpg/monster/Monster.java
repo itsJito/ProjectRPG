@@ -22,6 +22,12 @@ public final class Monster extends Npc {
     public int level;
     /** A dragon's breed (null for every other kind). */
     public MonsterKind.Breed breed;
+    /** (0.4.8) Which of its kind's looks this one has (MonsterKind.variants; the figure built by MonsterModels for it). */
+    public int variant;
+    /** (0.4.8) The creature strike it last made ("pincer", "sting"...): the renderer finishes the stroke it began. */
+    public String lastStrike;
+    /** (0.4.8) Lifted on its wings until then (a greater demon hovering a moment over the ground it fights on). */
+    public double hoverUntil, hoverFrom, nextHover;
     /** Its lair (0: a wanderer), and where that lair is. */
     public long lair;
     public float lairX, lairZ;
@@ -143,7 +149,8 @@ public final class Monster extends Npc {
     /** How big its figure is against a person's (its own skeleton's scale): the humanoids' swings reach as far as their arms. */
     @Override public float figureScale() { return kind.form == MonsterKind.Form.HUMANOID ? kind.scale() : 1; }
 
-    public String label() { return (breed != null ? breed.title + " dragon" : kind.title) + "  (level " + level + ")"; }
+    /** The name alone: its combat level is the tag beside it (Interactable.levelTag), coloured against the player's. */
+    public String label() { return breed != null ? breed.title + " dragon" : kind.title; }
 
     @Override public List<Option> options(Rpg g, Actor a) {
         return List.of();

@@ -103,6 +103,8 @@ public final class AstrattoNative {
     public static final int STREAM_END = 1, SIZEOF_STREAM_IO = 32;
     public static final int EVT_VOICE_ENDED = 96;
     public static final int VOICE_LOOP = 1, VOICE_POSITIONAL = 1 << 1, VOICE_OCCLUDE = 1 << 2, VOICE_REVERB = 1 << 3;
+    /** (2.16) A non-positional bed of the open air: muffled by the mixer as the listener goes indoors. */
+    public static final int VOICE_OUTDOOR = 1 << 4;
     public static final int SET_GAIN = 1, SET_PITCH = 1 << 1, SET_POSITION = 1 << 2, SET_FADE = 1 << 3;
 
     // ---- modules (128-159)
@@ -175,7 +177,7 @@ public final class AstrattoNative {
             {"astratto_snap_softbody", 40}, {"astratto_snap_vehicle", 176}, {"astratto_snap_agent", 104}, {"astratto_audio_stats", 72},
             {"astratto_snapshot_io", 24}, {"astratto_evt_module_log", 24}, {"astratto_render_block", 12}, {"astratto_shape_def", 12},
             {"astratto_render_table", 48}, {"astratto_mesh_io", 72}, {"astratto_renderer_desc", 32}, {"astratto_texture_desc", 40}, {"astratto_texture_update", 24},
-            {"astratto_world_look", 56}, {"astratto_rcmd_camera", 256}, {"astratto_rcmd_env", 112}, {"astratto_rcmd_light", 56}, {"astratto_rcmd_model", 112},
+            {"astratto_world_look", 56}, {"astratto_rcmd_camera", 256}, {"astratto_rcmd_env", 136}, {"astratto_rcmd_light", 56}, {"astratto_rcmd_model", 112},
             {"astratto_rcmd_particles", 16}, {"astratto_rcmd_quads", 16}, {"astratto_rcmd_grading", 32}, {"astratto_rcmd_body", 32},
             {"astratto_rcmd_world", 16}, {"astratto_rcmd_clear", 24}, {"astratto_rcmd_quality", 24}, {"astratto_rcmd_lens", 24}, {"astratto_rcmd_smoke", 16}, {"astratto_render_io", 120},
             {"astratto_rcmd_foliage", 168}, {"astratto_rcmd_props", 16}, {"astratto_rcmd_decals", 32},

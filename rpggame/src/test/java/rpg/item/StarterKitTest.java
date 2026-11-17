@@ -21,8 +21,10 @@ class StarterKitTest {
             Rpg g = game.add(new Rpg(game, "Kit", new Appearance(), true));
             var p = g.player;
             assertEquals(25, p.count(Items.COINS), "25 gold to start");
-            for (ItemDef d : new ItemDef[]{Items.SHORTBOW, Items.TINDERBOX, Items.FISHING_NET, Items.POT, Items.BUCKET, Items.BREAD, Items.SHRIMP})
+            for (ItemDef d : new ItemDef[]{Items.SHORTBOW, Items.TINDERBOX, Items.FISHING_NET, Items.BREAD, Items.SHRIMP})
                 assertEquals(1, p.count(d), "the kit's " + d.name + " is carried");
+            assertEquals(0, p.count(Items.POT), "no pot to start (0.4.8)");
+            assertEquals(0, p.count(Items.BUCKET), "no bucket to start (0.4.8)");
             assertNotNull(p.eq.get(ItemDef.Slot.MAIN), "the sword is worn");
             assertTrue(g.objects.all().stream().noneMatch(o -> o instanceof rpg.objects.GroundItem gi && Math.hypot(gi.x - p.x, gi.z - p.z) < 3), "nothing of the kit was dropped for want of room");
             // tidy: read row by row, the kinds come in the shelf's order

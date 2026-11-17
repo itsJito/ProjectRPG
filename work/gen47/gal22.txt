@@ -1,0 +1,90 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :gallery
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 14 2026 17:37:31 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 20.93s ({regions=795, overlays=558, variants=426, scarp=59, coast=447, erosion=376, peaks=94, lakes=61, isles=1, rivers=1065, wadis=14, ground=24, roads=636, causeways=3, architecture=1264, pitsFilled=1396, pits=513, banks=83, clamp=14, cliffs=77, columns=1124, falls=16, raise=11449, trees=293, outcrops=0, ways=749, lava=0, dungeons=99, postsSunk=28, floatingRemoved=59, floating=616}), made and lit in 2.40s
+[Load] ShadowVeil 23.40s
+[Load] renderer and UI 23.66s
+[water] flow field grown in 777 ms: 39016 columns moving
+[gathering] 757 wild herb patches, flax and berry bushes
+[monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 49 chunks made, 37 meshes, 1.77s
+[Load] 245 furniture models made in 0.17s
+[Load] first rendered frame 6.86s
+[Load] the world about the spawn made ready in 16.36s
+[Load] growth about the spawn: 14 chunks made, 56 meshes, 0.68s
+[Load] game frame 1: scene 34 ms, interface 1498 ms, render 28 ms
+[Load] game frame 2: scene 178 ms, interface 4 ms, render 6 ms
+[Load] game frame 3: scene 9 ms, interface 3 ms, render 33 ms
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-391-26-829-0.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-391-26-829-1.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-391-26-829-2.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-391-26-829-3.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-391-26-829-4.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-391-26-829-5.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-391-26-829-6.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-391-26-829-7.png
+[Load] growth about the spawn: 49 chunks made, 96 meshes, 1.36s
+[Load] 0 furniture models made in 0.00s
+[Load] the world about the spawn made ready in 1.83s
+[Load] growth about the spawn: 15 chunks made, 115 meshes, 0.88s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-537-19-848-0.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-537-19-848-1.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-537-19-848-2.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-537-19-848-3.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-537-19-848-4.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-537-19-848-5.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-537-19-848-6.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-537-19-848-7.png
+[Load] growth about the spawn: 49 chunks made, 97 meshes, 1.11s
+[Load] 0 furniture models made in 0.00s
+[Load] the world about the spawn made ready in 1.57s
+[Load] growth about the spawn: 14 chunks made, 113 meshes, 0.42s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-177-39-596-0.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-177-39-596-1.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-177-39-596-2.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-177-39-596-3.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-177-39-596-4.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-177-39-596-5.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-177-39-596-6.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-177-39-596-7.png
+[Load] growth about the spawn: 49 chunks made, 95 meshes, 1.04s
+[Load] 0 furniture models made in 0.00s
+[Load] the world about the spawn made ready in 1.64s
+[Load] growth about the spawn: 21 chunks made, 57 meshes, 0.57s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-201-25-947-0.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-201-25-947-1.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-201-25-947-2.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-201-25-947-3.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-201-25-947-4.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-201-25-947-5.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-201-25-947-6.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\dung1\in-201-25-947-7.png
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 2m 7s
+8 actionable tasks: 1 executed, 7 up-to-date

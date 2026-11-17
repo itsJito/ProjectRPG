@@ -1,0 +1,698 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+
+> Task :probe
+
+WorldInspectProbeTest > inspect() STANDARD_OUT
+    [Load] ShadowVeil grown in 20.96s ({regions=936, overlays=514, variants=473, scarp=46, coast=824, erosion=397, peaks=45, lakes=435, isles=4, rivers=753, wadis=12, ground=21, roads=674, causeways=3, architecture=1395, pitsFilled=1302, pits=429, banks=67, clamp=12, cliffs=59, columns=1368, falls=15, raise=10961, trees=278, outcrops=0, ways=556, postsSunk=32, floatingRemoved=59, floating=627}), made and lit in 2.18s
+    [water] flow field grown in 1413 ms: 39016 columns moving
+    [gathering] 757 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+
+    ================ 214, 41, 937  law Loxford  stand Y 40.0
+    structure here: loxford_houses_1 House (building) lot 212,935 - 216,939 floor 39
+      near loxford_graveyard          Loxford Graveyard                        graveyard      20 m lot 202,948-223,965 floor 39
+      near sextons_cottage            Sexton's cottage                         building       15 m lot 223,924-228,930 floor 38
+      near loxford_houses_0           House                                    building       17 m lot 228,936-232,940 floor 38
+      near loxford_houses_2           House                                    building       8 m lot 207,928-211,932 floor 39
+      near loxford_houses_3           House                                    building       15 m lot 203,922-207,926 floor 39
+      near loxford_houses_4           House                                    building       18 m lot 216,917-220,921 floor 39
+      near loxford_houses_5           House                                    building       24 m lot 213,911-217,915 floor 39
+      near loxford_houses_6           House                                    building       25 m lot 197,913-203,919 floor 39
+      near loxford_houses_7           House                                    building       33 m lot 210,901-216,907 floor 39
+      near loxford_houses_8           House                                    building       34 m lot 192,904-199,911 floor 39
+      near loxford_undertaker_bunker  Loxford Undertaker's Bunker              building       33 m lot 228,962-234,967 floor 38
+      object Door                   House door                     (216.5, 41.2, 937.5)
+      object Furniture              Bed                            (214.0, 40.5, 936.5)
+      object Furniture              Fireplace                      (214.0, 41.0, 938.5)
+      object Furniture              Rug                            (214.5, 40.5, 937.0)
+      npc Father Wulfric UNDERTAKER     (221.5, 39.0, 929.5) goal IDLE
+      npc Grimbold     UNDERTAKER     (231.5, 39.0, 960.5) goal IDLE
+      layer Y39 (x 210..218 across, z down; * the point)
+       aaaaaaabc
+       aaaaaaaab
+       aadddddab
+       aadeeedaa
+       aade*eecc
+       aadeeedca
+       aadddddaa
+       aaaaaaaaa
+       aaaaaaaaa
+      layer Y40 (x 210..218 across, z down; * the point)
+       .........
+       ....ff...
+       ..fddgf..
+       ..dhh.f..
+       ..d.*.i..
+       ..djj.f..
+       ..fdddf..
+       .........
+       .........
+      layer Y41 (x 210..218 across, z down; * the point)
+       .........
+       ....ff...
+       ..fklgf..
+       ..m...f..
+       ..l.*.i..
+       ..mjj.f..
+       ..fnnnf..
+       .........
+       .........
+      layer Y42 (x 210..218 across, z down; * the point)
+       .........
+       .........
+       ..fkfgf..
+       ..m...o..
+       ..f.*.o..
+       ..m...o..
+       ..fnnnf..
+       .........
+       .........
+      layer Y43 (x 210..218 across, z down; * the point)
+       ..p......
+       .p.....p.
+       .pqqqgqp.
+       .p.....p.
+       .p..*..p.
+       .p.....p.
+       .pqqqqqp.
+       .p.....p.
+       .........
+      layer Y44 (x 210..218 across, z down; * the point)
+       .p.......
+       ..p...p..
+       ..pqqgp..
+       ..p...p..
+       ..p.*.p..
+       ..p...p..
+       ..pqqqp..
+       ..p...p..
+       .........
+      layer Y45 (x 210..218 across, z down; * the point)
+       p........
+       ...p.p...
+       ...pqg...
+       ...p.p...
+       ...p*p...
+       ...p.p...
+       ...pqp...
+       ...p.p...
+       .........
+      legend: a=grass b=dirt c=gravel d=cobble e=planks f=spruce_log g=stone_bricks h=bed i=door j=headstone k=#171 l=glass m=#169 n=#172 o=#170 p=thatch q=timber_frame
+
+    ================ 209, 41, 930  law Loxford  stand Y 40.0
+    structure here: loxford_houses_2 House (building) lot 207,928 - 211,932 floor 39
+      near loxford_graveyard          Loxford Graveyard                        graveyard      27 m lot 202,948-223,965 floor 39
+      near sextons_cottage            Sexton's cottage                         building       17 m lot 223,924-228,930 floor 38
+      near loxford_houses_0           House                                    building       23 m lot 228,936-232,940 floor 38
+      near loxford_houses_1           House                                    building       9 m lot 212,935-216,939 floor 39
+      near loxford_houses_3           House                                    building       7 m lot 203,922-207,926 floor 39
+      near loxford_houses_4           House                                    building       14 m lot 216,917-220,921 floor 39
+      near loxford_houses_5           House                                    building       18 m lot 213,911-217,915 floor 39
+      near loxford_houses_6           House                                    building       16 m lot 197,913-203,919 floor 39
+      near loxford_houses_7           House                                    building       26 m lot 210,901-216,907 floor 39
+      near loxford_houses_8           House                                    building       26 m lot 192,904-199,911 floor 39
+      near loxford_houses_9           House                                    building       33 m lot 205,895-209,899 floor 39
+      near loxford_houses_10          House                                    building       40 m lot 203,887-209,893 floor 38
+      object Door                   House door                     (211.5, 41.2, 930.5)
+      object Furniture              Bed                            (208.5, 40.5, 930.0)
+      object Furniture              Pot rack                       (210.5, 41.0, 929.5)
+      object Furniture              Rug                            (209.5, 40.5, 930.0)
+      object Furniture              Candelabrum                    (208.5, 40.5, 931.5)
+      object Station                Range                          (209.5, 40.6, 929.5)
+      npc Father Wulfric UNDERTAKER     (221.5, 39.0, 929.5) goal IDLE
+      layer Y39 (x 205..213 across, z down; * the point)
+       aaabbbbbc
+       bbbbbbbbb
+       bbaaaaabb
+       bbadddabb
+       bbad*ddcc
+       bbadddacb
+       bbaaaaabb
+       bbbbbbbbb
+       bbbbbbbbb
+      layer Y40 (x 205..213 across, z down; * the point)
+       aef......
+       ....ff...
+       ..faaaf..
+       ..agh.f..
+       ..ag*.i..
+       ..aj..f..
+       ..faaef..
+       .........
+       .........
+      layer Y41 (x 205..213 across, z down; * the point)
+       kef......
+       ....ff...
+       ..flklf..
+       ..m...f..
+       ..k.*.i..
+       ..m...f..
+       ..fnkef..
+       .........
+       .........
+      layer Y42 (x 205..213 across, z down; * the point)
+       fef......
+       .........
+       ..flflf..
+       ..m...o..
+       ..f.*.o..
+       ..m...o..
+       ..fnfef..
+       .........
+       .........
+      layer Y43 (x 205..213 across, z down; * the point)
+       pepq.....
+       .q.q...q.
+       .qpppppq.
+       .q.....q.
+       .q..*..q.
+       .q.....q.
+       .qpppepq.
+       .q.....q.
+       ......q..
+      layer Y44 (x 205..213 across, z down; * the point)
+       peq......
+       ..q...q..
+       ..qpppq..
+       ..q...q..
+       ..q.*.q..
+       ..q...q..
+       ..qppeq..
+       ..q...q..
+       .......q.
+      layer Y45 (x 205..213 across, z down; * the point)
+       pe.......
+       .q.q.q...
+       ...qpq...
+       ...q.q...
+       ...q*q...
+       ...q.q...
+       ...qpe...
+       ...q.q...
+       ........q
+      legend: a=cobble b=grass c=gravel d=planks e=stone_bricks f=spruce_log g=bed h=range i=door j=table k=glass l=#171 m=#169 n=#172 o=#170 p=timber_frame q=thatch
+
+    ================ 205, 41, 924  law Loxford  stand Y 40.0
+    structure here: loxford_houses_3 House (building) lot 203,922 - 207,926 floor 39
+      near loxford_graveyard          Loxford Graveyard                        graveyard      34 m lot 202,948-223,965 floor 39
+      near sextons_cottage            Sexton's cottage                         building       21 m lot 223,924-228,930 floor 38
+      near loxford_houses_0           House                                    building       29 m lot 228,936-232,940 floor 38
+      near loxford_houses_1           House                                    building       17 m lot 212,935-216,939 floor 39
+      near loxford_houses_2           House                                    building       8 m lot 207,928-211,932 floor 39
+      near loxford_houses_4           House                                    building       14 m lot 216,917-220,921 floor 39
+      near loxford_houses_5           House                                    building       15 m lot 213,911-217,915 floor 39
+      near loxford_houses_6           House                                    building       9 m lot 197,913-203,919 floor 39
+      near loxford_houses_7           House                                    building       21 m lot 210,901-216,907 floor 39
+      near loxford_houses_8           House                                    building       18 m lot 192,904-199,911 floor 39
+      near loxford_houses_9           House                                    building       27 m lot 205,895-209,899 floor 39
+      near loxford_houses_10          House                                    building       34 m lot 203,887-209,893 floor 38
+      object Door                   House door                     (207.5, 41.2, 924.5)
+      object Furniture              Bed                            (204.5, 40.5, 924.0)
+      object Furniture              Pot rack                       (206.5, 41.0, 923.5)
+      object Furniture              Candelabrum                    (205.5, 40.5, 923.5)
+      object Station                Range                          (204.5, 40.6, 925.5)
+      npc Father Wulfric UNDERTAKER     (221.5, 39.0, 929.5) goal IDLE
+      layer Y39 (x 201..209 across, z down; * the point)
+       aaaaaaaaa
+       aaaaaaaaa
+       aabbbbbaa
+       aabcccbaa
+       aabc*ccdd
+       aabcccbda
+       aabbbbbaa
+       aaaaaaaaa
+       aaaaaabbb
+      layer Y40 (x 201..209 across, z down; * the point)
+       .........
+       .........
+       ..ebbbe..
+       ..bfg.e..
+       ..bf*.h..
+       ..bi..e..
+       ..ebbje..
+       ........e
+       ......ebb
+      layer Y41 (x 201..209 across, z down; * the point)
+       .........
+       .........
+       ..eklke..
+       ..m...e..
+       ..m.*.h..
+       ..m...e..
+       ..enlje..
+       ........e
+       ......ekl
+      layer Y42 (x 201..209 across, z down; * the point)
+       .........
+       .........
+       ..ekeke..
+       ..m...o..
+       ..m.*.o..
+       ..m...o..
+       ..eneje..
+       .........
+       ......eke
+      layer Y43 (x 201..209 across, z down; * the point)
+       .........
+       .p.....p.
+       .pqqqqqp.
+       .p.....p.
+       .p..*..p.
+       .p.....p.
+       .pqqqjqp.
+       .p...p.p.
+       .....pqqq
+      layer Y44 (x 201..209 across, z down; * the point)
+       .........
+       ..p...p..
+       ..pqqqp..
+       ..p...p..
+       ..p.*.p..
+       ..p...p..
+       ..pqqjp..
+       ..p...p..
+       ......pqq
+      layer Y45 (x 201..209 across, z down; * the point)
+       .........
+       ...p.p...
+       ...pqp...
+       ...p.p...
+       ...p*p...
+       ...p.p...
+       ...pqj...
+       ...p.p.p.
+       .......pq
+      legend: a=grass b=cobble c=planks d=gravel e=spruce_log f=bed g=table h=door i=range j=stone_bricks k=#171 l=glass m=#169 n=#172 o=#170 p=thatch q=timber_frame
+
+    ================ 218, 41, 919  law Loxford  stand Y 40.0
+    structure here: loxford_houses_4 House (building) lot 216,917 - 220,921 floor 39
+      near loxford_graveyard          Loxford Graveyard                        graveyard      38 m lot 202,948-223,965 floor 39
+      near sextons_cottage            Sexton's cottage                         building       12 m lot 223,924-228,930 floor 38
+      near loxford_houses_0           House                                    building       23 m lot 228,936-232,940 floor 38
+      near loxford_houses_1           House                                    building       19 m lot 212,935-216,939 floor 39
+      near loxford_houses_2           House                                    building       14 m lot 207,928-211,932 floor 39
+      near loxford_houses_3           House                                    building       14 m lot 203,922-207,926 floor 39
+      near loxford_houses_5           House                                    building       6 m lot 213,911-217,915 floor 39
+      near loxford_houses_6           House                                    building       18 m lot 197,913-203,919 floor 39
+      near loxford_houses_7           House                                    building       15 m lot 210,901-216,907 floor 39
+      near loxford_houses_8           House                                    building       25 m lot 192,904-199,911 floor 39
+      near loxford_houses_9           House                                    building       24 m lot 205,895-209,899 floor 39
+      near loxford_houses_10          House                                    building       31 m lot 203,887-209,893 floor 38
+      near loxford_houses_11          House                                    building       39 m lot 200,881-204,885 floor 38
+      object Door                   House door                     (216.5, 41.2, 919.5)
+      object Furniture              Bed                            (219.0, 40.5, 918.5)
+      object Furniture              Pot rack                       (219.5, 41.0, 920.5)
+      object Furniture              Rug                            (218.5, 40.5, 920.0)
+      object Furniture              Candelabrum                    (219.5, 40.5, 920.5)
+      object Station                Range                          (219.5, 40.6, 919.5)
+      npc Father Wulfric UNDERTAKER     (221.5, 39.0, 929.5) goal IDLE
+      layer Y39 (x 214..222 across, z down; * the point)
+       aaaabbbbb
+       bbbbbbbbb
+       bbaaaaabb
+       bbacccabb
+       ddcc*cabb
+       ddacccabb
+       ebaaaaabb
+       ebbbbbbb.
+       ddbbbbb..
+      layer Y40 (x 214..222 across, z down; * the point)
+       aaaf.....
+       ff.......
+       ..fgaaf..
+       ..f.hha..
+       ..i.*ja..
+       ..f..ka..
+       ..faaaf..
+       .........
+       .........
+      layer Y41 (x 214..222 across, z down; * the point)
+       lmlf.....
+       ff.......
+       ..fgmnf..
+       ..f...o..
+       ..i.*.m..
+       ..f...o..
+       ..flmlf..
+       .........
+       .........
+      layer Y42 (x 214..222 across, z down; * the point)
+       lflf.....
+       .........
+       ..fgfnf..
+       ..p...o..
+       ..p.*.f..
+       ..p...o..
+       ..flflf..
+       .........
+       .........
+      layer Y43 (x 214..222 across, z down; * the point)
+       qqqqr....
+       .r..r..r.
+       .rqgqqqr.
+       .r.....r.
+       .r..*..r.
+       .r.....r.
+       .rqqqqqr.
+       .r.....r.
+       ........r
+      layer Y44 (x 214..222 across, z down; * the point)
+       qqqr.....
+       ..rr..r..
+       ..rgqqr..
+       ..r...r..
+       ..r.*.r..
+       ..r...r..
+       ..rqqqr..
+       ..r...r..
+       .........
+      layer Y45 (x 214..222 across, z down; * the point)
+       rqr......
+       r.rr.r...
+       ...gqr...
+       ...r.r...
+       ...r*r...
+       ...r.r...
+       ...rqr...
+       ...r.r...
+       .........
+      legend: a=cobble b=grass c=planks d=gravel e=dirt f=spruce_log g=stone_bricks h=bed i=door j=range k=table l=#172 m=glass n=#171 o=#170 p=#169 q=timber_frame r=thatch
+
+    ================ 215, 41, 913  law Loxford  stand Y 40.0
+    structure here: loxford_houses_5 House (building) lot 213,911 - 217,915 floor 39
+      near sextons_cottage            Sexton's cottage                         building       18 m lot 223,924-228,930 floor 38
+      near loxford_houses_0           House                                    building       30 m lot 228,936-232,940 floor 38
+      near loxford_houses_1           House                                    building       25 m lot 212,935-216,939 floor 39
+      near loxford_houses_2           House                                    building       18 m lot 207,928-211,932 floor 39
+      near loxford_houses_3           House                                    building       15 m lot 203,922-207,926 floor 39
+      near loxford_houses_4           House                                    building       7 m lot 216,917-220,921 floor 39
+      near loxford_houses_6           House                                    building       15 m lot 197,913-203,919 floor 39
+      near loxford_houses_7           House                                    building       9 m lot 210,901-216,907 floor 39
+      near loxford_houses_8           House                                    building       20 m lot 192,904-199,911 floor 39
+      near loxford_houses_9           House                                    building       17 m lot 205,895-209,899 floor 39
+      near loxford_houses_10          House                                    building       24 m lot 203,887-209,893 floor 38
+      near loxford_houses_11          House                                    building       32 m lot 200,881-204,885 floor 38
+      near loxford_houses_12          House                                    building       40 m lot 197,872-204,879 floor 38
+      object Door                   House door                     (213.5, 41.2, 913.5)
+      object Furniture              Bed                            (216.0, 40.5, 912.5)
+      object Furniture              Rug                            (215.5, 40.5, 914.0)
+      object Furniture              Candelabrum                    (216.5, 40.5, 913.5)
+      object Station                Range                          (216.5, 40.6, 914.5)
+      npc Father Wulfric UNDERTAKER     (221.5, 39.0, 929.5) goal IDLE
+      layer Y39 (x 211..219 across, z down; * the point)
+       aaaaaaaaa
+       aaaaaaaaa
+       aabbbbbaa
+       aabcccbaa
+       ddcc*cbaa
+       ddbcccbaa
+       dabbbbbaa
+       daaaaaaaa
+       deaaabbbb
+      layer Y40 (x 211..219 across, z down; * the point)
+       .........
+       .........
+       ..fgbbf..
+       ..f.hhb..
+       ..i.*jb..
+       ..f..kb..
+       ..fbbbf..
+       ...ff....
+       .....fgbb
+      layer Y41 (x 211..219 across, z down; * the point)
+       .........
+       .........
+       ..fglmf..
+       ..f...n..
+       ..i.*.l..
+       ..f...n..
+       ..folof..
+       ...ff....
+       .....fglm
+      layer Y42 (x 211..219 across, z down; * the point)
+       .........
+       .........
+       ..fgfmf..
+       ..p...n..
+       ..p.*.f..
+       ..p...n..
+       ..fofof..
+       .........
+       .....fgfm
+      layer Y43 (x 211..219 across, z down; * the point)
+       .........
+       .q.....q.
+       .qrgrrrq.
+       .q.....q.
+       .q..*..q.
+       .q.....q.
+       .qrrrrrq.
+       .q..q..q.
+       ....qrgrr
+      layer Y44 (x 211..219 across, z down; * the point)
+       .........
+       ..q...q..
+       ..qgrrq..
+       ..q...q..
+       ..q.*.q..
+       ..q...q..
+       ..qrrrq..
+       ..q..qq..
+       .....qgrr
+      layer Y45 (x 211..219 across, z down; * the point)
+       .........
+       ...q.q...
+       ...grq...
+       ...q.q...
+       ...q*q...
+       ...q.q...
+       ...qrq...
+       ...q.qq.q
+       ......grq
+      legend: a=grass b=cobble c=planks d=gravel e=dirt f=spruce_log g=stone_bricks h=bed i=door j=table k=range l=glass m=#171 n=#170 o=#172 p=#169 q=thatch r=timber_frame
+
+    ================ 866, 38, 934  law Azharad  stand Y 37.0
+    structure here: azharad_homes_3 House (building) lot 864,932 - 869,937 floor 36
+      near azharad_bank               Azharad Bank                             building       38 m lot 882,960-893,969 floor 36
+      near azharad_workshop           Azharad Workshop                         building       23 m lot 882,922-893,931 floor 36
+      near zafirs_swords              Zafir's Superior Swords                  building       24 m lot 850,951-858,958 floor 36
+      near mohameds_crafting          Mohamed's Crafting Store                 building       23 m lot 856,908-864,915 floor 36
+      near azharad_homes_0            House                                    building       33 m lot 830,935-836,940 floor 36
+      near azharad_homes_1            House                                    building       38 m lot 830,950-836,955 floor 36
+      near azharad_homes_2            House                                    building       6 m lot 857,932-862,937 floor 36
+      near azharad_homes_4            House                                    building       20 m lot 875,947-880,951 floor 36
+      near azharad_homes_5            House                                    building       23 m lot 882,944-887,949 floor 36
+      near azharad_homes_6            House                                    building       30 m lot 890,944-895,949 floor 36
+      near azharad_homes_7            House                                    building       34 m lot 896,927-902,932 floor 36
+      near azharad_homes_19           House                                    building       6 m lot 865,925-870,930 floor 36
+      near azharad_homes_20           House                                    building       25 m lot 868,907-873,912 floor 36
+      near azharad_homes_21           House                                    building       26 m lot 882,913-887,919 floor 36
+      near azharad_homes_22           House                                    building       34 m lot 886,906-891,911 floor 36
+      near azharad_homes_61           House                                    building       37 m lot 861,894-866,900 floor 36
+      near azharad_homes_62           House                                    building       31 m lot 868,900-872,905 floor 36
+      near azharad_homes_63           House                                    building       20 m lot 848,918-853,924 floor 36
+      near azharad_homes_89           House                                    building       24 m lot 870,954-875,959 floor 36
+      object Door                   House door                     (869.5, 38.2, 935.0)
+      object Furniture              Bed                            (867.5, 41.5, 934.0)
+      object Furniture              Bedside table                  (868.5, 41.5, 933.5)
+      object Furniture              Pot rack                       (868.5, 38.0, 936.5)
+      object Furniture              Rug                            (867.5, 37.5, 935.0)
+      object Furniture              Chandelier                     (867.5, 38.0, 934.5)
+      object Furniture              Rug                            (867.5, 41.5, 935.0)
+      object Station                Range                          (867.5, 37.6, 936.5)
+      object Container              Chest                          (867.5, 37.4, 933.5)
+      object Container              Chest                          (868.5, 41.4, 936.5)
+      npc Zafir        CRAFTSMAN      (850.5, 37.0, 950.5) goal IDLE
+      npc Mohamed      MERCHANT       (865.5, 37.0, 908.5) goal IDLE
+      layer Y36 (x 862..870 across, z down; * the point)
+       aaabbbbbb
+       aaaaaaaaa
+       babbbbbba
+       babccccba
+       babc*cccd
+       babcccccd
+       babccccba
+       babbbbbba
+       aaaaaaaaa
+      layer Y37 (x 862..870 across, z down; * the point)
+       ...ebbbbe
+       .........
+       e.ebbbbe.
+       b.b..f.e.
+       b.bg*..h.
+       b.bc...h.
+       b.bcci.e.
+       e.ebbbbe.
+       ....ee...
+      layer Y38 (x 862..870 across, z down; * the point)
+       ...ejjkje
+       .........
+       e.eeekee.
+       e.e....e.
+       e.k.*..h.
+       e.eg...h.
+       e.ecc..e.
+       e.eeeeee.
+       ....ee...
+      layer Y39 (x 862..870 across, z down; * the point)
+       ...ejjkje
+       .........
+       e.eeekee.
+       e.e....e.
+       e.k.*..e.
+       e.e....e.
+       e.egc..e.
+       e.eeeeee.
+       .........
+      layer Y40 (x 862..870 across, z down; * the point)
+       ...eeeeee
+       .........
+       e.eeeeee.
+       e.ecccce.
+       e.e.*cce.
+       e.e.ccce.
+       e.e.gcce.
+       e.eeeeee.
+       .........
+      layer Y41 (x 862..870 across, z down; * the point)
+       ...ejjjje
+       .........
+       e.eeeeee.
+       e.ellmne.
+       e.e.*m.e.
+       e.e....e.
+       e.e...fe.
+       e.eeeeee.
+       .........
+      layer Y42 (x 862..870 across, z down; * the point)
+       ...ejjkje
+       .........
+       e.eeekee.
+       e.e....e.
+       e.k.*..k.
+       k.e....e.
+       e.e....e.
+       e.eeekee.
+       .........
+      legend: a=sand b=red_sandstone c=terracotta d=gravel e=sandstone f=crate g=stairs h=door i=range j=adobe_zellige k=white_glass l=fence m=bed n=table
+
+    ================ 870, 38, 956  law Azharad  stand Y 37.0
+    structure here: azharad_homes_89 House (building) lot 870,954 - 875,959 floor 36
+      near azharad_bank               Azharad Bank                             building       20 m lot 882,960-893,969 floor 36
+      near azharad_workshop           Azharad Workshop                         building       34 m lot 882,922-893,931 floor 36
+      near zafirs_swords              Zafir's Superior Swords                  building       16 m lot 850,951-858,958 floor 36
+      near azharad_homes_1            House                                    building       37 m lot 830,950-836,955 floor 36
+      near azharad_homes_2            House                                    building       23 m lot 857,932-862,937 floor 36
+      near azharad_homes_3            House                                    building       21 m lot 864,932-869,937 floor 36
+      near azharad_homes_4            House                                    building       10 m lot 875,947-880,951 floor 36
+      near azharad_homes_5            House                                    building       17 m lot 882,944-887,949 floor 36
+      near azharad_homes_6            House                                    building       25 m lot 890,944-895,949 floor 36
+      near azharad_homes_7            House                                    building       39 m lot 896,927-902,932 floor 36
+      near azharad_homes_19           House                                    building       28 m lot 865,925-870,930 floor 36
+      near azharad_homes_63           House                                    building       39 m lot 848,918-853,924 floor 36
+      object Door                   House door                     (870.5, 38.2, 957.0)
+      object Furniture              Bed                            (872.0, 41.5, 958.5)
+      object Furniture              Bedside table                  (871.5, 41.5, 957.5)
+      object Furniture              Rug                            (872.5, 37.5, 957.0)
+      object Furniture              Chandelier                     (872.5, 38.0, 957.5)
+      object Furniture              Painting                       (873.5, 42.0, 955.5)
+      object Furniture              Rug                            (872.5, 41.5, 957.0)
+      object Station                Range                          (872.5, 37.6, 955.5)
+      object Container              Chest                          (872.5, 37.4, 958.5)
+      object Container              Chest                          (871.5, 41.4, 955.5)
+      npc Tariq        CIVIC          (882.5, 37.0, 959.5) goal IDLE
+      npc Zafir        CRAFTSMAN      (850.5, 37.0, 950.5) goal IDLE
+      layer Y36 (x 866..874 across, z down; * the point)
+       aaabbbbbb
+       aaabbbbbb
+       aabbccccc
+       aabbcdddd
+       aeee*dddd
+       aeeeddddd
+       bbbbcdddd
+       bbbbccccc
+       bbbbbbbbb
+      layer Y37 (x 866..874 across, z down; * the point)
+       .........
+       .........
+       ....acccc
+       ....a.fdd
+       ....*...d
+       ....g...h
+       ....a.i..
+       j...acccc
+       ......aa.
+      layer Y38 (x 866..874 across, z down; * the point)
+       .........
+       .........
+       ....aklkk
+       ....a..dd
+       ....*...h
+       ....g....
+       ....a....
+       j...aklkk
+       ......aa.
+      layer Y39 (x 866..874 across, z down; * the point)
+       .........
+       .........
+       ....aklkk
+       ....k..dh
+       ....*....
+       ....d....
+       ....k....
+       j...aklkk
+       .........
+      layer Y40 (x 866..874 across, z down; * the point)
+       .........
+       .........
+       ....ddddd
+       ....dddh.
+       ....*ddd.
+       ....dddd.
+       ....ddddd
+       m...ddddd
+       .........
+      layer Y41 (x 866..874 across, z down; * the point)
+       .........
+       .........
+       ....aaaaa
+       ....ai...
+       ....*....
+       ....an.o.
+       ....appoo
+       ....aaaaa
+       .........
+      layer Y42 (x 866..874 across, z down; * the point)
+       .........
+       .........
+       ....aalaa
+       ....a....
+       ....*....
+       ....l....
+       ....a....
+       ....aalaa
+       .........
+      legend: a=sandstone b=sand c=red_sandstone d=terracotta e=gravel f=range g=door h=stairs i=crate j=spruce_log k=adobe_zellige l=white_glass m=lamp n=table o=fence p=bed
+  slow: rpg.probe.WorldInspectProbeTest.inspect() 52.012 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 22s
+9 actionable tasks: 2 executed, 7 up-to-date

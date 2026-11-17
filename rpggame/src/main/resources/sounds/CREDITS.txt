@@ -127,3 +127,34 @@ animal/whale_blow_1-2.ogg
 animal/wolf_growl_1-2.ogg
     "Dogs' Expectation about Signalers' Body Size by Virtue of Their Growls" (PLoS ONE 0015175, supplementary s006/s007,
     via Wikimedia Commons) - CC BY 2.5. Normalised. Used for the wolf's growl.
+animal/crow_caw_1-3.ogg
+    "Carrion Crow #3", "#5" and "#4" (sounds 3463, 3465, 3464) by Joseph Sardin, BigSoundBank (bigsoundbank.com) -
+    Creative Commons Zero (CC0), public domain. One caw cut from each and normalised.
+animal/pigeon_coo_1-2.ogg
+    "Columba livia - Rock Dove XC541143" and "XC539061" by Marie-Lan Tay Pamart (xeno-canto, via Wikimedia Commons) -
+    CC BY-SA 4.0. Credit required. One coo cut from each, band-limited to the call and normalised.
+animal/vulture_hiss_1-2.ogg
+    "Turkey Vulture" by G. McGrane (Wikimedia Commons, File:Turkey_Vulture.ogg) - public domain. Two calls cut out and
+    normalised.
+elements/wind_soft.ogg, wind_gale.ogg, blizzard.ogg, sand.ogg
+    BigSoundBank by Joseph Sardin (bigsoundbank.com) - Creative Commons Zero (CC0), public domain. Sound numbers 0595 ("Wind"), 0153 ("Strong wind #3") and 0147 ("Whistling of the Wind #1") for the gale,
+    0152 ("Strong wind #2") and 0155 ("Whistling of the Wind #2") for the blizzard, 0154 ("Strong wind #4", brightened)
+    with 0595 for the sandstorm. Each cut into a seamless loop (work/gen47/hqsnd/build_sounds.py) at an even loudness.
+elements/hail.ogg
+    "Hail in Melbourne 19-June-2023" by Amrithraj (Wikimedia Commons) - CC BY-SA 4.0. Credit required. Cut into a seamless
+    loop and normalised.
+elements/rain_light.ogg, rain_heavy.ogg (0.4.8)
+    "Bourne woods rain 2020-05-10 0757" by Robert EA Harvey (Wikimedia Commons) - CC BY-SA 4.0. Credit required.
+    "Rain on leaves (Gravity Sound)" by Gravity Sound (Wikimedia Commons) - CC BY 4.0. Credit required.
+    "Listening to Raindrops (1035382 - heavy loop)" by NASA (Wikimedia Commons) - public domain.
+    "Summer Rain on Terrace" (1019) by Joseph Sardin, BigSoundBank - CC0.
+    Light rain: the wood's rain over the rain on leaves; heavy rain: the rain on leaves with NASA's heavy rain and the
+    terrace beneath. Each band-limited, cut into a seamless loop at an even loudness (work/gen48/hqsnd/build_rain.py).
+elements/rain_roof.ogg (0.4.8)
+    "Rain Under an Umbrella" (2679) and "Rain on plastic tarpaulin" (1292) by Joseph Sardin, BigSoundBank - CC0. Mixed,
+    band-limited and cut into a seamless loop.
+elements/drops/drop_*.ogg (0.4.8)
+    Single drops cut from BigSoundBank recordings by Joseph Sardin (CC0): "Drops of water #1" and "#2" (1384, 1385) and
+    "Rain on Puddle" (1290) for water, "Rain on concrete" (1289) for stone, "Rain on plastic tarpaulin" (1292) and "Big
+    rain on car roof" (1294) for roofs; and from "Rain on leaves (Gravity Sound)" (Wikimedia Commons, CC BY 4.0) for
+    leaves. Each the cleanest onset of its recording, faded and normalised (work/gen48/hqsnd/build_rain.py).

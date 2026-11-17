@@ -189,6 +189,8 @@ final class Gallery {
         if ("locomotion".equals(System.getenv("RPG_GALLERY_ONLY"))) { locomotionShots(tag); return 0; }
         // RPG_GALLERY_ONLY=animals: just the animal sheets (a quick look while working on them)
         if ("animals".equals(System.getenv("RPG_GALLERY_ONLY"))) { if (!female) animalSheets(); return 0; }
+        if ("birds".equals(System.getenv("RPG_GALLERY_ONLY"))) { birdSheets(); return 0; }
+        if ("chairs".equals(System.getenv("RPG_GALLERY_ONLY"))) { chairShots(); return 0; }
         // RPG_GALLERY_ONLY=motion: the locomotion and blows only, each also measured for twitching under uneven frames
         boolean motionOnly = "motion".equals(System.getenv("RPG_GALLERY_ONLY"));
         // RPG_GALLERY_ONLY=daycycle: one view of the street across a whole day, each still after the eye has adapted
@@ -855,6 +857,54 @@ final class Gallery {
                 reviewUi("fp-" + id + "-" + pitch);
             }
         }
+        // (0.4.8) RPG_REVIEW_ONLY=p34ui: the journal (empty, a quest chosen and set active, the settings), the world map whole,
+        // zoomed in on the player with markers dropped and the active quest starred, and a skill's unlock list
+        if (want.test("p34ui")) {
+            stand.accept(start); g.controller.snapTo(map.spawnYaw); g.state.minutes = 12 * 60; frames(30);
+            g.questLog.showUnstarted = false;
+            hud.go(Hud.Scene.JOURNAL); reviewUi("p34-journal-default"); hud.closeAll();
+            g.questLog.showUnstarted = true;
+            hud.go(Hud.Scene.JOURNAL); reviewUi("p34-journal-unstarted"); hud.closeAll();
+            g.quests.start();
+            g.questLog.active = "courier";
+            hud.journalSelect("courier");
+            hud.go(Hud.Scene.JOURNAL); reviewUi("p34-journal-quest"); hud.closeAll();
+            hud.journalSettings(true);
+            hud.go(Hud.Scene.JOURNAL); reviewUi("p34-journal-settings"); hud.closeAll();
+            hud.journalSettings(false);
+            g.questLog.mapMarks.clear();
+            g.questLog.mapMarks.add(new float[]{g.player.x + 40, g.player.z - 25, 0}); g.questLog.mapMarks.add(new float[]{g.player.x - 60, g.player.z + 30, 1}); g.questLog.nextMark = 2;
+            hud.flag = new float[]{g.player.x + 20, g.player.z + 45};
+            hud.go(Hud.Scene.MAP); reviewUi("p34-map-whole");
+            for (float z : new float[]{3, 8}) { hud.mapView(g.player.x, g.player.z, z); reviewUi("p34-map-zoom" + (int) z); }
+            hud.closeAll();
+            hud.go(Hud.Scene.MAP); hud.mapView(g.player.x, g.player.z, 1); hud.closeAll();
+            frames(10); reviewUi("p34-minimap-active");
+            for (rpg.skill.Skill sk : new rpg.skill.Skill[]{rpg.skill.Skill.SMITHING, rpg.skill.Skill.ATTACK, rpg.skill.Skill.FISHING}) {
+                hud.guide = sk; hud.go(Hud.Scene.SKILLS); reviewUi("p34-skills-" + sk.name().toLowerCase()); hud.closeAll();
+            }
+        }
+        // (0.4.8) RPG_REVIEW_ONLY=p34snow: deep snow, the player walked across open ground and a cart's worth of props in it
+        // (prints pressed in, the snow capping the blocks' edges); then soaked ground in the rain (puddles, wet prints)
+        if (want.test("p34snow")) {
+            float[] pt = start;
+            stand.accept(pt); g.controller.snapTo(map.spawnYaw); g.state.minutes = 11 * 60; g.player.firstPerson = false;
+            for (String wx : new String[]{"Snow", "Rain"}) {
+                g.weatherSystem.force(wx, g.player.x, g.player.z, 6);
+                g.timeSystem.weather.snap();
+                if (wx.equals("Snow")) { g.timeSystem.weather.snowCover = 1; g.timeSystem.weather.wetness = 0; }
+                else { g.timeSystem.weather.snowCover = 0; g.timeSystem.weather.wetness = 1; }
+                stand.accept(pt); frames(30);
+                float x0 = g.player.x, z0 = g.player.z;
+                for (int i = 0; i < 150; i++) { g.controller.in.forward = 1; frames(1); }
+                g.controller.in.forward = 0; frames(20);
+                float x1 = g.player.x, z1 = g.player.z, mx = (x0 + x1) / 2, mz = (z0 + z1) / 2, y = rpg.world.WorldMap.standY(mx, mz);
+                String tag = wx.toLowerCase();
+                view(mx + 4, y + 3.2f, mz + 4, mx, y, mz, "p34-" + tag + "-trail");
+                view(x0 - (x1 - x0) * 0.3f, y + 1.7f, z0 - (z1 - z0) * 0.3f, x1, y + 0.3f, z1, "p34-" + tag + "-along");
+                view(mx + 8, y + 6, mz - 8, mx - 4, y, mz + 4, "p34-" + tag + "-wide");
+            }
+        }
         // RPG_REVIEW_AT="x,y,z[,dist];...": four views of each point (from the north, east, south and west, a little above),
         // at noon, the player taken out of the way - for a bug report's coordinates
         String at = System.getenv("RPG_REVIEW_AT");
@@ -870,6 +920,43 @@ final class Gallery {
                 view(ex, Math.max(y + dist * 0.45f, rpg.world.WorldMap.standY(ex, ez) + 2), ez, x, y + 1, z, "at-" + (int) x + "-" + (int) z + "-" + dirs[k]);
             }
             view(x + 0.5f, y + dist * 1.6f, z + 0.5f + dist * 0.2f, x, y, z, "at-" + (int) x + "-" + (int) z + "-top");
+        }
+        // (0.4.7) RPG_REVIEW_WHO="Name,Name,...[;open]": each named person brought out onto open ground beside them (or
+        // seen where they stand with ';stay'), held still, and seen from the front, the front quarter, the side and the
+        // back at noon - a person's look, gear and poses
+        String who = System.getenv("RPG_REVIEW_WHO");
+        if (who != null && !who.isBlank()) {
+            String[] parts = who.split(";");
+            boolean stay = parts.length > 1 && parts[1].trim().equals("stay");
+            for (String name : parts[0].split(",")) {
+                rpg.ai.Npc n = null;
+                for (rpg.ai.Npc o : g.npcs) if (o.name.equalsIgnoreCase(name.trim()) || o.name.endsWith(" " + name.trim())) { n = o; break; }
+                if (n == null) { System.out.println("[who] no " + name); continue; }
+                g.state.minutes = 12 * 60; g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR); g.timeSystem.weather.snap();
+                float x = n.x, z = n.z;
+                if (!n.loaded) { g.ai.reload(n); n.offstage = false; n.indoors = false; }
+                if (!stay) { float[] d = openGround(n.x, n.z, 5); x = d[0]; z = d[1]; g.teleport(n, x, rpg.world.WorldMap.standY(x, z), z); }
+                float y = rpg.world.WorldMap.standY(x, z);
+                g.teleport(g.player, x + 9, rpg.world.WorldMap.standY(x + 9, z), z); Main.preloadAll(g, gfx); gfx.preloadWorld(g, x, z); frames(30);
+                n.yaw = n.wantYaw = 0; n.nextThink = g.time + 1e6;
+                for (int i = 0; i < 60; i++) { n.yaw = n.wantYaw = 0; n.vx = n.vz = 0; if (Math.hypot(n.x - x, n.z - z) > 0.3) g.teleport(n, x, y, z); game.tick(1 / 60f); draw(new float[]{x, y + 1.6f, z - 3, x, y + 1.1f, z}, 1 / 60f); }
+                StringBuilder worn = new StringBuilder();
+                for (rpg.item.ItemDef.Slot sl : rpg.item.ItemDef.Slot.values()) if (n.eq.def(sl) != null) worn.append(' ').append(sl).append('=').append(n.eq.def(sl).id);
+                System.out.println("[who] " + n.name + " (" + n.role + ", " + n.title + ") at " + n.x + "," + n.y + "," + n.z + " wears" + worn);
+                String tag = "who-" + name.trim().toLowerCase(java.util.Locale.ROOT).replace(' ', '_');
+                // round them by the way they actually face (forward is -sin, -cos of their yaw)
+                // the person held facing north (yaw 0, forward -z) and the frames drawn without the world stepping on
+                double[] around = {0, Math.PI / 4, Math.PI / 2, Math.PI};
+                String[] sides = {"front", "quarter", "side", "back"};
+                for (int k = 0; k <= 4; k++) {
+                    n.yaw = n.wantYaw = 0;
+                    double a2 = k < 4 ? around[k] : 0;
+                    float r = k < 4 ? 3.2f : 1.4f, ey = k < 4 ? y + 1.55f : y + 2.1f, ty = k < 4 ? y + 1.0f : y + 1.55f;
+                    float[] cam = {x - (float) Math.sin(a2) * r, ey, z - (float) Math.cos(a2) * r, x, ty, z};
+                    for (int i = 0; i < 4; i++) { n.yaw = n.wantYaw = 0; draw(cam, 0); }
+                    Main.shot(gfx, win.width, win.height, new File(shots, tag + "-" + (k < 4 ? sides[k] : "face") + ".png"));
+                }
+            }
         }
         // (0.4.6) RPG_REVIEW_WEATHER="x,y,z;name,name,...": each weather brought over a place and let settle, seen from the
         // street at eye height and from a little above (the weather's own reference shots)
@@ -898,11 +985,42 @@ final class Gallery {
             float x = Float.parseFloat(v[0]) + 0.5f, y = Float.parseFloat(v[1]), z = Float.parseFloat(v[2]) + 0.5f, eye = v.length > 3 ? Float.parseFloat(v[3]) : 1.6f;
             g.state.minutes = 12 * 60; g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR); g.timeSystem.weather.snap();
             g.teleport(g.player, x + 40, rpg.world.WorldMap.standY(x + 40, z), z); Main.preloadAll(g, gfx); gfx.preloadWorld(g, x, z); gfx.preloadChunks(g, x, z); frames(40);
+            // the body at the eye (seen from within: the fog's ring and a room's air are the player's, not a far-off body's)
+            g.player.firstPerson = true; g.teleport(g.player, x, y, z);
             for (int i = 0; i < 150; i++) { game.tick(1 / 60f); draw(new float[]{x, y + eye, z, x, y + eye - 0.6f, z - 4}, 1 / 60f); }
             for (int k = 0; k < 8; k++) {
                 double a = k * Math.PI / 4;
                 float dx = (float) Math.sin(a), dz = -(float) Math.cos(a);
                 view(x, y + eye, z, x + dx * 4, y + eye - 0.6f, z + dz * 4, "in-" + (int) x + "-" + (int) y + "-" + (int) z + "-" + k);
+            }
+        }
+        // (0.4.8) RPG_REVIEW_ONLY=deeps: one level of each theme under ShadowVeil, its two largest rooms each seen from a
+        // high corner once the eye has settled to the torchlight (the dungeons' dressing: floors, plinths, beams, pieces)
+        if (only != null && only.contains("deeps")) {
+            java.util.Set<rpg.world.DungeonLayout.Theme> seen = java.util.EnumSet.noneOf(rpg.world.DungeonLayout.Theme.class);
+            for (var l : rpg.world.DungeonLayout.underground()) {
+                if (!seen.add(l.theme)) continue;
+                var rooms = new java.util.ArrayList<>(l.rooms);
+                rooms.sort((a, b) -> Integer.compare((b.x1() - b.x0()) * (b.z1() - b.z0()), (a.x1() - a.x0()) * (a.z1() - a.z0())));
+                for (int i = 0; i < Math.min(2, rooms.size()); i++) {
+                    var room = rooms.get(i);
+                    float cx = l.ox + room.cx(), cz = l.oz + room.cz(), f = l.floorY;
+                    g.state.minutes = 12 * 60;
+                    g.teleport(g.player, cx, f, cz); g.player.firstPerson = true; Main.preloadAll(g, gfx); gfx.preloadWorld(g, cx, cz); gfx.preloadChunks(g, cx, cz);
+                    float ey = f + Math.min(room.height() - 0.5f, 2.8f);
+                    String tag = "deeps-" + l.theme.name().toLowerCase(java.util.Locale.ROOT) + "-" + l.id + "-" + i;
+                    System.out.println("[deeps] " + tag + " " + l.name + " room " + room.kind() + " at " + cx + "," + f + "," + cz);
+                    // from the two corners that see the room's middle (a pillar in a corner hid the room behind it)
+                    int took = 0;
+                    float[][] corners = {{l.ox + room.x0() + 1.5f, l.oz + room.z0() + 1.5f}, {l.ox + room.x1() - 0.5f, l.oz + room.z1() - 0.5f}, {l.ox + room.x1() - 0.5f, l.oz + room.z0() + 1.5f}, {l.ox + room.x0() + 1.5f, l.oz + room.z1() - 0.5f}};
+                    java.util.Set<float[]> used = new java.util.HashSet<>();
+                    for (int pass = 0; pass < 2; pass++) for (float[] c : corners) {
+                        if (took >= 2 || used.contains(c)) continue;
+                        if (g.vox.solid((int) Math.floor(c[0]), (int) Math.floor(ey), (int) Math.floor(c[1])) || pass == 0 && !g.vox.sight(c[0], ey, c[1], cx, f + 0.8f, cz)) continue;
+                        used.add(c);
+                        adapted(new float[]{c[0], ey, c[1], cx, f + 0.6f, cz}, tag + "-" + (char) ('a' + took++));
+                    }
+                }
             }
         }
         // (0.4.4) RPG_REVIEW_ONLY=cascade: the tallest fall and a rapid's single step, each poured, from the side and the front
@@ -1429,7 +1547,7 @@ final class Gallery {
                 if (k == rpg.objects.Furniture.Kind.HEADSTONE || k == rpg.objects.Furniture.Kind.SLAB || k == rpg.objects.Furniture.Kind.TARGET) continue;
                 int w = switch (k) { case DINING_TABLE, SOFA, SIDEBOARD, WARDROBE, DRESSER, CUPBOARD, SHELVES, WINE_RACK, FOURPOSTER, BATHTUB, FIREPLACE, RUG, DESK, COUNTER, BOOKCASE, TAPESTRY, POT_RACK -> 2; default -> 1; };
                 int d = k == rpg.objects.Furniture.Kind.FOURPOSTER || k == rpg.objects.Furniture.Kind.DINING_TABLE || k == rpg.objects.Furniture.Kind.RUG ? 3 : 1;
-                int h = switch (k) { case CHANDELIER, PAINTING, TAPESTRY, MIRROR, WEAPON_RACK, POT_RACK -> 4; case WARDROBE, CUPBOARD, SHELVES, WINE_RACK, CLOCK, ARMOR_STAND, FIREPLACE, BOOKCASE -> 2; default -> 1; };
+                int h = switch (k) { case CHANDELIER, PAINTING, TAPESTRY, MIRROR, WEAPON_RACK, POT_RACK, SCONCE -> 4; case WARDROBE, CUPBOARD, SHELVES, WINE_RACK, CLOCK, ARMOR_STAND, FIREPLACE, BOOKCASE -> 2; default -> 1; };
                 var fu = g.objects.add(new rpg.objects.Furniture(g.state.newEntityId(), k, (int) x, 60, (int) x + w - 1, 60 + d - 1, h, 2, 0, true));
                 g.objects.furniture.add(fu);
                 if (k == rpg.objects.Furniture.Kind.FIREPLACE) fu.fuel = 200;
@@ -1437,6 +1555,38 @@ final class Gallery {
                 if (x > 72) break;
             }
             adapted(new float[]{64f, DevMap.FLOOR + 3.2f, 55f, 64f, DevMap.FLOOR + 0.8f, 61f}, "furn-row");
+        }
+        // (0.4.8) RPG_REVIEW_ONLY=furn48: the fifteen new furnishings in two rows, whole; then each struck hard (Wreckage)
+        if (want.test("furn48")) {
+            rpg.objects.Furniture.Kind[] kinds = {rpg.objects.Furniture.Kind.BARREL, rpg.objects.Furniture.Kind.KEG, rpg.objects.Furniture.Kind.LECTERN, rpg.objects.Furniture.Kind.SPINNING_WHEEL,
+                    rpg.objects.Furniture.Kind.SCROLL_RACK, rpg.objects.Furniture.Kind.THRONE, rpg.objects.Furniture.Kind.CRADLE, rpg.objects.Furniture.Kind.COAT_RACK,
+                    rpg.objects.Furniture.Kind.BUTTER_CHURN, rpg.objects.Furniture.Kind.GLOBE, rpg.objects.Furniture.Kind.TOOL_RACK, rpg.objects.Furniture.Kind.MAP_TABLE,
+                    rpg.objects.Furniture.Kind.DISPLAY_CABINET, rpg.objects.Furniture.Kind.FOLDING_SCREEN, rpg.objects.Furniture.Kind.SACKS};
+            java.util.List<rpg.objects.Furniture> made = new java.util.ArrayList<>();
+            float x = 57;
+            int row = 0;
+            for (var k : kinds) {
+                int w = switch (k) { case SCROLL_RACK, MAP_TABLE, DISPLAY_CABINET, FOLDING_SCREEN, SACKS, TOOL_RACK -> 2; default -> 1; };
+                int d = k == rpg.objects.Furniture.Kind.MAP_TABLE ? 2 : 1;
+                int h = switch (k) { case SCROLL_RACK, DISPLAY_CABINET, THRONE, COAT_RACK, FOLDING_SCREEN -> 2; case TOOL_RACK -> 3; default -> 1; };
+                int z = row == 0 ? 60 : 64;
+                var fu = g.objects.add(new rpg.objects.Furniture(g.state.newEntityId(), k, (int) x, z, (int) x + w - 1, z + d - 1, h, 2, 0, true));
+                g.objects.furniture.add(fu); made.add(fu);
+                x += w + 1;
+                if (x > 70 && row == 0) { x = 57; row = 1; }
+            }
+            frames(30);
+            adapted(new float[]{63.5f, DevMap.FLOOR + 3.4f, 55.5f, 63.5f, DevMap.FLOOR + 0.6f, 61.5f}, "furn48-row1");
+            adapted(new float[]{63.5f, DevMap.FLOOR + 3.4f, 59.5f, 63.5f, DevMap.FLOOR + 0.6f, 65.5f}, "furn48-row2");
+            adapted(new float[]{59f, DevMap.FLOOR + 1.6f, 57.5f, 61f, DevMap.FLOOR + 0.8f, 61.5f}, "furn48-close-a");
+            adapted(new float[]{67f, DevMap.FLOOR + 1.6f, 57.5f, 67f, DevMap.FLOOR + 0.8f, 61.5f}, "furn48-close-b");
+            adapted(new float[]{60f, DevMap.FLOOR + 1.6f, 61.5f, 62f, DevMap.FLOOR + 0.8f, 65.5f}, "furn48-close-c");
+            adapted(new float[]{67f, DevMap.FLOOR + 1.6f, 61.5f, 67f, DevMap.FLOOR + 0.8f, 65.5f}, "furn48-close-d");
+            for (var fu : made) for (int k = 0; k < 10; k++) g.wreckage.strike(fu, k * 5, fu.x + 0.1f * k % 3, fu.floor + 0.5f + 0.1f * k, fu.z, 7, 0, 0, 1, rpg.item.ItemDef.DamageType.BLUNT, g.player);
+            for (int k = 0; k < 50; k++) { game.tick(1 / 60f); draw(new float[]{63.5f, DevMap.FLOOR + 3.4f, 55.5f, 63.5f, DevMap.FLOOR + 0.6f, 61.5f}, 1 / 60f); }
+            Main.shot(gfx, win.width, win.height, new File(shots, "furn48-wrecked.png"));
+            int wrecked = 0; for (var fu : made) if (g.wreckage.of(fu).wrecked) wrecked++;
+            System.out.println("[furn48] wrecked " + wrecked + " of " + made.size());
         }
         if (want.test("crates")) {
             place(64.5f, 66.5f, 0); frames(10);
@@ -2418,6 +2568,22 @@ final class Gallery {
                 film("repair-" + (h < 0.6f ? "low" : "mid"), 72, i -> { if (g.player.working != null) { g.player.working.t = i / 60f; g.player.reachX = 64.5f; g.player.reachY = DevMap.FLOOR + h; g.player.reachZ = 59.0f; } },
                         a -> new float[]{a.x + 2.6f, a.y + 1.4f, a.z + 1.2f, a.x, a.y + 0.8f, a.z - 0.4f}, 0);
                 g.interact.cancel(g.player, "review");
+            }
+        }
+        if (want.test("handwork")) {
+            // (0.4.7) every work done with the hands, on a body seen from the side: a film of each
+            for (rpg.ai.Npc o : g.npcs) if (o.distTo(64.5f, 60f) < 22) g.ai.unload(o);
+            clearYard.run();
+            g.player.eq.clear(); g.player.firstPerson = false;
+            String acts = System.getenv("RPG_HANDWORK");
+            for (String act : new String[]{"milk", "shear", "butcher", "sow_wheat", "harvest", "pick", "gather", "bury", "light", "steal", "pickpocket"}) {
+                if (acts != null && !acts.contains(act)) continue;
+                place(64.5f, 60.5f, 0); frames(5);
+                var work = new rpg.interact.Work(g.player, null, act, act, 3f, false, g.time, () -> rpg.interact.Result.ok());
+                g.player.working = work;
+                film("hand-" + act, 60, i -> { if (g.player.working != null) g.player.working.t = 0.4f + i / 60f; },
+                        a -> new float[]{a.x + 3.4f, a.y + 1.4f, a.z - 1.2f, a.x, a.y + 0.9f, a.z - 0.3f}, 0);
+                g.player.working = null;
             }
         }
         if (want.test("swings")) {
@@ -4229,6 +4395,94 @@ final class Gallery {
      * The animals: every species, adult and young, every coat, from the front three-quarters; then the gaits filmed on
      * threes (a walk and a run each for a quadruped, a bird and the rabbit's hop).
      */
+    /**
+     * (0.4.7) The fliers: each standing (side and front), then held in the air with its wings at four points of the
+     * downstroke and upstroke and in the glide (side, below and above) - the reference sheet for the Crow, the Pigeon and
+     * the Vulture.
+     */
+    /**
+     * (0.4.7) A person sitting down at a table and getting up again (ShadowVeil, Valgard Keep's dining table or the
+     * chair nearest RPG_CHAIR_AT="x,z"): the chair drawn out, the sitter down into it, both in to the table, the rising
+     * and the chair pushed home - a sheet of the moments, seen from the side.
+     */
+    private void chairShots() {
+        String at = System.getenv("RPG_CHAIR_AT");
+        float ax = 203.5f, az = 669.5f;
+        if (at != null) { String[] v = at.split(","); ax = Float.parseFloat(v[0]); az = Float.parseFloat(v[1]); }
+        rpg.objects.Furniture chair = null; float bd = 1e9f;
+        for (var f : g.objects.furniture) if (f.kind == rpg.objects.Furniture.Kind.CHAIR) { float d = (float) Math.hypot(f.x - ax, f.z - az); if (d < bd) { bd = d; chair = f; } }
+        if (chair == null) { System.out.println("[chairs] no chair"); return; }
+        rpg.ai.Npc who = null; bd = 1e9f;
+        for (var n : g.npcs) if (n.alive && n.role != rpg.ai.Npc.Role.GUARD) { float d = (float) Math.hypot(n.x - chair.x, n.z - chair.z); if (d < bd) { bd = d; who = n; } }
+        if (!who.loaded) { g.ai.reload(who); who.offstage = false; who.indoors = false; }
+        g.state.minutes = Math.floor(g.state.minutes / 1440) * 1440 + 12.5 * 60;
+        float[] fr = chair.front();
+        float side = 2.6f;
+        // seen from across the table, a little above
+        float[] cam = {chair.x + fr[0] * 2.8f + fr[1] * 0.8f, chair.floor + 1.9f, chair.z + fr[1] * 2.8f - fr[0] * 0.8f, chair.x - fr[0] * 0.3f, chair.floor + 0.7f, chair.z - fr[1] * 0.3f};
+        g.teleport(g.player, chair.x + 30, rpg.world.WorldMap.standY(chair.x + 30, chair.z), chair.z); Main.preloadAll(g, gfx); gfx.preloadWorld(g, chair.x, chair.z); frames(20);
+        g.teleport(who, chair.x - fr[0] * 1.4f, chair.floor, chair.z - fr[1] * 1.4f);
+        who.nextThink = g.time + 1e6;
+        List<BufferedImage> tiles = new ArrayList<>(); List<String> labels = new ArrayList<>();
+        String[] marks = {"approach", "draws out", "sitting down", "seated", "tucked in"};
+        int shot = 0;
+        for (int i = 0; i < 60 * 8 && shot < marks.length; i++) {
+            who.nextThink = g.time + 1e6; who.goal = rpg.ai.Brain.Goal.HELD;
+            boolean sat = g.ai.brain.seating.sitOn(who, chair);
+            if (i % 60 == 0) System.out.printf("[chairs] t=%d %s at %.2f,%.2f,%.2f sat %s pull %.2f %s%n", i, who.name, who.x, who.y, who.z, sat, chair.pull, who.lastOutcome);
+            game.tick(1 / 60f);
+            int[] when = {8, 24, 40, 70, 110};
+            boolean take = i == when[shot];
+            if (take) { tiles.add(capture(cam)); labels.add(marks[shot++]); }
+        }
+        // up again: the chair out, the sitter clear, the chair home
+        g.ai.brain.seating.stand(who);
+        for (int i = 0; i < 60 * 2; i++) {
+            game.tick(1 / 60f);
+            if (i == 10) { tiles.add(capture(cam)); labels.add("rising"); }
+            if (i == 100) { tiles.add(capture(cam)); labels.add("pushed home"); }
+        }
+        System.out.println("[chairs] " + who.name + " at " + chair.kind + " " + chair.id + " pull " + chair.pull + " shots " + tiles.size());
+        sheet("chairs", tiles, labels, 4);
+    }
+
+    private void birdSheets() {
+        var sys = g.animals;
+        for (var a : sys.all()) if (!a.puppet) { a.loaded = false; sys.despawnBody(a); }
+        place(40.5f, 70.5f, 0);
+        List<BufferedImage> tiles = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        float x0 = 64.5f, z0 = 61.5f;
+        for (rpg.animal.Species s : new rpg.animal.Species[]{rpg.animal.Species.CROW, rpg.animal.Species.PIGEON, rpg.animal.Species.VULTURE}) {
+            var an = sys.display(s, false, true, 0, x0, z0, (float) Math.PI * 0.5f);
+            frames(4);
+            float h = an.height, d = Math.max(1.6f, Math.max(h, s.w) * 4.0f);
+            for (float side : new float[]{1.57f, 0}) {
+                float yaw = an.yaw + side;
+                float[] cam = {an.x - (float) Math.sin(yaw) * d, an.y + h * 0.6f, an.z - (float) Math.cos(yaw) * d, an.x, an.y + h * 0.45f, an.z};
+                tiles.add(capture(cam)); labels.add(s.label(false) + (side > 0 ? " side" : " front"));
+            }
+            // aloft: posed in the air, the stroke stepped through
+            float ay = an.y + 2.2f;
+            an.flying = true; an.flightSpeed = s.airspeed;
+            String[] names = {"down", "mid-down", "up", "mid-up", "glide"};
+            float[] phases = {(float) Math.PI / 2, 0, (float) -Math.PI / 2, (float) Math.PI, 0};
+            for (int k = 0; k < names.length; k++) {
+                an.flap = k == 4 ? 0.05f : 1; an.wingPhase = phases[k];
+                g.game.commands().moverPlace(an.body, an.x, ay, an.z, 0, 0, 0);
+                g.game.commands().moverInput(an.body, 0, 0, 0, 0, 10, astratto.bridge.AstrattoNative.MOVER_POSED);
+                an.y = ay;
+                for (int i = 0; i < 2; i++) { an.wingPhase = phases[k]; draw(new float[]{an.x - d * 1.4f, ay + 0.6f, an.z, an.x, ay, an.z}, 0); }
+                tiles.add(capture(new float[]{an.x - d * 0.9f, ay + 0.35f, an.z - d * 0.9f, an.x, ay, an.z})); labels.add(s.label(false) + " " + names[k]);
+            }
+            an.flap = 1; an.wingPhase = (float) Math.PI / 2;
+            tiles.add(capture(new float[]{an.x + 0.01f, ay - d * 1.6f, an.z + 0.3f, an.x, ay, an.z})); labels.add(s.label(false) + " from below");
+            tiles.add(capture(new float[]{an.x + 0.01f, ay + d * 1.6f, an.z + 0.3f, an.x, ay, an.z})); labels.add(s.label(false) + " from above");
+            sys.remove(an);
+        }
+        sheet("birds", tiles, labels, 9);
+    }
+
     private void animalSheets() {
         var sys = g.animals;
         for (var a : sys.all()) if (!a.puppet) { a.loaded = false; sys.despawnBody(a); }
@@ -4292,10 +4546,11 @@ final class Gallery {
         float x0 = 64.5f, z0 = 61.5f;
         for (var kind : rpg.monster.MonsterKind.values()) {
             if (pick != null && !pick.contains(kind.name())) continue;
-            int breeds = kind == rpg.monster.MonsterKind.DRAGON ? rpg.monster.MonsterKind.Breed.values().length : 1;
+            int breeds = kind == rpg.monster.MonsterKind.DRAGON ? rpg.monster.MonsterKind.Breed.values().length : kind.variants();
             for (int b = 0; b < breeds; b++) {
                 var mo = sys.display(kind, (kind.minLevel + kind.maxLevel) / 2, x0, z0, (float) Math.PI * 0.8f);
                 if (kind == rpg.monster.MonsterKind.DRAGON) mo.breed = rpg.monster.MonsterKind.Breed.values()[b];
+                else mo.variant = b;   // (0.4.8) each of the kind's looks
                 mo.wantAltitude = 0;
                 frames(6);
                 float size = Math.max(kind.mh, Math.max(kind.mw, kind.md));
@@ -4309,11 +4564,14 @@ final class Gallery {
         for (var kind : rpg.monster.MonsterKind.values()) {
             if (pick != null && !pick.contains(kind.name())) continue;
             float size = Math.max(kind.mh, Math.max(kind.mw, kind.md)), d = Math.max(2.2f, size * 2.2f);
-            for (int mode = 0; mode < (kind.flies() ? 4 : 3); mode++) {
-                if ("attack".equals(System.getenv("RPG_MONSTER_MODE")) && mode != 2) continue;
+            // (0.4.8) a scorpion's second attack (the sting) and a greater demon's hover as a fourth sheet
+            boolean extra = kind.scorpion() || kind == rpg.monster.MonsterKind.GREATER_DEMON;
+            for (int mode = 0; mode < (kind.flies() || extra ? 4 : 3); mode++) {
+                if ("attack".equals(System.getenv("RPG_MONSTER_MODE")) && mode < 2) continue;
                 var mo = sys.display(kind, (kind.minLevel + kind.maxLevel) / 2, 50.5f, 70.5f, (float) -Math.PI / 2);
                 // mode 3: a flyer aloft, flying past (taken from below and to the side, so the wings read)
-                boolean aloft = mode == 3;
+                boolean aloft = mode == 3 && !extra;
+                if (mode == 3 && kind == rpg.monster.MonsterKind.GREATER_DEMON) { mo.hoverFrom = g.time + 0.1; mo.hoverUntil = g.time + 4; }
                 mo.wantAltitude = aloft ? (kind == rpg.monster.MonsterKind.DRAGON ? 7 : 2.5f) : 0;
                 frames(4);
                 boolean run = mode == 1 || aloft;
@@ -4325,8 +4583,8 @@ final class Gallery {
                     if (mode < 2 || aloft) sys.puppetTo(mo, 95, 70.5f, run);
                     else if (i == 0) {
                         // the attack: a person's swing through the combat system for the humanoids, a creature's wind-up and strike for the beasts
-                        if (kind.form == rpg.monster.MonsterKind.Form.HUMANOID) g.combat.attack(mo, false, kind == rpg.monster.MonsterKind.TROLL ? Actor.Combat.Move.HEAVY : rpg.combat.CombatSystem.lightMove(mo, false));
-                        else { mo.windup = "bite"; mo.windupStart = g.time; mo.windupUntil = g.time + 0.5; }
+                        if (kind.form == rpg.monster.MonsterKind.Form.HUMANOID) { if (mode == 2) g.combat.attack(mo, false, kind.troll() ? Actor.Combat.Move.HEAVY : rpg.combat.CombatSystem.lightMove(mo, false)); }
+                        else { mo.windup = kind.scorpion() ? (mode == 3 ? "sting" : "pincer") : "bite"; mo.windupStart = g.time; mo.windupUntil = g.time + (mode == 3 ? 0.7 : 0.5); }
                     }
                     step();
                     if (i % 3 == 0) {
@@ -4334,7 +4592,7 @@ final class Gallery {
                         fl.add(String.format("f%d  %.2fm/s", i + 1, Math.hypot(mo.vx, mo.vz)));
                     }
                 }
-                sheet("monster-" + kind.name().toLowerCase() + "-" + (mode == 0 ? "walk" : mode == 1 ? "run" : mode == 2 ? "attack" : "fly"), ft, fl, 6);
+                sheet("monster-" + kind.name().toLowerCase() + "-" + (mode == 0 ? "walk" : mode == 1 ? "run" : mode == 2 ? "attack" : kind.scorpion() ? "sting" : extra ? "hover" : "fly"), ft, fl, 6);
                 sys.remove(mo);
             }
         }
@@ -4533,6 +4791,23 @@ final class Gallery {
     private float[] quarter(Actor a, float d) {
         float fx = (float) -Math.sin(a.yaw + 0.8), fz = (float) -Math.cos(a.yaw + 0.8);
         return new float[]{a.x + fx * d, a.y + 1.5f, a.z + fz * d, a.x, a.y + 1.1f, a.z};
+    }
+
+    /** (0.4.7) The nearest point to (x, z), out to 60 m, with open, level ground for r metres all round it (a portrait's stage). */
+    private float[] openGround(float x, float z, int r) {
+        for (int d = 0; d <= 60; d++) for (int dx = -d; dx <= d; dx++) for (int dz = -d; dz <= d; dz++) {
+            if (Math.max(Math.abs(dx), Math.abs(dz)) != d) continue;
+            int cx = (int) Math.floor(x) + dx, cz = (int) Math.floor(z) + dz;
+            int y0 = (int) Math.floor(rpg.world.WorldMap.standY(cx + 0.5f, cz + 0.5f) + 1e-3);
+            boolean ok = true;
+            for (int ax = -r; ax <= r && ok; ax++) for (int az = -r; az <= r && ok; az++) {
+                int yy = (int) Math.floor(rpg.world.WorldMap.standY(cx + ax + 0.5f, cz + az + 0.5f) + 1e-3);
+                if (Math.abs(yy - y0) > 1 || g.vox.block(cx + ax, yy - 1, cz + az) == rpg.world.Blocks.WATER) ok = false;
+                for (int yy2 = yy; yy2 < yy + 3 && ok; yy2++) if (g.vox.block(cx + ax, yy2, cz + az) != rpg.world.Blocks.AIR && !rpg.world.Blocks.plant(g.vox.block(cx + ax, yy2, cz + az))) ok = false;
+            }
+            if (ok) return new float[]{cx + 0.5f, cz + 0.5f};
+        }
+        return new float[]{x, z};
     }
 
     private void view(float ex, float ey, float ez, float tx, float ty, float tz, String name) {

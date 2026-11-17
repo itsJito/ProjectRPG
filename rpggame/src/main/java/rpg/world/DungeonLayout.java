@@ -66,11 +66,36 @@ public final class DungeonLayout {
     public final List<Spot> spots = new ArrayList<>();
     /** Where one arrives (and leaves by): the exit's cell inside. */
     public int entryX, entryZ;
+    /** (0.4.7) The level its floor stands at (the cell feet stand in): the devmap's floor, or a ShadowVeil level's depth. */
+    public final int floorY;
+    /** (0.4.7) On ShadowVeil: the site it lies under, and which of its levels it is (1 the first down). */
+    public String site = "";
+    public int depth = 1;
 
-    private DungeonLayout(int id, String name, Type type, Theme theme, long seed, int ox, int oz) {
-        this.id = id; this.name = name; this.type = type; this.theme = theme; this.seed = seed; this.ox = ox; this.oz = oz; this.w = type.w; this.d = type.d;
+    private DungeonLayout(int id, String name, Type type, Theme theme, long seed, int ox, int oz) { this(id, name, type, theme, seed, ox, oz, DevMap.FLOOR); }
+    private DungeonLayout(int id, String name, Type type, Theme theme, long seed, int ox, int oz, int floorY) {
+        this.id = id; this.name = name; this.type = type; this.theme = theme; this.seed = seed; this.ox = ox; this.oz = oz; this.w = type.w; this.d = type.d; this.floorY = floorY;
         open = new boolean[w][d]; height = new int[w][d];
         if (type.procedural) generate(); else authorBoss();
+    }
+    /**
+     * (0.4.7, gamefixes: the dungeon system on ShadowVeil) one level of a dungeon under the map: generated from its seed as
+     * any dungeon is, its region's corner (world cells) and the floor it is cut at.
+     */
+    public static DungeonLayout level(int id, String name, Type type, Theme theme, long seed, int ox, int oz, int floorY, String site, int depth) {
+        DungeonLayout l = new DungeonLayout(id, name, type, theme, seed, ox, oz, floorY);
+        l.site = site; l.depth = depth;
+        return l;
+    }
+    /** (0.4.7) ShadowVeil's dungeon levels, once planned (rpg.dungeon.Underground). */
+    private static List<DungeonLayout> underground = List.of();
+    public static void useUnderground(List<DungeonLayout> levels) { underground = levels; }
+    public static List<DungeonLayout> underground() { return underground; }
+    /** (0.4.7) The level of a ShadowVeil dungeon a point is in - inside its region and between its floor and its rock overhead - or null. */
+    public static DungeonLayout underAt(float x, float y, float z) {
+        if (!WorldMap.shadowveil()) return null;
+        for (DungeonLayout l : underground) if (x >= l.ox && x < l.ox + l.w && z >= l.oz && z < l.oz + l.d && y >= l.floorY - 1.5f && y < l.floorY + 9) return l;
+        return null;
     }
 
     // ------------------------------------------------------------------ the world's dungeons

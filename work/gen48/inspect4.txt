@@ -1,0 +1,148 @@
+    [cellars] loxford_castle undercroft: 5 rooms, door at 266,30,1017
+    [cellars] duck_cellar cellar_shortcut: 5 rooms, door at 337,32,1002
+    [cellars] valgard_keep undercroft: 6 rooms, door at 207,45,671
+    [cellars] museum_vault museum_vault: 6 rooms, door at 686,26,198
+    [cellars] unlit_lantern lantern_cellars: 4 rooms, door at 645,35,553
+    ================ 649, 38, 552  law WILDS  stand Y 43.0
+      object Door                   The Unlit Lantern cellars door (645.5, 36.2, 553.0)
+      layer Y36 (x 640..658 across, z down; * the point, which is air)
+       aaaaaaaaaaaabbbbbbb
+       aaaaaaaaaaaabbbbbbb
+       aaaaaaaaaaaabbbbbbb
+       aaaaaaaaaaaaabbbbbb
+       aaaaaaaaaaaaabbbbbb
+       aaaaaaaaaaaaabbbbbb
+       aaaaaaaaaaaaaabbbbb
+       aaaaaaaaaaaaaabbbbb
+       aaaaacaccccccabbbbb
+       aaaaadcce*..cabbbbb
+       aaaaadcce...cabbbbb
+       aaaaacaccccccabbbbb
+       aaaaaaaaaaaaaabbbbb
+       aaaaaaaaaaaaaabbbbb
+       aaaaaaaaaaaaabbbbbb
+       aaaaaaaaaaaaabbbbbb
+       aaaaaaaaaaaaabbbbbb
+       aaaaaaaaaaaabbbbbbb
+       aaaaaaaaaaabbbbbbbb
+      layer Y37 (x 640..658 across, z down; * the point, which is air)
+       aaaaaaaaabbbbbbbbbf
+       aaaaaaaaaabbbbbbbbb
+       aaaaaaaaaabbbbbbbbb
+       aaaaaaaaaaabbbbbbbb
+       aaaaaaaaaaabbbbbbbb
+       aaaaaaaaaaabbbbbbbb
+       aaaaaaaaaaabbbbbbbb
+       aaaaaaaaaaaabbbbbbb
+       aaaacccccccccbbbbbb
+       aaaacace.*..cbbbbbb
+       aaaacace....cbbbbbb
+       aaaacccccccccbbbbbf
+       aaaaaaaaaaaabbbbbbf
+       aaaaaaaaaaaabbbbbbf
+       aaaaaaaaaaabbbbbbff
+       aaaaaaaaaaabbbbbbff
+       aaaaaaaaaaabbbbbbff
+       aaaaaaaaaabbbbbbfff
+       aaaaaaaaabbbbbbbfff
+      layer Y38 (x 640..658 across, z down; * the point, which is air)
+       aaaaaaaabbbbbbffff~
+       aaaaaaaabbbbbbbffff
+       aaaaaaaabbbbbbbffff
+       aaaaaaaaabbbbbbbfff
+       aaaaaaaaabbbbbbbfff
+       aaaaaaaaabbbbbbbfff
+       aaaaaaaaaabbbbbbfff
+       aaaaaaaaaabbbbbbfff
+       aaaccccccccccbbbfff
+       aaacace..*..cbbbfff
+       aaacace.....cbbbfff
+       aaaccccccccccbbbff~
+       aaaaaaaaaabbbbbbff~
+       aaaaaaaaaabbbbbfff~
+       aaaaaaaaaabbbbbff~~
+       aaaaaaaaabbbbbbff~~
+       aaaaaaaaabbbbbfff~~
+       aaaaaaaabbbbbbff~~~
+       aaaaaaabbbbbbfff~~~
+      layer Y39 (x 640..658 across, z down; * the point, which is air)
+       aaaaaabbbbbbff~~~~~
+       aaaaaabbbbbbfff~~~~
+       aaaaaaabbbbbfff~~~~
+       aaaaaaabbbbbbfff~~~
+       aaaaaaabbbbbbfff~~~
+       aaaaaaaabbbbbfff~~~
+       aaaaaaaabbbbbbff~~~
+       aaaaaaaabbbbbbff~~~
+       aacccccccccccbff~~~
+       aacccc...*..cbff~~~
+       aacccc......cbff~~~
+       aacccccccccccbff~~~
+       aaaaaaaabbbbbbff~~~
+       aaaaaaaabbbbbbf~~~~
+       aaaaaaaabbbbbff~~~~
+       aaaaaaabbbbbbff~~~~
+       aaaaaaabbbbbbf~~~~~
+       aaaaaabbbbbbff~~~~~
+       aaaaabbbbbbff~~~~~~
+      layer Y40 (x 640..658 across, z down; * the point, which is air)
+       aaaabbbbbfff~~~~~~~
+       aaaaabbbbbff~~~~~~~
+       aaaaabbbbbff~~~~~~~
+       aaaaaabbbbbff~~~~~~
+       aaaaaabbbbbff~~~~~~
+       aaaaaabbbbbff~~~~~~
+       aaaaaabbbbbfff~~~~~
+       aaaaaaabbbbbff~~~~~
+       accccccccccccf~~~~~
+       ace..g...*..cf~~~~~
+       ace..g......cf~~~~~
+       accccccccccccf~~~~~
+       aaaaaabbbbbbff~~~~~
+       aaaaaabbbbbbff~~~~~
+       aaaaaabbbbbff~~~~~~
+       aaaaabbbbbbff~~~~~~
+       aaaaabbbbbbff~~~~~~
+       aaaabbbbbbff~~~~~~~
+       aaabbbbbbff~~~~~~~~
+      layer Y41 (x 640..658 across, z down; * the point, which is air)
+       aabbbbbbf~~~~~~~~~~
+       aaabbbbbff~~~~~~~~~
+       aaabbbbbff~~~~~~~~~
+       aaaabbbbbff~~~~~~~~
+       aaaabbbbbff~~~~~~~~
+       aaaaabbbbff~~~~~~~~
+       aaaaabbbbbf~~~~~~~~
+       aaaaabbbbbff~~~~~~~
+       ccccccccccccc~~~~~~
+       ce...g...*..c~~~~~~
+       ce...g......c~~~~~~
+       ccccccccccccc~~~~~~
+       aaaaabbbbbff~~~~~~~
+       aaaabbbbbbff~~~~~~~
+       aaaabbbbbbf~~~~~~~~
+       aaaabbbbbff~~~~~~~~
+       aaabbbbbbff~~~~~~~~
+       aaabbbbbff~~~~~~~~~
+       aabbbbbff~~~~~~~~~~
+      layer Y42 (x 640..658 across, z down; * the point, which is air)
+       aabbbbff~~~~~~~~~~~
+       aaabbbff~~~~~~~~~~~
+       aaabbbbf~~~~~~~~~~~
+       aaaabbbff~~~~~~~~~~
+       aaaabbbff~~~~~~~~~~
+       aaaabbbbf~~~~~~~~~~
+       aaaabbbbff~~~~~~~~~
+       aaaabbbbff~~~~~~~~~
+       ccccccccccccc~~~~~~
+       e....b...*..c~~~~~~
+       e....b......c~~~~~~
+       ccccccccccccc~~~~~~
+       aaaabbbbff~~~~~~~~~
+       aaaabbbbff~~~~~~~~~
+       aaaabbbbff~~~~~~~~~
+       aaabbbbff~~~~~~~~~~
+       aaabbbbff~~~~~~~~~~
+       aabbbbff~~~~~~~~~~~
+       abbbbff~~~~~~~~~~~~
+      legend: a=stone b=dirt c=mossy_bricks d=door e=stairs f=mud g=locked_door

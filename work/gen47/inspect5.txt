@@ -1,0 +1,269 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldInspectProbeTest > inspect() STANDARD_OUT
+    [Load] ShadowVeil grown in 19.46s ({regions=830, overlays=464, variants=478, scarp=47, coast=701, erosion=342, peaks=72, lakes=59, isles=1, rivers=739, wadis=12, ground=20, roads=634, causeways=3, architecture=1300, pitsFilled=1396, pits=429, banks=68, clamp=12, cliffs=47, columns=682, falls=15, raise=10580, trees=272, outcrops=0, ways=606, lava=0, dungeons=104, postsSunk=28, floatingRemoved=59, floating=883}), made and lit in 2.19s
+    [water] flow field grown in 1143 ms: 39016 columns moving
+    [gathering] 757 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+
+    ================ 620, 31, 947  law WILDS  stand Y 39.0
+    structure here: culvert_cave Culvert cave (mouth) lot 616,945 - 625,949 floor 32
+      near waystation_bunks           Waystation                               hall           37 m lot 645,917-652,930 floor 33
+      near wagon_stop                 Wagon stop                               yard           34 m lot 649,941-658,952 floor 32
+      near waystation_stakes          Torchlit stakes                          gibbets        34 m lot 605,907-618,920 floor 33
+      npc Brannoc      THIEF          (627.5, 33.0, 947.5) goal IDLE
+      npc Corvane      HUNTER         (632.5, 34.0, 936.5) goal IDLE
+      layer Y29 (x 616..624 across, z down; * the point)
+       aabbaaaaa
+       aaaaaaaaa
+       aaaaac.aa
+       aa.aaa.aa
+       aa.a*a.aa
+       aa.aaa.aa
+       aaaaaaaab
+       bbbbbbbbb
+       bbbbbbbbb
+      layer Y30 (x 616..624 across, z down; * the point)
+       ddbbddddd
+       ddddddddd
+       aaaac..ad
+       aa.aae.ad
+       aa.a*a.ad
+       aa.aaaaad
+       aaaaaaaab
+       bbbbbbbbb
+       bbbbbbbbb
+      layer Y31 (x 616..624 across, z down; * the point)
+       ddbbddddd
+       ddddddddd
+       aaac...aa
+       aa.aaa.aa
+       aa.a*a..a
+       aa.aaa..a
+       aaaaaaaaa
+       bbbbbbbbb
+       bbbbbbbbb
+      layer Y32 (x 616..624 across, z down; * the point)
+       dbbbbbbbb
+       bbbbbbbbb
+       aac....aa
+       aaaaaaaaa
+       aaaa*aaaa
+       aaaaaaaaa
+       aaaaaaaaa
+       bbbbbbbbb
+       fbbbbbbbb
+      layer Y33 (x 616..624 across, z down; * the point)
+       .bffbbbbb
+       gaaabbbbb
+       aa....aaa
+       a........
+       a...*....
+       a........
+       aaaaaaaaa
+       fbbbbbbbb
+       .bffbbbbb
+      layer Y34 (x 616..624 across, z down; * the point)
+       .g..ggbbb
+       .aaabbbbb
+       aa...aaaa
+       a........
+       a...*....
+       a........
+       aaaaaaaaa
+       .bfbbbbbb
+       .f..bfbbb
+      layer Y35 (x 616..624 across, z down; * the point)
+       ......bbb
+       .aaabgbbb
+       aa..aaaaa
+       a........
+       a...*....
+       a........
+       aaaaaaaaa
+       .f.fffbbb
+       ....f.ffb
+      legend: a=stone b=dirt c=stairs d=gravel e=lamp f=dry_grass g=grass
+
+    ================ 620, 24, 947  law WILDS  stand Y 39.0
+    structure here: culvert_cave Culvert cave (mouth) lot 616,945 - 625,949 floor 32
+      near waystation_bunks           Waystation                               hall           37 m lot 645,917-652,930 floor 33
+      near wagon_stop                 Wagon stop                               yard           34 m lot 649,941-658,952 floor 32
+      near waystation_stakes          Torchlit stakes                          gibbets        34 m lot 605,907-618,920 floor 33
+      npc Brannoc      THIEF          (627.5, 33.0, 947.5) goal IDLE
+      npc Corvane      HUNTER         (632.5, 34.0, 936.5) goal IDLE
+      layer Y22 (x 616..624 across, z down; * the point)
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaaaaaaa
+       aa.a*aaaa
+       aa.baaaaa
+       aa..caaaa
+       aaaaaaaaa
+       aaaaaaaaa
+      layer Y23 (x 616..624 across, z down; * the point)
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaa*aaaa
+       aa.aaaaaa
+       aa...caaa
+       aaaaaaaaa
+       aaaaaaaaa
+      layer Y24 (x 616..624 across, z down; * the point)
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaa*aaaa
+       aaaaaaaaa
+       aa....caa
+       aaaaaaaaa
+       aaaaaaaaa
+      layer Y25 (x 616..624 across, z down; * the point)
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaa*aaaa
+       aaaaaacaa
+       aaa....aa
+       aaaaaaaaa
+       aaaaaaaaa
+      layer Y26 (x 616..624 across, z down; * the point)
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaa*acaa
+       aaaaaa.aa
+       aaaa...aa
+       aaaaaaaaa
+       aaaaaaaaa
+      layer Y27 (x 616..624 across, z down; * the point)
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaaaacaa
+       aaaa*a.aa
+       aaaaaa.aa
+       aaaaa..aa
+       aaaaaaaaa
+       aaaaaaaaa
+      layer Y28 (x 616..624 across, z down; * the point)
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaaaacaa
+       aaaaaa.aa
+       aaaa*a.aa
+       aaaaaa.aa
+       aaaaaa.aa
+       aaaaaaaaa
+       aaaaaaaaa
+      legend: a=stone b=lamp c=stairs
+
+    ================ 620, 17, 947  law WILDS  stand Y 39.0
+    structure here: culvert_cave Culvert cave (mouth) lot 616,945 - 625,949 floor 32
+      near waystation_bunks           Waystation                               hall           37 m lot 645,917-652,930 floor 33
+      near wagon_stop                 Wagon stop                               yard           34 m lot 649,941-658,952 floor 32
+      near waystation_stakes          Torchlit stakes                          gibbets        34 m lot 605,907-618,920 floor 33
+      npc Brannoc      THIEF          (627.5, 33.0, 947.5) goal IDLE
+      npc Corvane      HUNTER         (632.5, 34.0, 936.5) goal IDLE
+      layer Y15 (x 616..624 across, z down; * the point)
+       aaaaaaaaa
+       ......aaa
+       ......aaa
+       ........a
+       ...a*a...
+       ...aaa...
+       .........
+       .........
+       .........
+      layer Y16 (x 616..624 across, z down; * the point)
+       aaaaaaaaa
+       ......aaa
+       ......aaa
+       ........a
+       ...a*a...
+       ...aaa...
+       .........
+       .........
+       .........
+      layer Y17 (x 616..624 across, z down; * the point)
+       aaaaaaaaa
+       ......aaa
+       ......aaa
+       ........a
+       ..aa*a...
+       ...aaa...
+       .........
+       .........
+       .........
+      layer Y18 (x 616..624 across, z down; * the point)
+       aaaaaaaaa
+       ......aaa
+       ......aaa
+       ........a
+       .aba*a...
+       ..aaaa...
+       .........
+       .........
+       .........
+      layer Y19 (x 616..624 across, z down; * the point)
+       aaaaaaaaa
+       .aaaaaaaa
+       .a..aaaaa
+       .a.aaa..a
+       .a.a*a...
+       .abaaa...
+       ..a......
+       ....aa...
+       ....aa...
+      layer Y20 (x 616..624 across, z down; * the point)
+       aaaaaaaaa
+       .aaaaaaaa
+       .a..aaaaa
+       .a.aaaaaa
+       .a.a*aaaa
+       .a.aaaaaa
+       .abaaaaaa
+       .aa.aaaa.
+       ....aaa..
+      layer Y21 (x 616..624 across, z down; * the point)
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaaaaaaa
+       aa.aaaaaa
+       aa.a*aaaa
+       aa.aaaaaa
+       aa.baaaaa
+       aaaaaaaaa
+       aaaaaaaaa
+      legend: a=stone b=stairs
+  slow: rpg.probe.WorldInspectProbeTest.inspect() 34.108 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 38s
+9 actionable tasks: 1 executed, 8 up-to-date

@@ -521,7 +521,7 @@ public final class Main {
     }
 
     /** The game's version (the patch notes' number). */
-    public static final String VERSION = "Alpha 0.4.6";
+    public static final String VERSION = "Alpha 0.4.8";
     /**
      * (0.4.1, gamefixes: the stutter on loading into the map) everything the first seconds in the world would otherwise do
      * a piece at a time, done before the first frame: the growth about the spawn, the routing graph about it, and the

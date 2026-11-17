@@ -1,0 +1,108 @@
+    ================ 177, 58, 638  law Valgard  stand Y 60.0
+    structure here: sanctuary_jaehaerys Sanctuary of Jaehaerys (church) lot 175,637 - 198,650 floor 59
+      object Door                   Sanctuary of Jaehaerys vestry door (179.5, 61.2, 642.5)
+      npc Maelin       SCHOLAR        (175.5, 60.0, 636.5) goal IDLE
+      npc King Phillip CIVIC          (193.5, 53.0, 659.5) goal IDLE
+      npc Duke Edran   CIVIC          (190.5, 53.0, 659.5) goal IDLE
+      npc Sir Vaelor   KNIGHT         (200.5, 59.0, 644.5) goal IDLE
+      npc Father Anselm PRIEST         (174.5, 60.0, 639.5) goal IDLE
+      npc Lothar       GUARD          (205.5, 57.0, 642.5) goal IDLE
+      layer Y56 (x 171..183 across, z down; * the point, which is stone)
+       aaaaabbaaaabc
+       aaaaabaaaabbc
+       bbdddbbbbbbcc
+       bbbbbbbbbbccc
+       bcccccccccccc
+       dcccccccccddc
+       dddccc*cccccc
+       dedcccccccddd
+       ffeccccccccdd
+       ffcccccccccdd
+       ffecccccccccd
+       ffcccccccccdd
+       .ccccccccccdd
+      layer Y57 (x 171..183 across, z down; * the point, which is gravel)
+       ...........ab
+       ..........abc
+       aaaaa..aaabbb
+       bbbbbggbbbbbb
+       bbbbbbbbbbbbb
+       dbbbbbbbbbddb
+       dddbbb*bbbbbb
+       dedbbbbbbbddd
+       ..ebbbbbbbbdd
+       ..cbbbbbbbbdd
+       ..ebbbbbbbbbd
+       ..cbbbbbbbbdd
+       .cbbbbbbbbbdd
+      layer Y58 (x 171..183 across, z down; * the point, which is gravel)
+       ............b
+       ...........ab
+       ..........abb
+       aaaaa..baabbb
+       .gbbbggbbbbbb
+       abbbbbbbbbddb
+       addbbb*bbbbbb
+       aedbbbbbbbddd
+       ..ebbbbbbbbdd
+       ..cbbbbbbbbdd
+       ..ebbbbbbbbbd
+       ..cbbbbbbbbdd
+       .cbbbbbbbbbdd
+      layer Y59 (x 171..183 across, z down; * the point, which is planks)
+       ............a
+       ............b
+       ...........aa
+       ..........aaa
+       ..baa..abaaaa
+       .abahhhhhhhhh
+       .aaahi*iiiiii
+       .eaahiiiiiiii
+       ..ebhiiiiiiii
+       ..cahiiiiiiii
+       ..ebhiiiiiiii
+       ..cbhiiiiiiii
+       .cbbhiiiiiiii
+      layer Y60 (x 171..183 across, z down; * the point, which is air)
+       .............
+       ............a
+       .............
+       .............
+       .............
+       ....ejjjjjjjj
+       ....kl*lm....
+       ....k...m...n
+       ....kl..m...n
+       ....koo.ml..n
+       ....k...p...n
+       ....kl..m...n
+       ....koo.mq...
+      layer Y61 (x 171..183 across, z down; * the point, which is air)
+       .rrrrrrrrr...
+       .............
+       .............
+       .............
+       .............
+       ....ejsjjsjjs
+       ....k.*.m....
+       ....s...m....
+       ....k...m....
+       ....k...m....
+       ....s...p....
+       ....k...m....
+       ....k...m....
+      layer Y62 (x 171..183 across, z down; * the point, which is air)
+       .............
+       .............
+       .............
+       .............
+       .............
+       ....ejsjjsjjs
+       ....k.*.m....
+       ....s...m....
+       ....k...m....
+       ....k...m....
+       ....s...m....
+       ....k...m....
+       ....k...m....
+      legend: a=grass b=gravel c=stone d=dirt e=granite f=cobble g=stairs h=stone_bricks i=planks j=#90 k=#88 l=table m=plaster n=seat o=bed p=door q=gold_block r=slate_roof s=white_glass

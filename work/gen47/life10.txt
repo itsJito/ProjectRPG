@@ -1,0 +1,375 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 19.37s ({regions=873, overlays=488, variants=537, scarp=49, coast=420, erosion=449, peaks=80, lakes=64, isles=1, rivers=752, wadis=13, ground=21, roads=579, causeways=3, architecture=1301, pitsFilled=1396, pits=456, banks=73, clamp=15, cliffs=50, columns=1207, falls=15, raise=10549, trees=246, outcrops=0, ways=484, lava=0, dungeons=90, postsSunk=28, floatingRemoved=59, floating=504}), made and lit in 2.17s
+    [water] flow field grown in 933 ms: 39016 columns moving
+    [gathering] 757 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+    [life] start: 236 people, 0 stand with 3+ others within 2 m
+
+    [trace]    30 Yrsa       (438.50,56.04,465.50) yaw 0.00 want NaN v 0.00,0.05 goal SOCIALIZE(lonely (60%), Ulven nearby) act go to goal working null gp true 438.5,56.0,467.5 legs 0/11 st 0 nu 0 ss 0.5 na 0.0 t 0.5 | 
+    [trace]    40 Yrsa       (438.50,56.00,465.66) yaw 0.43 want NaN v 0.00,2.19 goal SOCIALIZE(lonely (60%), Ulven nearby) act go to goal working null gp true 438.5,56.0,467.5 legs 0/11 st 0 nu 0 ss 0.5 na 0.0 t 0.7 | 
+    [trace]    50 Yrsa       (438.50,56.00,466.07) yaw 1.52 want NaN v 0.00,2.45 goal SOCIALIZE(lonely (60%), Ulven nearby) act go to goal working null gp true 440.5,56.0,467.5 legs 1/11 st 0 nu 0 ss 0.8 na 0.0 t 0.9 | 
+    [trace]    60 Yrsa       (438.57,56.00,466.42) yaw 2.60 want NaN v 1.33,1.51 goal SOCIALIZE(lonely (60%), Ulven nearby) act go to goal working null gp true 440.5,56.0,467.5 legs 1/11 st 0 nu 0 ss 1.0 na 0.0 t 1.0 | 
+    [trace]    70 Yrsa       (438.90,56.00,466.63) yaw -2.60 want NaN v 2.15,1.17 goal SOCIALIZE(lonely (60%), Ulven nearby) act go to goal working null gp true 440.5,56.0,467.5 legs 1/11 st 0 nu 0 ss 1.0 na 0.0 t 1.2 | 
+    [trace]    80 Yrsa       (439.24,56.00,466.83) yaw -2.16 want NaN v 1.57,1.55 goal SOCIALIZE(lonely (60%), Ulven nearby) act go to goal working null gp true 440.5,56.0,470.5 legs 2/11 st 0 nu 0 ss 1.3 na 0.0 t 1.4 | 
+    [trace]    90 Yrsa       (439.41,56.00,467.18) yaw -2.61 want NaN v 0.77,2.33 goal SOCIALIZE(lonely (60%), Ulven nearby) act go to goal working null gp true 440.5,56.0,470.5 legs 2/11 st 0 nu 0 ss 1.5 na 0.0 t 1.5 | 
+    [trace]   100 Yrsa       (439.53,56.00,467.57) yaw -2.76 want NaN v 0.77,2.33 goal SOCIALIZE(lonely (60%), Ulven nearby) act go to goal working null gp true 439.5,56.0,470.5 legs 0/8 st 0 nu 0 ss 1.5 na 0.0 t 1.7 | 
+    [trace]   110 Yrsa       (439.57,56.00,467.97) yaw -3.02 want NaN v -0.06,2.45 goal SOCIALIZE(lonely (60%), Ulven nearby) act go to goal working null gp true 439.5,56.0,470.5 legs 0/8 st 0 nu 0 ss 1.8 na 0.0 t 1.9 | 
+    [trace]   120 Yrsa       (439.56,56.00,468.38) yaw -3.13 want NaN v -0.06,2.45 goal SOCIALIZE(lonely (60%), Ulven nearby) act go to goal working null gp true 439.5,56.0,470.5 legs 0/8 st 0 nu 0 ss 1.8 na 0.0 t 2.0 | 
+    [trace]   130 Yrsa       (439.54,56.00,468.79) yaw 3.13 want NaN v -0.28,2.36 goal SOCIALIZE(lonely (60%), Ulven nearby) act go to goal working null gp true 438.5,56.0,470.5 legs 1/8 st 0 nu 0 ss 2.1 na 0.0 t 2.2 | 
+    [trace]   140 Yrsa       (439.37,56.00,469.14) yaw 2.79 want NaN v -1.32,2.06 goal SOCIALIZE(lonely (60%), Ulven nearby) act go to goal working null gp true 438.5,56.0,473.5 legs 2/8 st 0 nu 0 ss 2.3 na 0.0 t 2.4 | 
+    [trace]   150 Yrsa       (439.15,56.00,469.49) yaw 2.63 want NaN v -1.32,2.06 goal SOCIALIZE(lonely (60%), Ulven nearby) act go to goal working null gp true 438.5,56.0,473.5 legs 2/9 st 0 nu 0 ss 2.5 na 0.0 t 2.5 | 
+    [trace]   160 Yrsa       (439.00,56.00,469.86) yaw 2.77 want NaN v -0.34,2.43 goal SOCIALIZE(lonely (60%), Ulven nearby) act go to goal working null gp true 438.5,56.0,473.5 legs 2/9 st 0 nu 0 ss 2.6 na 0.0 t 2.7 | 
+    [trace]   170 Yrsa       (438.95,56.00,470.26) yaw 2.93 want NaN v -0.34,2.43 goal SOCIALIZE(lonely (61%), Ulven nearby) act go to goal working null gp true 438.5,56.0,473.5 legs 2/9 st 0 nu 0 ss 2.8 na 0.0 t 2.9 | 
+    [trace]   180 Yrsa       (438.89,56.00,470.67) yaw 2.96 want NaN v -0.34,2.43 goal SOCIALIZE(lonely (61%), Ulven nearby) act go to goal working null gp true 438.5,56.0,473.5 legs 2/9 st 0 nu 0 ss 3.0 na 0.0 t 3.0 | 
+    [trace]   190 Yrsa       (438.84,56.00,471.07) yaw 2.99 want NaN v -0.34,2.43 goal SOCIALIZE(lonely (61%), Ulven nearby) act go to goal working null gp true 438.5,56.0,473.5 legs 0/8 st 0 nu 0 ss 3.1 na 0.0 t 3.2 | 
+    [trace]   200 Yrsa       (438.78,56.00,471.47) yaw 2.99 want NaN v -0.34,2.43 goal SOCIALIZE(lonely (61%), Ulven nearby) act go to goal working null gp true 438.5,56.0,473.5 legs 0/8 st 0 nu 0 ss 3.3 na 0.0 t 3.4 | 
+    [trace]   210 Yrsa       (438.72,56.00,471.88) yaw 2.99 want NaN v -0.34,2.43 goal SOCIALIZE(lonely (61%), Ulven nearby) act go to goal working null gp true 431.5,56.0,473.5 legs 1/8 st 0 nu 0 ss 3.5 na 0.0 t 3.5 | 
+    [trace]   220 Yrsa       (438.67,56.00,472.28) yaw 2.99 want NaN v -0.34,2.43 goal SOCIALIZE(lonely (61%), Ulven nearby) act go to goal working null gp true 443.5,56.0,473.5 legs 1/14 st 0 nu 0 ss 3.6 na 0.0 t 3.7 | 
+    [trace]   230 Yrsa       (438.61,56.00,472.69) yaw 2.99 want NaN v -0.34,2.43 goal SOCIALIZE(lonely (61%), Ulven nearby) act go to goal working null gp true 443.5,56.0,473.5 legs 1/14 st 0 nu 0 ss 3.8 na 0.0 t 3.9 | 
+    [trace]   240 Yrsa       (438.65,56.00,472.98) yaw -3.04 want NaN v 1.09,0.91 goal SOCIALIZE(lonely (61%), Ulven nearby) act go to goal working null gp true 443.5,56.0,473.5 legs 1/14 st 0 nu 0 ss 4.0 na 0.0 t 4.0 | 
+    [trace]   250 Yrsa       (438.98,56.00,473.06) yaw -2.01 want NaN v 2.44,0.24 goal SOCIALIZE(lonely (61%), Ulven nearby) act go to goal working null gp true 443.5,56.0,473.5 legs 1/14 st 0 nu 0 ss 4.0 na 0.0 t 4.2 | 
+    [trace]   260 Yrsa       (439.38,56.00,473.10) yaw -1.76 want NaN v 2.44,0.24 goal SOCIALIZE(lonely (61%), Ulven nearby) act go to goal working null gp true 443.5,56.0,473.5 legs 0/13 st 0 nu 0 ss 4.3 na 0.0 t 4.4 | 
+    [trace]   270 Yrsa       (439.79,56.00,473.14) yaw -1.69 want NaN v 2.44,0.24 goal SOCIALIZE(lonely (61%), Ulven nearby) act go to goal working null gp true 443.5,56.0,473.5 legs 0/13 st 0 nu 0 ss 4.3 na 0.0 t 4.5 | 
+    [trace]   280 Yrsa       (440.20,56.00,473.18) yaw -1.69 want NaN v 2.44,0.24 goal SOCIALIZE(lonely (61%), Ulven nearby) act go to goal working null gp true 443.5,56.0,473.5 legs 0/13 st 0 nu 0 ss 4.3 na 0.0 t 4.7 | 
+    [trace]   290 Yrsa       (440.60,56.00,473.21) yaw -1.69 want NaN v 2.44,0.24 goal SOCIALIZE(lonely (61%), Ulven nearby) act go to goal working null gp true 443.5,56.0,473.5 legs 0/13 st 0 nu 0 ss 4.7 na 0.0 t 4.9 | 
+    [trace]   300 Yrsa       (441.01,56.00,473.26) yaw -1.69 want NaN v 2.44,0.24 goal SOCIALIZE(lonely (61%), Ulven nearby) act go to goal working null gp true 443.5,56.0,473.5 legs 0/13 st 0 nu 0 ss 4.7 na 0.0 t 5.0 | 
+    [trace]   310 Yrsa       (441.27,56.00,473.36) yaw -1.97 want NaN v 0.14,0.69 goal SOCIALIZE(lonely (61%), Ulven nearby) act go to goal working null gp true 433.5,56.0,473.5 legs 0/10 st 0 nu 0 ss 5.2 na 0.0 t 5.2 | 
+    [trace]   320 Yrsa       (441.11,56.00,473.44) yaw -2.90 want NaN v -2.09,0.19 goal SOCIALIZE(lonely (61%), Ulven nearby) act go to goal working null gp true 433.5,56.0,473.5 legs 0/10 st 0 nu 0 ss 5.2 na 0.0 t 5.4 | 
+    [trace]   330 Yrsa       (440.72,56.00,473.47) yaw 2.30 want NaN v -2.43,0.17 goal SOCIALIZE(lonely (61%), Ulven nearby) act go to goal working null gp true 433.5,56.0,473.5 legs 0/10 st 0 nu 0 ss 5.5 na 0.0 t 5.5 | 
+    [trace]   340 Yrsa       (440.36,56.00,473.50) yaw 1.66 want NaN v -1.25,0.18 goal SOCIALIZE(lonely (61%), Ulven nearby) act go to goal working null gp true 443.5,56.0,473.5 legs 0/13 st 0 nu 0 ss 5.7 na 0.0 t 5.7 | 
+    [trace]   350 Yrsa       (440.33,56.00,473.51) yaw 1.82 want NaN v 1.07,0.04 goal SOCIALIZE(lonely (62%), Ulven nearby) act go to goal working null gp true 443.5,56.0,473.5 legs 0/13 st 0 nu 0 ss 5.8 na 0.0 t 5.9 | 
+    [trace]   360 Yrsa       (440.67,56.00,473.52) yaw 2.47 want NaN v 2.45,-0.01 goal SOCIALIZE(lonely (62%), Ulven nearby) act go to goal working null gp true 443.5,56.0,473.5 legs 0/13 st 0 nu 0 ss 5.9 na 0.0 t 6.0 | 
+    [trace]   370 Yrsa       (441.07,56.00,473.51) yaw -2.73 want NaN v 2.45,-0.01 goal SOCIALIZE(lonely (62%), Ulven nearby) act go to goal working null gp true 443.5,56.0,473.5 legs 0/14 st 0 nu 0 ss 6.2 na 0.0 t 6.2 | 
+    [trace]   380 Yrsa       (441.48,56.00,473.51) yaw -1.65 want NaN v 2.45,-0.01 goal SOCIALIZE(lonely (62%), Ulven nearby) act go to goal working null gp true 443.5,56.0,473.5 legs 0/14 st 0 nu 0 ss 6.2 na 0.0 t 6.4 | 
+    [trace]   390 Yrsa       (441.88,56.00,473.52) yaw -1.57 want NaN v 1.96,0.49 goal SOCIALIZE(lonely (62%), Ulven nearby) act go to goal working null gp true 443.5,56.0,480.5 legs 1/14 st 0 nu 0 ss 6.4 na 0.0 t 6.5 | 
+    [trace]   400 Yrsa       (442.10,56.00,473.75) yaw -1.91 want NaN v 0.86,2.30 goal SOCIALIZE(lonely (62%), Ulven nearby) act go to goal working null gp true 443.5,56.0,480.5 legs 1/14 st 0 nu 0 ss 6.4 na 0.0 t 6.7 | 
+    [trace]   410 Yrsa       (442.25,56.00,474.13) yaw -2.77 want NaN v 0.86,2.30 goal SOCIALIZE(lonely (62%), Ulven nearby) act go to goal working null gp true 443.5,56.0,480.5 legs 1/14 st 0 nu 0 ss 6.4 na 0.0 t 6.9 | 
+    [trace]   420 Yrsa       (442.39,56.00,474.52) yaw -2.77 want NaN v 0.86,2.30 goal SOCIALIZE(lonely (62%), Ulven nearby) act go to goal working null gp true 443.5,56.0,480.5 legs 1/14 st 0 nu 0 ss 6.9 na 0.0 t 7.0 | 
+    [trace]   430 Yrsa       (442.53,56.00,474.90) yaw -2.77 want NaN v 0.86,2.30 goal SOCIALIZE(lonely (62%), Ulven nearby) act go to goal working null gp true 443.5,56.0,480.5 legs 1/14 st 0 nu 0 ss 7.2 na 0.0 t 7.2 | 
+    [trace]   440 Yrsa       (442.67,55.99,475.28) yaw -2.77 want NaN v 0.86,2.30 goal SOCIALIZE(lonely (62%), Ulven nearby) act go to goal working null gp true 443.5,56.0,480.5 legs 1/14 st 0 nu 0 ss 7.2 na 0.0 t 7.4 | 
+    [trace]   450 Yrsa       (442.77,55.58,475.66) yaw -2.90 want NaN v 0.00,2.28 goal SOCIALIZE(lonely (62%), Ulven nearby) act go to goal working null gp true 443.5,56.0,480.5 legs 1/14 st 0 nu 0 ss 7.4 na 0.0 t 7.5 | 
+    [trace]   460 Yrsa       (442.78,55.39,476.04) yaw -3.05 want NaN v 0.28,2.22 goal SOCIALIZE(lonely (62%), Ulven nearby) act go to goal working null gp true 443.5,56.0,480.5 legs 1/14 st 0 nu 0 ss 7.6 na 0.0 t 7.7 | 
+    [trace]   470 Yrsa       (442.79,56.09,476.40) yaw -2.94 want NaN v 0.74,2.15 goal SOCIALIZE(lonely (62%), Ulven nearby) act go to goal working null gp true 443.5,56.0,480.5 legs 1/14 st 0 nu 0 ss 7.7 na 0.0 t 7.9 | 
+    [trace]   480 Yrsa       (442.95,56.17,476.75) yaw -2.76 want NaN v 1.19,2.04 goal SOCIALIZE(lonely (62%), Ulven nearby) act go to goal working null gp true 443.5,56.0,480.5 legs 1/14 st 0 nu 0 ss 8.0 na 0.0 t 8.0 | 
+    [trace]   490 Yrsa       (443.10,56.00,477.11) yaw -2.80 want NaN v 0.29,2.43 goal SOCIALIZE(lonely (62%), Ulven nearby) act go to goal working null gp true 443.5,56.0,480.5 legs 1/14 st 0 nu 0 ss 8.0 na 0.0 t 8.2 | 
+    [trace]   500 Yrsa       (443.15,56.00,477.52) yaw -2.95 want NaN v 0.29,2.43 goal SOCIALIZE(lonely (63%), Ulven nearby) act go to goal working null gp true 443.5,56.0,480.5 legs 1/14 st 0 nu 0 ss 8.3 na 0.0 t 8.4 | 
+    [trace]   510 Yrsa       (443.19,56.00,477.93) yaw -2.98 want NaN v 0.29,2.43 goal SOCIALIZE(lonely (63%), Ulven nearby) act go to goal working null gp true 443.5,56.0,480.5 legs 1/14 st 0 nu 0 ss 8.5 na 0.0 t 8.5 | 
+    [trace]   520 Yrsa       (443.24,56.00,478.33) yaw -3.01 want NaN v 0.29,2.43 goal SOCIALIZE(lonely (63%), Ulven nearby) act go to goal working null gp true 443.5,56.0,480.5 legs 1/14 st 0 nu 0 ss 8.7 na 0.0 t 8.7 | 
+    [trace]   530 Yrsa       (443.29,56.00,478.74) yaw -3.01 want NaN v 0.29,2.43 goal SOCIALIZE(lonely (63%), Ulven nearby) act go to goal working null gp true 443.5,56.0,480.5 legs 1/14 st 0 nu 0 ss 8.7 na 0.0 t 8.9 | 
+    [trace]   540 Yrsa       (443.21,56.00,479.11) yaw 2.96 want NaN v -1.11,2.18 goal SOCIALIZE(lonely (63%), Ulven nearby) act go to goal working null gp true 442.5,54.0,480.5 legs 2/14 st 0 nu 0 ss 9.0 na 0.0 t 9.0 | 
+    [trace]   550 Yrsa       (443.02,56.00,479.48) yaw 2.75 want NaN v -1.11,2.18 goal SOCIALIZE(lonely (63%), Ulven nearby) act go to goal working null gp true 442.5,54.0,480.5 legs 2/14 st 0 nu 0 ss 9.0 na 0.0 t 9.2 | 
+    [trace]   560 Yrsa       (442.84,56.00,479.84) yaw 2.71 want NaN v -1.11,2.18 goal SOCIALIZE(lonely (63%), Ulven nearby) act go to goal working null gp true 433.4,54.0,484.5 legs - st 0 nu 0 ss 9.2 na 0.0 t 9.4 | postponed a conversation; no safe route to the partner
+    [trace]   570 Yrsa       (442.66,55.84,480.19) yaw 2.68 want NaN v -0.96,1.89 goal HOME(Solday: getting up) act hold/face working null gp false 432.0,56.0,466.0 legs - st 0 nu 0 ss 9.2 na 0.0 t 9.5 | getting up and dressed
+    [trace]   580 Yrsa       (442.51,55.09,480.47) yaw 2.68 want NaN v -0.75,1.48 goal HOME(Solday: getting up) act hold/face working null gp false 432.0,56.0,466.0 legs - st 0 nu 0 ss 9.2 na 0.0 t 9.7 | getting up and dressed
+    [trace]   590 Yrsa       (442.41,54.00,480.68) yaw 2.68 want NaN v -0.37,0.73 goal HOME(Solday: getting up) act hold/face working null gp false 432.0,56.0,466.0 legs - st 0 nu 0 ss 9.2 na 0.0 t 9.9 | getting up and dressed
+    [trace]   600 Yrsa       (442.40,54.00,480.71) yaw 2.49 want 2.50 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 432.0,56.0,466.0 legs - st 0 nu 0 ss 9.2 na 0.0 t 10.0 | getting up and dressed
+    [trace]   610 Yrsa       (442.40,54.00,480.71) yaw 2.55 want 2.57 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 432.0,56.0,466.0 legs - st 0 nu 0 ss 9.2 na 0.0 t 10.2 | getting up and dressed
+    [trace]   620 Yrsa       (442.40,54.00,480.71) yaw 2.62 want 2.63 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 432.0,56.0,466.0 legs - st 0 nu 0 ss 9.2 na 0.0 t 10.4 | getting up and dressed
+    [trace]   630 Yrsa       (442.40,54.00,480.71) yaw 2.69 want 2.70 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 432.0,56.0,466.0 legs - st 0 nu 0 ss 9.2 na 0.0 t 10.5 | getting up and dressed
+    [trace]   640 Yrsa       (442.40,54.00,480.71) yaw 2.76 want 2.77 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 432.0,56.0,466.0 legs - st 0 nu 0 ss 9.2 na 0.0 t 10.7 | getting up and dressed
+    [trace]   650 Yrsa       (442.40,54.00,480.71) yaw 2.83 want 2.84 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 432.0,56.0,466.0 legs - st 0 nu 0 ss 9.2 na 0.0 t 10.9 | getting up and dressed
+    [trace]   660 Yrsa       (442.40,54.00,480.71) yaw 2.89 want 2.90 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 432.0,56.0,466.0 legs - st 0 nu 0 ss 9.2 na 0.0 t 11.0 | getting up and dressed
+    [trace]   670 Yrsa       (442.40,54.00,480.71) yaw 2.92 want 2.95 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 432.0,56.0,466.0 legs - st 0 nu 0 ss 9.2 na 0.0 t 11.2 | getting up and dressed
+    [trace]   680 Yrsa       (442.40,54.00,480.71) yaw 2.99 want 2.99 v 0.00,0.00 goal HOME(Solday: getting up) act hold/face working null gp false 432.0,56.0,466.0 legs - st 0 nu 0 ss 9.2 na 0.0 t 11.4 | getting up and dressed
+    [trace]   690 Yrsa       (442.37,54.00,480.62) yaw 2.99 want 2.99 v -0.44,-1.57 goal HOME(Solday: getting up) act go to goal working null gp true 441.5,54.0,477.5 legs 2/13 st 0 nu 0 ss 11.4 na 0.0 t 11.5 | getting up and dressed
+    [trace]   700 Yrsa       (442.27,54.00,480.25) yaw 2.01 want NaN v -0.66,-2.36 goal HOME(Solday: getting up) act go to goal working null gp true 441.5,54.0,477.5 legs 2/13 st 0 nu 0 ss 11.6 na 0.0 t 11.7 | getting up and dressed
+    [trace]   710 Yrsa       (442.16,54.00,479.86) yaw 0.93 want NaN v -0.66,-2.36 goal HOME(Solday: getting up) act go to goal working null gp true 441.5,54.0,477.5 legs 2/13 st 0 nu 0 ss 11.8 na 0.0 t 11.9 | getting up and dressed
+    [trace]   720 Yrsa       (442.05,54.00,479.47) yaw 0.28 want NaN v -0.66,-2.36 goal HOME(Solday: getting up) act go to goal working null gp true 441.5,54.0,477.5 legs 2/13 st 0 nu 0 ss 12.0 na 0.0 t 12.0 | getting up and dressed
+    [trace]   730 Yrsa       (441.94,54.00,479.07) yaw 0.28 want NaN v -0.66,-2.36 goal HOME(Solday: getting up) act go to goal working null gp true 438.5,54.0,477.5 legs 3/13 st 0 nu 0 ss 12.1 na 0.0 t 12.2 | getting up and dressed
+    [trace]   740 Yrsa       (441.83,54.00,478.68) yaw 0.28 want NaN v -0.66,-2.36 goal HOME(Solday: getting up) act go to goal working null gp true 438.5,54.0,477.5 legs 3/13 st 0 nu 0 ss 12.3 na 0.0 t 12.4 | getting up and dressed
+    [trace]   750 Yrsa       (441.72,54.00,478.29) yaw 0.28 want NaN v -0.66,-2.36 goal HOME(Solday: getting up) act go to goal working null gp true 438.5,54.0,477.5 legs 3/13 st 0 nu 0 ss 12.5 na 0.0 t 12.5 | getting up and dressed
+    [trace]   760 Yrsa       (441.58,54.00,477.93) yaw 0.37 want NaN v -1.44,-1.50 goal HOME(Solday: getting up) act go to goal working null gp true 438.5,54.0,477.5 legs 3/13 st 0 nu 0 ss 12.7 na 0.0 t 12.7 | getting up and dressed
+    [trace]   770 Yrsa       (441.24,54.00,477.81) yaw 1.08 want NaN v 0.00,-0.27 goal HOME(Solday: getting up) act go to goal working null gp true 438.5,54.0,477.5 legs 3/13 st 0 nu 0 ss 12.8 na 0.0 t 12.9 | getting up and dressed
+    [trace]   780 Yrsa       (441.22,54.00,477.76) yaw 0.92 want NaN v -0.58,-0.26 goal HOME(Solday: getting up) act go to goal working null gp true 438.5,54.0,477.5 legs 3/13 st 0 nu 0 ss 12.8 na 0.0 t 13.0 | getting up and dressed
+    [trace]   790 Yrsa       (440.94,54.00,477.72) yaw 1.36 want NaN v -2.44,-0.22 goal HOME(Solday: getting up) act go to goal working null gp true 438.5,54.0,477.5 legs 3/13 st 0 nu 0 ss 13.2 na 0.0 t 13.2 | getting up and dressed
+    [trace]   800 Yrsa       (440.55,54.00,477.69) yaw 1.44 want NaN v -1.22,-0.26 goal HOME(Solday: getting up) act go to goal working null gp true 438.5,54.0,477.5 legs 3/13 st 0 nu 0 ss 13.3 na 0.0 t 13.4 | getting up and dressed
+    [trace]   810 Yrsa       (440.49,54.00,477.63) yaw 1.26 want NaN v -0.29,-0.38 goal HOME(Solday: getting up) act go to goal working null gp true 438.5,54.0,477.5 legs 3/13 st 0 nu 0 ss 13.3 na 0.0 t 13.5 | getting up and dressed
+    [trace]   820 Yrsa       (440.48,54.00,477.55) yaw 0.92 want NaN v -0.37,-0.46 goal HOME(Solday: getting up) act go to goal working null gp true 438.5,54.0,477.5 legs 3/13 st 0 nu 0 ss 13.3 na 0.0 t 13.7 | getting up and dressed
+    [trace]   830 Yrsa       (440.44,54.00,477.45) yaw 0.79 want NaN v -0.57,-0.59 goal HOME(Solday: getting up) act go to goal working null gp true 438.5,54.0,477.5 legs 3/13 st 0 nu 0 ss 13.8 na 0.0 t 13.9 | getting up and dressed
+    [trace]   840 Yrsa       (440.34,54.00,477.32) yaw 0.86 want NaN v -1.00,-0.68 goal HOME(Solday: getting up) act go to goal working null gp true 438.5,54.0,477.5 legs 3/13 st 0 nu 0 ss 13.8 na 0.0 t 14.0 | getting up and dressed
+    [trace]   850 Yrsa       (440.12,54.00,477.16) yaw 0.94 want NaN v -1.67,-1.74 goal HOME(Solday: getting up) act go to goal working null gp true 438.5,55.0,475.5 legs 4/13 st 0 nu 0 ss 14.1 na 0.0 t 14.2 | getting up and dressed
+    [trace]   860 Yrsa       (439.84,54.00,476.86) yaw 0.79 want NaN v -1.68,-1.78 goal HOME(Solday: getting up) act go to goal working null gp true 438.5,55.0,475.5 legs 4/13 st 0 nu 0 ss 14.3 na 0.0 t 14.4 | getting up and dressed
+    [trace]   870 Yrsa       (439.56,54.00,476.57) yaw 0.79 want NaN v -1.72,-1.74 goal HOME(Solday: getting up) act go to goal working null gp true 438.5,55.0,475.5 legs 4/13 st 0 nu 0 ss 14.5 na 0.0 t 14.5 | getting up and dressed
+    [trace]   880 Yrsa       (439.27,54.00,476.28) yaw 0.79 want NaN v -1.72,-1.74 goal HOME(Solday: getting up) act go to goal working null gp true 438.5,55.0,475.5 legs 4/13 st 0 nu 0 ss 14.7 na 0.0 t 14.7 | getting up and dressed
+    [trace]   890 Yrsa       (439.00,54.81,476.24) yaw 0.73 want NaN v -1.41,-1.95 goal HOME(Solday: getting up) act go to goal working null gp true 438.5,55.0,474.5 legs 5/13 st 0 nu 0 ss 14.7 na 0.0 t 14.9 | getting up and dressed
+    [trace]   900 Yrsa       (438.80,55.20,476.01) yaw 0.59 want NaN v -0.98,-2.13 goal HOME(Solday: getting up) act go to goal working null gp true 432.5,55.0,474.5 legs 6/13 st 0 nu 0 ss 14.9 na 0.0 t 15.0 | getting up and dressed
+    [trace]   910 Yrsa       (438.67,55.01,475.64) yaw 0.40 want NaN v -0.39,-2.40 goal HOME(Solday: getting up) act go to goal working null gp true 432.5,55.0,474.5 legs 6/13 st 0 nu 0 ss 15.2 na 0.0 t 15.2 | getting up and dressed
+    [trace]   920 Yrsa       (438.50,55.00,475.39) yaw 0.61 want NaN v -1.92,-0.68 goal HOME(Solday: getting up) act go to goal working null gp true 432.5,55.0,474.5 legs 6/13 st 0 nu 0 ss 15.3 na 0.0 t 15.4 | getting up and dressed
+    [trace]   930 Yrsa       (438.11,55.00,475.32) yaw 1.22 want NaN v -2.42,-0.36 goal HOME(Solday: getting up) act go to goal working null gp true 432.5,55.0,474.5 legs 6/13 st 0 nu 0 ss 15.4 na 0.0 t 15.5 | getting up and dressed
+    [trace]   940 Yrsa       (437.70,55.00,475.26) yaw 1.39 want NaN v -2.42,-0.36 goal HOME(Solday: getting up) act go to goal working null gp true 432.5,55.0,474.5 legs 6/13 st 0 nu 0 ss 15.6 na 0.0 t 15.7 | getting up and dressed
+    [trace]   950 Yrsa       (437.30,55.00,475.20) yaw 1.39 want NaN v -2.42,-0.36 goal HOME(Solday: getting up) act go to goal working null gp true 432.5,55.0,474.5 legs 6/13 st 0 nu 0 ss 15.8 na 0.0 t 15.9 | getting up and dressed
+    [trace]   960 Yrsa       (436.89,55.00,475.14) yaw 1.42 want NaN v -2.42,-0.36 goal HOME(Solday: getting up) act go to goal working null gp true 432.5,55.0,474.5 legs 6/13 st 0 nu 0 ss 15.9 na 0.0 t 16.0 | getting up and dressed
+    [trace]   970 Yrsa       (436.49,55.00,475.09) yaw 1.42 want NaN v -2.42,-0.36 goal HOME(Solday: getting up) act go to goal working null gp true 432.5,55.0,474.5 legs 6/13 st 0 nu 0 ss 16.1 na 0.0 t 16.2 | getting up and dressed
+    [trace]   980 Yrsa       (436.09,55.00,475.03) yaw 1.42 want NaN v -2.42,-0.36 goal HOME(Solday: getting up) act go to goal working null gp true 432.5,55.0,474.5 legs 6/13 st 0 nu 0 ss 16.3 na 0.0 t 16.4 | getting up and dressed
+    [trace]   990 Yrsa       (435.68,55.00,474.97) yaw 1.42 want NaN v -2.42,-0.36 goal HOME(Solday: getting up) act go to goal working null gp true 432.5,55.0,474.5 legs 6/13 st 0 nu 0 ss 16.5 na 0.0 t 16.5 | getting up and dressed
+    [trace]  1000 Yrsa       (435.28,55.00,474.91) yaw 1.42 want NaN v -2.42,-0.36 goal HOME(Solday: getting up) act go to goal working null gp true 432.5,55.0,474.5 legs 6/13 st 0 nu 0 ss 16.5 na 0.0 t 16.7 | getting up and dressed
+    [trace]  1010 Yrsa       (434.87,55.00,474.85) yaw 1.42 want NaN v -2.42,-0.36 goal HOME(Solday: getting up) act go to goal working null gp true 432.5,55.0,474.5 legs 6/13 st 0 nu 0 ss 16.7 na 0.0 t 16.9 | getting up and dressed
+    [trace]  1020 Yrsa       (434.47,55.00,474.79) yaw 1.42 want NaN v -2.42,-0.36 goal HOME(Solday: getting up) act go to goal working null gp true 432.5,55.0,474.5 legs 6/13 st 0 nu 0 ss 17.0 na 0.0 t 17.0 | getting up and dressed
+    [trace]  1030 Yrsa       (434.08,55.00,474.71) yaw 1.36 want NaN v -2.03,-1.20 goal HOME(Solday: getting up) act go to goal working null gp true 432.5,56.0,473.5 legs 7/13 st 0 nu 0 ss 17.0 na 0.0 t 17.2 | getting up and dressed
+    [trace]  1040 Yrsa       (433.75,55.00,474.46) yaw 1.03 want NaN v -1.94,-1.49 goal HOME(Solday: getting up) act go to goal working null gp true 432.5,56.0,473.5 legs 7/13 st 0 nu 0 ss 17.4 na 0.0 t 17.4 | getting up and dressed
+    [trace]  1050 Yrsa       (433.43,55.06,474.23) yaw 0.96 want NaN v -1.94,-1.49 goal HOME(Solday: getting up) act go to goal working null gp true 432.5,56.0,473.5 legs 7/13 st 0 nu 0 ss 17.5 na 0.0 t 17.5 | getting up and dressed
+    [trace]  1060 Yrsa       (433.11,55.94,474.23) yaw 0.93 want NaN v -1.97,-1.38 goal HOME(Solday: getting up) act go to goal working null gp true 429.5,56.0,473.5 legs 9/13 st 0 nu 0 ss 17.5 na 0.0 t 17.7 | getting up and dressed
+    [trace]  1070 Yrsa       (432.76,56.21,474.06) yaw 1.01 want NaN v -2.24,-1.00 goal HOME(Solday: getting up) act go to goal working null gp true 429.5,56.0,473.5 legs 9/13 st 0 nu 0 ss 17.8 na 0.0 t 17.9 | getting up and dressed
+    [trace]  1080 Yrsa       (432.39,56.00,473.90) yaw 1.11 want NaN v -2.35,-0.54 goal HOME(Solday: getting up) act go to goal working null gp true 429.5,56.0,473.5 legs 9/13 st 0 nu 0 ss 17.8 na 0.0 t 18.0 | getting up and dressed
+    [trace]  1090 Yrsa       (431.99,56.00,473.84) yaw 1.36 want NaN v -2.43,-0.33 goal HOME(Solday: getting up) act go to goal working null gp true 429.5,56.0,473.5 legs 9/13 st 0 nu 0 ss 18.1 na 0.0 t 18.2 | getting up and dressed
+    [trace]  1100 Yrsa       (431.58,56.00,473.79) yaw 1.39 want NaN v -2.43,-0.33 goal HOME(Solday: getting up) act go to goal working null gp true 429.5,56.0,473.5 legs 9/13 st 0 nu 0 ss 18.1 na 0.0 t 18.4 | getting up and dressed
+    [trace]  1110 Yrsa       (431.18,56.00,473.73) yaw 1.42 want NaN v -2.43,-0.33 goal HOME(Solday: getting up) act go to goal working null gp true 429.5,56.0,468.5 legs 10/13 st 0 nu 0 ss 18.1 na 0.0 t 18.5 | getting up and dressed
+    [trace]  1120 Yrsa       (430.77,56.00,473.68) yaw 1.42 want NaN v -2.43,-0.33 goal HOME(Solday: getting up) act go to goal working null gp true 429.5,56.0,468.5 legs 10/13 st 0 nu 0 ss 18.6 na 0.0 t 18.7 | getting up and dressed
+    [trace]  1130 Yrsa       (430.37,56.00,473.62) yaw 1.42 want NaN v -2.43,-0.34 goal HOME(Solday: getting up) act go to goal working null gp true 429.5,56.0,468.5 legs 10/13 st 0 nu 0 ss 18.6 na 0.0 t 18.9 | getting up and dressed
+    [trace]  1140 Yrsa       (429.98,56.00,473.54) yaw 1.38 want NaN v -1.77,-1.00 goal HOME(Solday: getting up) act go to goal working null gp true 429.5,56.0,468.5 legs 10/13 st 0 nu 0 ss 18.6 na 0.0 t 19.0 | getting up and dressed
+    [trace]  1150 Yrsa       (429.82,56.00,473.25) yaw 0.66 want NaN v -0.28,-2.43 goal HOME(Solday: getting up) act go to goal working null gp true 429.5,56.0,468.5 legs 10/13 st 0 nu 0 ss 19.2 na 0.0 t 19.2 | getting up and dressed
+    [trace]  1160 Yrsa       (429.77,56.00,473.22) yaw 0.76 want NaN v -0.21,-0.23 goal HOME(Solday: getting up) act go to goal working null gp true 429.5,56.0,468.5 legs 10/13 st 0 nu 0 ss 19.2 na 0.0 t 19.4 | getting up and dressed
+    [trace]  1170 Yrsa       (429.75,56.00,473.00) yaw 0.19 want NaN v -0.13,-2.45 goal HOME(Solday: getting up) act go to goal working null gp true 429.5,56.0,468.5 legs 10/13 st 0 nu 0 ss 19.2 na 0.0 t 19.5 | getting up and dressed
+    [trace]  1180 Yrsa       (429.72,56.00,472.59) yaw 0.10 want NaN v -0.13,-2.45 goal HOME(Solday: getting up) act go to goal working null gp true 429.5,56.0,468.5 legs 10/13 st 0 nu 0 ss 19.7 na 0.0 t 19.7 | getting up and dressed
+    [trace]  1190 Yrsa       (429.70,56.00,472.19) yaw 0.07 want NaN v -0.13,-2.45 goal HOME(Solday: getting up) act go to goal working null gp true 429.5,56.0,468.5 legs 10/13 st 0 nu 0 ss 19.8 na 0.0 t 19.9 | getting up and dressed
+    [life] stop 440,478 done (17 people seen so far)
+
+    [life] 1 stops of 1200 frames; 17 people seen
+      never in play: Ealdra MERCHANT home (309,974)
+      never in play: Torren LAWMAN home (287,1035)
+      never in play: Aldric GUARD home (278,1028)
+      never in play: Oswin WORKER home (352,949)
+      never in play: Tam CRAFTSMAN home (333,884)
+      never in play: Brannoc THIEF home (628,948)
+      never in play: Mara MERCHANT home (162,819)
+      never in play: Lucan LAWMAN home (143,749)
+      never in play: Ferrick CARTER home (240,1021)
+      never in play: Garvin QUEST_GIVER home (259,945)
+      never in play: Kettil CONTACT home (647,924)
+      never in play: Wynn FARMER home (252,1018)
+      never in play: Father Wulfric UNDERTAKER home (227,928)
+      never in play: Skarn FENCE home (628,1074)
+      never in play: Bram GUARD home (285,1026)
+      never in play: Bilal BEGGAR home (956,908)
+      never in play: Ysolde PRIEST home (231,1011)
+      never in play: Father Gregory PRIEST home (260,942)
+      never in play: Rafe HUNTER home (403,849)
+      never in play: Maelin SCHOLAR home (178,647)
+      never in play: Bryn FISHERMAN home (619,641)
+      never in play: Brokk MINER home (247,482)
+      never in play: Fred CRAFTSMAN home (289,965)
+      never in play: Sir Andrew KNIGHT home (269,944)
+      never in play: Hakon HUNTER home (144,624)
+      never in play: Hadwin CIVIC home (312,1004)
+      never in play: Danek CRAFTSMAN home (183,825)
+      never in play: Dawud MINER home (995,926)
+      never in play: Sir Hedric KNIGHT home (407,796)
+      never in play: Gudrik FISHERMAN home (650,1068)
+      never in play: Vesna FISHERMAN home (152,821)
+      never in play: King Leonidas CIVIC home (617,134)
+      never in play: Baron Photios LAWMAN home (644,155)
+      never in play: Leontios GUARD home (643,160)
+      never in play: Anwar GUARD home (926,928)
+      never in play: Roder GUARD home (196,668)
+      never in play: Baroness Guinevere CIVIC home (865,415)
+      never in play: Zoe MERCHANT home (528,165)
+      never in play: Father Paul PRIEST home (925,101)
+      never in play: Aristides SCHOLAR home (659,199)
+      never in play: Polyxena MINER home (925,177)
+      never in play: Tolis BEGGAR home (534,109)
+      never in play: King Fahad CIVIC home (954,943)
+      never in play: Cerys CRAFTSMAN home (862,468)
+      never in play: Wat FISHERMAN home (230,1010)
+      never in play: Tauron HUNTER home (908,557)
+      never in play: King Arthur CIVIC home (865,419)
+      never in play: Sir Lancelot KNIGHT home (857,420)
+      never in play: Sir Gawain KNIGHT home (890,392)
+      never in play: Torvik MINER home (242,487)
+      never in play: Merlin SCHOLAR home (827,423)
+      never in play: Dunstan CRAFTSMAN home (352,952)
+      never in play: Olek CRAFTSMAN home (146,791)
+      never in play: Alexios CRAFTSMAN home (510,82)
+      never in play: Cenric WORKER home (351,944)
+      never in play: Radek WORKER home (136,817)
+      never in play: Dorran MINER home (224,584)
+      never in play: Merek MINER home (140,612)
+      never in play: Meriwyn MERCHANT home (647,919)
+      never in play: Damaris MERCHANT home (528,167)
+      never in play: Cuthmar FARMER home (297,946)
+      never in play: Baron Osric CIVIC home (292,902)
+      never in play: Kyra FARMER home (262,338)
+      never in play: Marinos FARMER home (264,331)
+      never in play: Berthild CIVIC home (320,992)
+      never in play: Maddoc MERCHANT home (324,994)
+      never in play: Karlon CRAFTSMAN home (327,993)
+      never in play: Melitta CIVIC home (585,239)
+      never in play: Basil MERCHANT home (593,239)
+      never in play: Lazaros CRAFTSMAN home (580,239)
+      never in play: Brennar CRAFTSMAN home (230,664)
+      never in play: Fenna MERCHANT home (248,699)
+      never in play: Aldred CIVIC home (361,964)
+      never in play: Layla CRAFTSMAN home (942,880)
+      never in play: Zainab CRAFTSMAN home (943,876)
+      never in play: Baron Jalal CIVIC home (893,924)
+      never in play: Ziad CRAFTSMAN home (940,877)
+      never in play: Murad CRAFTSMAN home (940,881)
+      never in play: Ilva FARMER home (203,806)
+      never in play: Ioanna CIVIC home (517,260)
+      never in play: Petros FISHERMAN home (513,84)
+      never in play: Sabine SCHOLAR home (260,1041)
+      never in play: Baron Hadrik CIVIC home (238,662)
+      never in play: Yannis FISHERMAN home (510,84)
+      never in play: Count Dracula CIVIC home (140,750)
+      never in play: Sir Garran KNIGHT home (200,672)
+      never in play: Sella CIVIC home (188,825)
+      never in play: Orven CARTER home (253,661)
+      never in play: Leofric CRAFTSMAN home (346,944)
+      never in play: Hurk BANDIT home (878,741)
+      never in play: Sigrun BANDIT home (875,742)
+      never in play: Garmund BRUTE home (876,740)
+      never in play: King Richard CIVIC home (274,1025)
+      never in play: Duke Donald CIVIC home (275,1031)
+      never in play: Count William CIVIC home (346,932)
+      never in play: Alaric PRIEST home (263,944)
+      never in play: Maeve CRAFTSMAN home (282,1029)
+      never in play: Hob GUARD home (407,790)
+      never in play: Eadmund CRAFTSMAN home (346,950)
+      never in play: Beric HUNTER home (404,844)
+      never in play: Duke Bashir CIVIC home (951,947)
+      never in play: Count Awhad CIVIC home (905,913)
+      never in play: Sir Faris-ul-Azhar KNIGHT home (954,931)
+      never in play: Hassan SCHOLAR home (954,936)
+      never in play: Idris SCHOLAR home (954,928)
+      never in play: Father Rafiq PRIEST home (962,907)
+      never in play: Yusuf PRIEST home (959,908)
+      never in play: Tariq CIVIC home (892,968)
+      never in play: Zafir CRAFTSMAN home (852,958)
+      never in play: Osama CRAFTSMAN home (985,899)
+      never in play: Marwan CRAFTSMAN home (1004,871)
+      never in play: Karim CRAFTSMAN home (878,885)
+      never in play: Mohamed MERCHANT home (864,911)
+      never in play: Rashid MERCHANT home (909,913)
+      never in play: Munir CARTER home (876,883)
+      never in play: Hakim CARTER home (951,925)
+      never in play: Hamid CRAFTSMAN home (985,946)
+      never in play: Nabil CRAFTSMAN home (989,944)
+      never in play: Salim CRAFTSMAN home (994,928)
+      never in play: Kamal CRAFTSMAN home (996,928)
+      never in play: Qasim WORKER home (987,928)
+      never in play: Fadi MINER home (921,834)
+      never in play: Jamila FARMER home (817,1033)
+      never in play: Samira FARMER home (814,1033)
+      never in play: Zaid GUARD home (939,949)
+      never in play: Sabir GUARD home (947,949)
+      never in play: Baron Nuri CIVIC home (945,923)
+      never in play: Duke Artemios CIVIC home (601,134)
+      never in play: Count Constantine CIVIC home (545,101)
+      never in play: Sir Nicholas KNIGHT home (640,155)
+      never in play: Sir Kosmas KNIGHT home (638,155)
+      never in play: Baroness Eudokia CIVIC home (653,198)
+      never in play: Father Khalid PRIEST home (532,160)
+      never in play: Ione PRIEST home (498,82)
+      never in play: Stavros CIVIC home (479,263)
+      never in play: Demetrios CRAFTSMAN home (495,244)
+      never in play: Irene SCHOLAR home (589,134)
+      never in play: Theodora CRAFTSMAN home (496,221)
+      never in play: Xenia CRAFTSMAN home (638,164)
+      never in play: Eleni CRAFTSMAN home (497,221)
+      never in play: Theron MERCHANT home (530,161)
+      never in play: Pavlos FENCE home (528,160)
+      never in play: Melina FISHERMAN home (516,84)
+      never in play: Spiros WORKER home (510,84)
+      never in play: Timon WORKER home (512,87)
+      never in play: Damon WORKER home (516,82)
+      never in play: Alkis CARTER home (529,166)
+      never in play: Andreas CRAFTSMAN home (472,200)
+      never in play: Nikos CRAFTSMAN home (470,200)
+      never in play: Kallias CRAFTSMAN home (472,205)
+      never in play: Isidoros CRAFTSMAN home (476,205)
+      never in play: Orestes WORKER home (228,179)
+      never in play: Myron GUARD home (638,162)
+      never in play: Perikles GUARD home (641,167)
+      never in play: Zenon GUARD home (639,167)
+      never in play: Argyros GUARD home (638,159)
+      never in play: Gorgias GUARD home (643,163)
+      never in play: Kleon GUARD home (643,158)
+      never in play: Kyros THIEF home (470,201)
+      never in play: Mimis BEGGAR home (531,109)
+      never in play: Argus THIEF home (474,200)
+      never in play: Phaedra CARTER home (642,155)
+      never in play: Leandros BEGGAR home (518,82)
+      never in play: Sabeen BEGGAR home (518,84)
+      never in play: King Phillip CIVIC home (207,669)
+      never in play: Duke Edran CIVIC home (204,672)
+      never in play: Sir Vaelor KNIGHT home (177,642)
+      never in play: Father Anselm PRIEST home (177,645)
+      never in play: Tovin CRAFTSMAN home (248,704)
+      never in play: Elric CIVIC home (230,682)
+      never in play: Halwen CRAFTSMAN home (263,701)
+      never in play: Hesta FARMER home (252,654)
+      never in play: Aldis CIVIC home (177,705)
+      never in play: Toben CRAFTSMAN home (177,708)
+      never in play: Varek SCHOLAR home (137,754)
+      never in play: Father Odran PRIEST home (198,772)
+      never in play: Mother Mirel PRIEST home (156,787)
+      never in play: Borin FARMER home (202,836)
+      never in play: Sir Bedivere KNIGHT home (910,435)
+      never in play: Father Cadren PRIEST home (831,422)
+      never in play: Elian PRIEST home (889,395)
+      never in play: Baron Aldren CIVIC home (845,432)
+      never in play: Wystan CRAFTSMAN home (863,464)
+      never in play: Perrin CRAFTSMAN home (862,465)
+      never in play: Rowena MERCHANT home (877,471)
+      never in play: Huw FARMER home (918,433)
+      never in play: Edric GUARD home (918,436)
+      never in play: Vark BANDIT home (879,740)
+      never in play: Dolgrin MINER home (249,482)
+      never in play: Pell WORKER home (913,626)
+      never in play: Ysmay WORKER home (1032,439)
+      never in play: Hask HUNTER home (768,529)
+      never in play: Orrin CRAFTSMAN home (417,702)
+      never in play: Corvane HUNTER home (633,937)
+      never in play: Bogdan GUARD home (148,837)
+      never in play: Milena CIVIC home (212,771)
+      never in play: Lothar GUARD home (211,654)
+      never in play: Hilde UNDERTAKER home (175,628)
+      never in play: Nadim GUARD home (971,1019)
+      never in play: Samir UNDERTAKER home (878,843)
+      never in play: Emrys GUARD home (892,435)
+      never in play: Rhiannon CIVIC home (868,437)
+      never in play: Rask BANDIT home (874,741)
+      never in play: Wenna BANDIT home (880,741)
+      never in play: Hullen BANDIT home (872,740)
+      never in play: Grisel BANDIT home (882,741)
+      never in play: Haskel MINER home (219,583)
+      never in play: Tamsin MINER home (147,611)
+      never in play: Osk MINER home (248,487)
+      never in play: Mabry WORKER home (226,179)
+      never in play: Edvin WORKER home (220,179)
+      never in play: Corra WORKER home (916,625)
+      never in play: Grimbold UNDERTAKER home (233,967)
+      never in play: Odo UNDERTAKER home (148,808)
+      never in play: Kyrillos UNDERTAKER home (478,187)
+      never in play: Elidor UNDERTAKER home (853,442)
+      never in play: Gwenna UNDERTAKER home (839,461)
+      never in play: Nasira SCHOLAR home (916,845)
+      never in play: Merrin SCHOLAR home (892,466)
+    [life] 0 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 50.221 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 54s
+9 actionable tasks: 1 executed, 8 up-to-date

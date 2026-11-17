@@ -155,7 +155,8 @@ bool Mover::subStep(const VoxelWorld* w, float dt, float gravity) {
     climbing = onLadder && climb;
     if (fly) { /* no gravity */ }
     else if (climbing) {
-        vy = (wishY >= 0 ? 1.0f : -1.0f) * 3.2f;
+        // (2.14) a climber with no way asked holds on to the rungs (an agent at its rung between one waypoint and the next)
+        vy = wishY == 0 ? 0.0f : (wishY > 0 ? 1.0f : -1.0f) * 3.2f;
         if (wishY < 0 && !bodyFree(w, x, y - 0.1f, z, r, hh)) vy = 0;
         vx *= 0.55f; vz *= 0.55f;
     } else if (onLadder && !onGround && vy <= 0) {

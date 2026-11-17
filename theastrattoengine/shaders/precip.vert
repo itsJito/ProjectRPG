@@ -65,9 +65,11 @@ void main() {
     vec3 rel = mod(base - (uCam - half_), vec3(tile, tall, tile)) - half_;
     p = uCam + rel;
     roof = texture(uRoof, p.xz / uWorld).r;
+    float band = 0.0;
     if (uMotion.z > 0.5) {
         // a ground layer: its height a band over whatever is underfoot, its own seed choosing where in the band
-        p.y = roof + mix(uBox.z, uBox.w, fract(seed.y + base.y / max(1.0, tall)));
+        band = fract(seed.y + base.y / max(1.0, tall));
+        p.y = roof + mix(uBox.z, uBox.w, band);
     }
     // under a roof: not drawn (a layer's band over the roof never is)
     float open = p.y > roof - 0.05 ? 1.0 : 0.0;
@@ -75,6 +77,13 @@ void main() {
     // thinned toward the box's edge (no seam where it wraps), and faded out at hand's reach (no drops in the eye)
     vFade = open * (1.0 - smoothstep(tile * 0.36, tile * 0.5, length(rel.xz))) * (1.0 - smoothstep(tall * 0.38, tall * 0.5, abs(rel.y)))
           * smoothstep(0.35, 1.4, d);
+    // (2.14, gamefixes: every weather polished) a ground layer thins out toward the top of its band (it ended in a hard
+    // shelf at the band's height) and is thinner near the ground's own face
+    if (uMotion.z > 0.5) vFade *= (1.0 - smoothstep(0.35, 1.0, band)) * (0.55 + 0.45 * smoothstep(0.0, 0.15, band));
+    // wind-borne wisps close to the eye were long smears filling the view, all pointing at the wind's vanishing point:
+    // they come in only past an arm's length or two and shorten as they near
+    float nearK = 1.0;
+    if (kind == 3) { vFade *= smoothstep(1.6, 5.0, d); nearK = clamp(d / 8.0, 0.25, 1.0); }
     vec3 corner;
     if (kind == 0 || kind == 3 && uLayer.w > 0.0) {
         // a streak along its own fall, turned about it to face the eye, longer the faster it falls
@@ -82,7 +91,7 @@ void main() {
         vec3 view = normalize(p - uCam);
         vec3 side = cross(dir, view);
         side = length(side) > 1e-3 ? normalize(side) : uRight;
-        corner = p + dir * q.y * uLayer.w + side * q.x * uLayer.z;
+        corner = p + dir * q.y * uLayer.w * nearK + side * q.x * uLayer.z;
     } else {
         // a flake, a hailstone, a mote of dust: a small round sprite facing the eye, turned by its seed
         float a = seed.x * 6.2832 + t * (kind == 1 ? 1.5 : 0.4);

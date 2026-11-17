@@ -1,0 +1,86 @@
+> Task :processResources
+> Task :processTestResources NO-SOURCE
+> Task :theastrattoengine:compileJava
+
+> Task :theastrattoengine:buildNative
+'vswhere.exe' is not recognized as an internal or external command,
+operable program or batch file.
+ai_service.cpp
+c_api.cpp
+audio_device.cpp
+audio_service.cpp
+chemistry_service.cpp
+engine.cpp
+collide.cpp
+impulsis_service.cpp
+
+> Task :compileJava
+> Task :classes
+
+> Task :theastrattoengine:buildNative
+space.cpp
+module_host.cpp
+pathfinder.cpp
+walkability.cpp
+sight.cpp
+bodies.cpp
+physics_service.cpp
+ragdoll.cpp
+sydney.cpp
+chunk_mesher.cpp
+layers.cpp
+renderer.cpp
+voxel_world.cpp
+   Creating library C:\Users\John\Documents\ProjectRPG-head\theastrattoengine\native\obj\astratto.lib and object C:\Users\John\Documents\ProjectRPG-head\theastrattoengine\native\obj\astratto.exp
+
+> Task :theastrattoengine:engineResources
+> Task :theastrattoengine:processResources
+> Task :theastrattoengine:classes
+> Task :theastrattoengine:jar
+> Task :compileTestJava
+> Task :testClasses
+
+> Task :test
+  slow: rpg.monster.MonsterFightTest.aGroundedRangedMonsterClimbsToReachableHighGround() 24.121 s
+
+MonsterFightTest > aGroundedRangedMonsterClimbsToReachableHighGround() FAILED
+    org.opentest4j.AssertionFailedError: ranged monster stayed at 29.5,4.001472,26.5 (ENGAGE, climbing to a clear firing position) ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+        at app//rpg.monster.MonsterFightTest.aGroundedRangedMonsterClimbsToReachableHighGround(MonsterFightTest.java:70)
+
+MonsterFightTest > aMeleeMonsterClimbsTowardAnElevatedVisibleOpponent() FAILED
+    org.opentest4j.AssertionFailedError: melee monster stayed at 29.85236,4.001472,25.79527 (roaring up at Fights) ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+        at app//rpg.monster.MonsterFightTest.aMeleeMonsterClimbsTowardAnElevatedVisibleOpponent(MonsterFightTest.java:80)
+
+5 tests completed, 2 failed
+
+> Task :test FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG-head/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///C:/Users/John/Documents/ProjectRPG-head/rpggame/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 2m 37s
+9 actionable tasks: 9 executed

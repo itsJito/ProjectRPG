@@ -43,7 +43,9 @@ public final class Animals {
     public long births, hatchings, maturations, deaths, kills, materialized, dematerialized, butchered, eggsLaid, thinks;
     private double lifeAt, tierAt;
 
-    public Animals(Rpg g) { this.g = g; this.mind = new AnimalMind(g, this); }
+    public Animals(Rpg g) { this.g = g; this.mind = new AnimalMind(g, this); this.flight = new Flight(g, this); }
+    /** (0.4.7) The fliers' time in the air. */
+    private final Flight flight;
 
     // ------------------------------------------------------------------ the farm's fixtures, as the animals see them
     /** A trough: where owned stock eats the feed people put in it. */
@@ -108,7 +110,7 @@ public final class Animals {
                 .cap(Species.BROWN_BEAR, 3).cap(Species.DUCK, 7).cap(Species.DOG, 3).cap(Species.CAT, 2).cap(Species.DEER, 5);
         float[][] farmWater = edge(DevMap.DUCK_POND_X0, DevMap.DUCK_POND_Z0, DevMap.DUCK_POND_X1, DevMap.DUCK_POND_Z1);
         float[][] farmRest = {{113.5f, 119.5f}, {116.5f, 119.5f}, {119.5f, 119f}, {112.5f, 121f}};
-        farm = new Habitat("farm", "Mara's farm", DevMap.FARM_X0 + 1, DevMap.FARM_Z0 + 1, DevMap.FARM_X1 - 1, DevMap.FARM_Z1 - 1, Ids.FARMER, farmWater, farmRest)
+        farm = new Habitat("farm", g.possessive(rpg.Ids.FARMER, "Mara") + " farm", DevMap.FARM_X0 + 1, DevMap.FARM_Z0 + 1, DevMap.FARM_X1 - 1, DevMap.FARM_Z1 - 1, Ids.FARMER, farmWater, farmRest)
                 .cap(Species.CHICKEN, 12).cap(Species.DUCK, 8).cap(Species.COW, 6).cap(Species.SHEEP, 9).cap(Species.PIG, 6).cap(Species.HORSE, 4)
                 .cap(Species.DOG, 2).cap(Species.CAT, 3);
         // (0.3.4) the great southern wood: its deer, browsing either side of the brook, and a bear that hunts them
@@ -177,6 +179,39 @@ public final class Animals {
             for (Object[] gr : here) h.cap((Species) gr[0], Math.max(2, ((int) gr[1] + (int) gr[2] + (int) gr[3]) * 2));
             habitats.add(h);
             for (Object[] gr : here) wildGroups.add(new Object[]{h, gr[0], gr[1], gr[2], gr[3], p});
+        }
+        perches(w, t, k);
+    }
+    /**
+     * (0.4.7, gamefixes: the Pigeon, the Crow) the settled places' own birds, from 'fauna.wilds.perches': each kind of
+     * structure listed (a town's squares, the fields and gardens, the graveyards) keeps its groups, each by its chance - the
+     * pigeons of the squares and rooftops, the crows of the fields and the graves - in a habitat about the place.
+     */
+    private void perches(java.util.Map<String, Object> w, rpg.world.shadowveil.Terrain t, int k) {
+        if (t.arch == null) return;
+        var a = rpg.world.shadowveil.Atlas.get();
+        for (var per : rpg.world.shadowveil.Atlas.list(w, "perches")) {
+            List<?> templates = rpg.world.shadowveil.Atlas.arr(per, "templates"), groups = rpg.world.shadowveil.Atlas.arr(per, "groups");
+            int size = rpg.world.shadowveil.Atlas.i(per, "size", 30);
+            for (var st : t.arch.structures) {
+                if (!templates.contains(st.template)) continue;
+                float[] p = rpg.world.shadowveil.ShadowVeil.dry(st.cx(), st.cz());
+                List<Object[]> here = new ArrayList<>();
+                for (Object o : groups) {
+                    List<?> gr = (List<?>) o;
+                    Species sp;
+                    try { sp = Species.valueOf(String.valueOf(gr.get(0))); } catch (IllegalArgumentException e) { continue; }
+                    if (rpg.world.shadowveil.Noise.hash(a.seed, (int) p[0], (int) p[1], 193 + sp.ordinal()) >= rpg.world.shadowveil.Atlas.dn(gr.get(4)) / 100.0) continue;
+                    here.add(new Object[]{sp, rpg.world.shadowveil.Atlas.n(gr.get(1)), rpg.world.shadowveil.Atlas.n(gr.get(2)), rpg.world.shadowveil.Atlas.n(gr.get(3))});
+                }
+                if (here.isEmpty()) continue;
+                float[][] rest = new float[4][];
+                for (int r = 0; r < 4; r++) rest[r] = rpg.world.shadowveil.ShadowVeil.dry(p[0] + (float) Math.cos(r * 1.57 + 0.4) * size * 0.3f, p[1] + (float) Math.sin(r * 1.57 + 0.4) * size * 0.3f);
+                Habitat h = new Habitat("perch_" + k++, "the birds of " + st.name, p[0] - size / 2f, p[1] - size / 2f, p[0] + size / 2f, p[1] + size / 2f, 0, new float[0][], rest);
+                for (Object[] gr : here) h.cap((Species) gr[0], Math.max(2, ((int) gr[1] + (int) gr[2] + (int) gr[3]) * 2));
+                habitats.add(h);
+                for (Object[] gr : here) wildGroups.add(new Object[]{h, gr[0], gr[1], gr[2], gr[3], p});
+            }
         }
     }
     private static float nearest(List<float[]> pts, float[] p) {
@@ -686,6 +721,13 @@ public final class Animals {
      * quick one; none in the air.
      */
     private void hooves(Animal a, float dt) {
+        // (0.4.8) each hoof that falls leaves its print where the ground takes one (Gfx.prints)
+        if (a.grounded && Math.hypot(a.vx, a.vz) > 0.4f && a.distTo(g.player) < 40 && g.time >= a.nextPrint) {
+            float sp = (float) Math.hypot(a.vx, a.vz), side = (a.printSide = -a.printSide) * 0.22f;
+            float rx = (float) Math.cos(a.yaw), rz = (float) -Math.sin(a.yaw);
+            rpg.render.Prints.push(a.x + rx * side, a.y, a.z + rz * side, a.yaw, true);
+            a.nextPrint = g.time + Math.max(0.12, 0.55 / sp);
+        }
         if (g.sfx == null || a.species != rpg.animal.Species.HORSE && a.species != rpg.animal.Species.PEGASUS) return;
         float speed = (float) Math.hypot(a.vx, a.vz);
         if (!a.grounded || speed < 0.4f || a.distTo(g.player) > HOOF_HEARD) { a.hoofClock = 0.5f; return; }
@@ -702,15 +744,17 @@ public final class Animals {
         tickList.clear(); tickList.addAll(animals);
         for (Animal a : tickList) {
             if (a.ragdoll != null) ragdollTick(a);
-            if (!a.alive) { carcass(a); continue; }
+            if (!a.alive) { if (a.flying) flight.ground(a); carcass(a); continue; }
             if (!a.loaded) continue;
             hooves(a, dt);
-            float rate = a.cs.frozenT>0?0.001f:a.actionRate()*(a.cs.slowT>0?0.6f:1)*waterPace(a);
+            float rate = a.cs.frozenT>0||a.cs.heldT>0?0.001f:a.actionRate()*(a.cs.slowT>0?0.6f:1)*waterPace(a);
             if (rate != a.sentRate) { a.sentRate = rate; g.game.commands().agentRate(a.agent, rate); }
             if (a.ragdoll != null) { desire(a, AnimalMind.A_HOLD); continue; }   // off its feet: no mind until it is up
             if (a.trappedBy!=0 && g.objects.get(a.trappedBy) instanceof rpg.objects.Trap trap && !trap.removed && !trap.contents.isEmpty()) { desire(a,AnimalMind.A_HOLD); continue; }
             a.trappedBy=0;
             if (a.puppet) { face(a, dt); continue; }
+            // (0.4.7) a flier aloft (or perched high) is flown, not walked
+            if (a.species.flies && flight.tick(a, dt)) continue;
             // (0.3.0) ridden: the rider's controls move it (Riding), not its own mind
             if (a.rider != 0) { desire(a, AnimalMind.A_HOLD); continue; }
             double due = a.nextSenseAt;
@@ -1391,6 +1435,9 @@ public final class Animals {
             case BROWN_BEAR -> "The bear huffs and shifts its weight. You give it room.";
             case DEER -> "The deer trembles under your hand, ears swivelling, ready to bolt.";
             case DIRE_WOLF -> "The dire wolf's mane is coarse and warm. It rumbles low in its chest, and lets you.";
+            case CROW -> "The crow cocks its head, one black eye on your hand, and stays just out of reach.";
+            case PIGEON -> "The pigeon puffs out its neck and shuffles a step away.";
+            case VULTURE -> "The vulture hunches its shoulders and hisses. It does not care to be touched.";
         };
     }
 
@@ -1434,17 +1481,25 @@ public final class Animals {
 
 
     // ------------------------------------------------------------------ sound
+    /** (0.4.7) When each kind of call was last heard about the player (a herd's idle calls spaced out). */
+    private final Map<String, Double> lastCall = new java.util.HashMap<>();
     public void sound(Animal a, String key, float vol) {
         if (key == null || g.sfx == null) return;
         a.lastSound = g.time;
-        if (a.distTo(g.player) > 34) return;
+        // (0.4.7, gamefixes: cows and the like were too loud) each call's own loudness, carry and spacing (audio.json voices)
+        float[] voice = rpg.audio.Sfx.voice(key);
+        if (a.distTo(g.player) > voice[1]) return;
+        boolean idle = vol < 0.7f;
+        if (idle && g.time - lastCall.getOrDefault(key, -1e9) < voice[2]) return;
+        lastCall.put(key, g.time);
+        vol *= voice[0];
         float pitch = (a.baby ? 1.35f : 0.92f + (a.variant % 4) * 0.05f) * g.sfx.pitchOf(key);
         // a cockerel crows now and then in place of the clucking, mostly round dawn
         if (key.equals("animal.chicken") && !a.female && !a.baby && g.sfx.has("animal.rooster")) {
             double h = g.state.hourOfDay();
             if (h > 4.5 && h < 8 || (a.id + (long) g.time) % 5 == 0) key = "animal.rooster";
         }
-        g.sfx.play(key, a.x, a.y + a.height * 0.7f, a.z, vol, pitch, 30);
+        g.sfx.play(key, a.x, a.y + a.height * 0.7f, a.z, vol, pitch, voice[1]);
     }
 
     /** A noise someone made: animals in earshot take fright in proportion. */

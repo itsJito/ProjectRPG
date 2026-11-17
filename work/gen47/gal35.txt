@@ -1,0 +1,49 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :gallery
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 14 2026 17:37:31 (MSVC)
+[Load] native services 0.04s
+[Load] Devmap (legacy test map) 9.03s
+[Load] renderer and UI 2.13s
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] first rendered frame 0.10s
+[Load] game frame 1: scene 572 ms, interface 277 ms, render 101 ms
+[Load] game frame 2: scene 28 ms, interface 4 ms, render 19 ms
+[Load] game frame 3: scene 29 ms, interface 3 ms, render 19 ms
+[sheet] hand-milk (20 frames)
+[sheet] hand-shear (20 frames)
+[sheet] hand-butcher (20 frames)
+[sheet] hand-sow_wheat (20 frames)
+[sheet] hand-harvest (20 frames)
+[sheet] hand-pick (20 frames)
+[sheet] hand-gather (20 frames)
+[sheet] hand-bury (20 frames)
+[sheet] hand-light (20 frames)
+[sheet] hand-steal (20 frames)
+[sheet] hand-pickpocket (20 frames)
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 37s
+8 actionable tasks: 1 executed, 7 up-to-date

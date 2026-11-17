@@ -20,6 +20,6 @@ void main() {
     vec3 col = mix(albedo * irr, albedo * (1.5 + 6.0 * uEmissive), clamp(uEmissive, 0.0, 1.0));
     float dist = length(vWorld - uCam);
     float f = (1.0 - exp(-uDensity * dist * 0.7)) * (1.0 - 0.5 * clamp(uEmissive, 0.0, 1.0));
-    oColor = vec4(mix(mix(col, uAmbient * uFogCol, f), bankSky(normalize(vWorld - uCam)), bankAt(vWorld) * (1.0 - 0.35 * clamp(uEmissive, 0.0, 1.0))), vCol.a * uTint.a);
+    oColor = vec4(mix(mix(col, uAmbient * uFogCol, f), bankSkyAt(normalize(vWorld - uCam), uCam), bankAt(vWorld) * (1.0 - 0.35 * clamp(uEmissive, 0.0, 1.0))), vCol.a * uTint.a);
     if (oColor.a < 0.02) discard;
 }

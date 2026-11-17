@@ -1,0 +1,102 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldInspectProbeTest > inspect() STANDARD_OUT
+    [sconcedbg] severia_homes_17 room kitchen 0,4-5,5 cand 7 clear 3
+       #224222#
+       #414145#
+       #543333#
+       ########
+    [sconcedbg]   try 1,4 dir 0,-1 ok false hung true st 1217312754 lit kitchen
+    [sconcedbg]   try 0,4 dir 0,-1 ok true hung false st 1217312754 lit kitchen
+    [sconcedbg] severia_homes_17 room bedroom 0,4-5,5 cand 2 clear 3
+       #322224#
+       #322224#
+       #320004#
+       ########
+    [sconcedbg]   try 5,5 dir 1,0 ok false hung true st 2072130509 lit bedroom
+    [sconcedbg]   try 5,5 dir 0,1 ok false hung true st 2072130509 lit bedroom
+    [Load] ShadowVeil grown in 20.07s ({regions=901, overlays=495, variants=589, scarp=47, coast=426, erosion=324, peaks=100, lakes=61, isles=1, rivers=1110, wadis=13, ground=21, roads=569, causeways=3, architecture=1277, pitsFilled=1396, pits=444, banks=67, clamp=17, cliffs=54, columns=1104, falls=17, raise=10607, trees=274, outcrops=0, ways=577, lava=0, dungeons=92, postsSunk=4, floatingRemoved=59, floating=832}), made and lit in 2.16s
+    [water] flow field grown in 1845 ms: 39016 columns moving
+    [gathering] 757 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+
+    ================ 590, 37, 222  law Severia  stand Y 37.0
+    structure here: severia_homes_17 House (building) lot 586,218 - 593,225 floor 36
+      near red_moon_inn               Red Moon Inn                             hall           21 m lot 578,237-593,248 floor 36
+      near severia_homes_13           House                                    building       33 m lot 559,239-568,246 floor 36
+      near severia_homes_14           House                                    building       31 m lot 557,225-562,230 floor 36
+      near severia_homes_15           House                                    building       23 m lot 564,222-570,228 floor 36
+      near severia_homes_16           House                                    building       9 m lot 577,220-584,227 floor 36
+      near severia_homes_18           House                                    building       21 m lot 599,234-608,241 floor 36
+      near severia_homes_19           House                                    building       13 m lot 599,216-606,223 floor 36
+      near severia_homes_20           House                                    building       28 m lot 610,230-619,237 floor 36
+      near severia_homes_21           House                                    building       22 m lot 608,213-614,221 floor 36
+      near severia_homes_22           House                                    building       37 m lot 621,228-630,235 floor 36
+      near severia_homes_23           House                                    building       35 m lot 619,210-628,217 floor 36
+      near severia_homes_55           House                                    building       31 m lot 556,218-561,223 floor 36
+      near severia_homes_56           House                                    building       24 m lot 563,213-570,220 floor 36
+      near severia_homes_57           House                                    building       19 m lot 572,207-577,212 floor 36
+      near severia_homes_58           House                                    building       36 m lot 566,188-573,195 floor 35
+      near severia_homes_59           House                                    building       17 m lot 580,203-586,209 floor 36
+      near severia_homes_60           House                                    building       35 m lot 575,184-581,192 floor 35
+      near severia_homes_61           House                                    building       18 m lot 588,200-597,207 floor 36
+      near severia_homes_74           House                                    building       25 m lot 602,199-608,205 floor 36
+      near severia_homes_75           House                                    building       32 m lot 610,197-617,204 floor 36
+      object Furniture              Fireplace                      (589.0, 38.0, 222.5)
+      npc Melitta      CIVIC          (579.5, 37.0, 249.5) goal IDLE
+      npc Basil        MERCHANT       (587.5, 37.0, 235.5) goal IDLE
+      npc Lazaros      CRAFTSMAN      (594.5, 37.0, 241.5) goal IDLE
+      layer Y35 (x 589..591 across, z down; * the point)
+       aaa
+       a*a
+       aaa
+      layer Y36 (x 589..591 across, z down; * the point)
+       bbb
+       b*b
+       bbb
+      layer Y37 (x 589..591 across, z down; * the point)
+       c.c
+       d*e
+       ...
+      layer Y38 (x 589..591 across, z down; * the point)
+       c.c
+       d*.
+       ...
+      layer Y39 (x 589..591 across, z down; * the point)
+       ccc
+       .*.
+       ...
+      layer Y40 (x 589..591 across, z down; * the point)
+       bbb
+       b*b
+       bbb
+      layer Y41 (x 589..591 across, z down; * the point)
+       ccc
+       .*.
+       .ff
+      legend: a=dirt b=terracotta c=stucco_fresco d=headstone e=seat f=bed
+  slow: rpg.probe.WorldInspectProbeTest.inspect() 35.364 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 39s
+9 actionable tasks: 1 executed, 8 up-to-date

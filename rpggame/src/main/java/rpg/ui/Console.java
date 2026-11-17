@@ -282,6 +282,11 @@ public final class Console {
             print(String.format("%s #%d%s: tame %.2f, agitation %.2f, %s, %s%s", an.kind(), an.id, setup, an.tame, an.agitation(), an.tamedBy == g.player.id ? "yours" : an.owned() ? "owned" : "wild",
                     an.saddled ? "saddled" : "no saddle", an.goal == rpg.animal.Animal.Goal.FLEE ? " (bolting)" : ""), TEXT);
         });
+        // (0.4.7) the encounters' debugging: what is eligible here and why not, start one, what is under way and has been
+        cmd("encounter", "encounter list | why | force [id] | active | history | on | off | clear | seed <n>: the world's encounters.", a -> {
+            if (g.encounters == null) { print("no encounters on this map", WARN); return; }
+            for (String line : g.encounters.console(a).split("\n")) print(line, TEXT);
+        });
         cmd("spawnlist", "Every animal, monster and kind of person 'spawn' can make.", a -> {
             List<String> animals = new ArrayList<>(), monsters = new ArrayList<>(), people = new ArrayList<>();
             for (var s : rpg.animal.Species.values()) animals.add(s.name().toLowerCase(Locale.ROOT));

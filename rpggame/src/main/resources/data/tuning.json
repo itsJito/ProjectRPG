@@ -64,11 +64,15 @@
   "swimFloat": 0.58,
   "swimPaceFloor": 1.8,
   "mountSeconds": 1.3,
-  "barebackExtra": 0.45
+  "barebackExtra": 0.45,
+  "dismountShare": 0.8
  },
  "seating": {
   "ease": 0.55,
-  "approach": 1.0
+  "approach": 1.0,
+  "heldSlack": 0.1,
+  "pull": 0.45,
+  "tucked": 0.3
  },
  "interiors": {
   "cellsPerPiece": 7,
@@ -131,6 +135,9 @@
   "tendDwell": 15,
   "spawnApart": 1.6,
   "spawnShift": 6,
+  "sealedCells": 48,
+  "stuckFarTries": 5,
+  "bedReach": 2.4,
   "carterLeg": 25,
   "beatDwell": 12,
   "nudgeReach": 1.9,
@@ -138,7 +145,10 @@
   "ladderAloft": 3.5,
   "jobMethodFails": 3,
   "tendHold": 3,
-  "nudgeAfter": 0.8
+  "nudgeAfter": 0.8,
+  "doorwayReach": 1.6,
+  "homeSeatReach": 9.0,
+  "benchReach": 7.0
  },
  "water": {
   "_about": "(0.4.5) The water's motion (rpg.world.FlowField): a river's pace (m/s), a lake's, the quickening toward a drop and how far before it, the slack by the banks, a lake drawn into its outflow, whitewater by a drop and on fast water, the cost of a carved step in the search for the way out, the aqueducts' pace; how hard the current pushes a swimmer and a wader.",
@@ -165,9 +175,25 @@
  },
  "render": {
   "_about": "The renderer's budgets: (0.4.5) how many falls pour, spray and stir their pools near the eye.",
-  "fallEmitters": 26,
+  "fallEmitters": 28,
   "fallSprays": 6,
-  "fallStirs": 12
+  "fallStirs": 12,
+  "fallRate": 80.0,
+  "fallRatePerM": 18.0,
+  "fallRateMax": 190.0,
+  "fallSize": 0.06,
+  "fallReach": 48,
+  "foliageBudgetMs": 2.5,
+  "foliageReach": 56,
+  "foliageUnderfoot": 6,
+  "interiorDraw": 30,
+  "lampRechecks": 12,
+  "pastFog": 24,
+  "seaBeyondB": 0.68,
+  "seaBeyondG": 0.58,
+  "seaBeyondR": 0.32,
+  "windowGlow": 1.6,
+  "windowLights": 10
  },
  "doors": {
   "_about": "(0.4.6) see the code that reads it",
@@ -186,7 +212,10 @@
   "edgeStart": 40,
   "edgeHurtMin": 0.08,
   "edgeHurtMax": 0.45,
-  "edgeTick": 1
+  "edgeTick": 1,
+  "edgeDepth": 0.5,
+  "lavaHurt": 0.1,
+  "edgeFogBand": 64.0
  },
  "fish": {
   "_about": "(0.4.6) a fish pressed against something (s) before it takes another way, and how long it keeps to it.",
@@ -201,7 +230,10 @@
  "foliage": {
   "_about": "(0.4.6) see the code that reads it",
   "genRings": 4,
-  "genPerPass": 3
+  "genPerPass": 3,
+  "roofReach": 24,
+  "evictRing": 6,
+  "keepChunks": 120
  },
  "audio": {
   "_about": "(0.4.6) see the code that reads it",
@@ -210,5 +242,83 @@
  "hud": {
   "regionShow": 5,
   "regionSettle": 1.5
+ },
+ "dungeons": {
+  "levelsPerDepth": 6,
+  "cover": 5,
+  "levelStep": 11
+ },
+ "guilds": {
+  "seatReach": 260.0
+ },
+ "fog": {
+  "indoorCut": 0.92,
+  "skyCover": 0.95
+ },
+ "shrines": {
+  "pathClear": 2
+ },
+ "animals": {
+  "farSense": 160,
+  "routeGiveUpAfter": 3,
+  "routeGiveUpFor": 25,
+  "routeGiveUpNear": 6
+ },
+ "combat": {
+  "arrowNoise": 11,
+  "bowNoise": 6
+ },
+ "danger": {
+  "kindSlack": 8
+ },
+ "flight": {
+  "carrionCrow": 110,
+  "carrionVulture": 300,
+  "peopleSpook": 2.2,
+  "soarMinutes": 50,
+  "spook": 2.4,
+  "stuck": 2.5,
+  "turn": 2.6,
+  "wanderMax": 150,
+  "wanderMin": 45
+ },
+ "jobs": {
+  "treeReach": 48
+ },
+ "load": {
+  "navRadius": 96,
+  "navRadiusCreatures": 24,
+  "warmTicks": 45
+ },
+ "map": {
+  "iconsFrom": 2.2,
+  "markersMost": 24,
+  "zoomMax": 12
+ },
+ "monsters": {
+  "demonLordLevel": 100,
+  "farRest": 220,
+  "hoverLift": 0.7,
+  "pincerHold": 1.3,
+  "venomPerDamage": 0.35,
+  "venomSeconds": 8
+ },
+ "nav": {
+  "corridorMargin": 64,
+  "corridorMinMargin": 20,
+  "corridorZones": 1200,
+  "routeBudget": 60
+ },
+ "offstage": {
+  "reload": 125,
+  "sellReach": 400,
+  "unload": 150
+ },
+ "shadowveil": {
+  "leash": 120
+ },
+ "weather": {
+  "snowPrintLife": 1200,
+  "wetPrintLife": 100
  }
 }

@@ -42,7 +42,8 @@ class Gamefixes045Test {
 
     @Test @Order(1) void theVersionIs045() { assertTrue(rpg.Main.VERSION.startsWith("Alpha 0.4."), rpg.Main.VERSION); }
 
-    @Test @Order(2) void twoHundredTwentyFivePeople() { assertEquals(225, g.npcs.size()); }
+    // (0.4.7) the undertakers, guild masters and chapter heads came on top of the 225
+    @Test @Order(2) void twoHundredTwentyFivePeople() { assertTrue(g.npcs.size() >= 225, "people: " + g.npcs.size()); }
 
     @Test @Order(3) void aShrineStandsOnTheGroundByEveryGraveyard() {
         assertEquals(g.graveyards.plots.size(), g.shrines.all.size());
@@ -100,7 +101,7 @@ class Gamefixes045Test {
     }
 
     @Test @Order(8) void theOutfitsAreItemsWithTheirRequirements() {
-        assertEquals(8, Apparel.outfits().size(), "Pigskin, Rogue, Prospector, three Desert, Farmer's, Lumberjack");
+        assertTrue(Apparel.outfits().size() >= 8, "Pigskin, Rogue, Prospector, three Desert, Farmer's, Lumberjack (and 0.4.7's Pendragon)");
         assertEquals(7, Apparel.outfit("pigskin").pieces().size());
         assertEquals(5, Apparel.outfit("rogue").pieces().size());
         assertEquals(4, Apparel.outfit("prospector").pieces().size());

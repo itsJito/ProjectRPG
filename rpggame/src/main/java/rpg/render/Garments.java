@@ -23,7 +23,7 @@ public final class Garments {
     public static boolean flag(ItemDef d, String k) { return d != null && d.wear != null && Boolean.TRUE.equals(d.wear.get(k)); }
     public static double num(ItemDef d, String k, double fallback) { return d != null && d.wear != null && d.wear.get(k) instanceof Number n ? n.doubleValue() : fallback; }
     /** Whether a head piece sits on the hair (a hat) rather than over it (a hood, a mask, a helmet). */
-    public static boolean onHair(ItemDef d) { String s = shape(d); return s.equals("fez") || s.equals("straw_hat") || s.equals("cap"); }
+    public static boolean onHair(ItemDef d) { String s = shape(d); return s.equals("fez") || s.equals("straw_hat") || s.equals("cap") || s.equals("crown"); }
 
     // ------------------------------------------------------------------ the pieces as things (coarse, 1/32 m)
     private static int m(int rgb) { return ItemModels.mat(rgb); }
@@ -37,6 +37,7 @@ public final class Garments {
             case "hood", "mask" -> hood(d, c, trim, shape(d).equals("mask"));
             case "mining_helmet" -> helmet(d, c, trim);
             case "fez" -> fez(d, c);
+            case "crown" -> crown(d, c);
             case "straw_hat" -> strawHat(d, c);
             case "cap" -> cap(c, trim);
             case "tunic", "jacket", "shirt" -> top(d, c, trim);
@@ -99,6 +100,23 @@ public final class Garments {
         v.box(7, 3, 4, 7, 6, 4, tassel);
         v.box(7, 2, 3, 8, 3, 5, sh(tassel, 1.3f));
         return new ItemModels.Model(v, 4.5f, 0.5f, 4.5f);
+    }
+
+    /**
+     * (0.4.7, gamefixes: King Arthur made his own) a crown: a gold circlet, a fleur at each corner and the middle of each
+     * side, a jewel set in the front and back of the band.
+     */
+    private static ItemModels.Model crown(ItemDef d, int c) {
+        VoxModel v = new VoxModel(13, 7, 13);
+        int gold = metal(d.color), gem = m(color(d, "gem", 0xA8142A)), gem2 = m(color(d, "gem2", 0x1E3A9A));
+        for (int y = 0; y < 3; y++) for (int x = 0; x < 13; x++) for (int z = 0; z < 13; z++) {
+            boolean ring = x == 0 || x == 12 || z == 0 || z == 12;
+            if (ring) v.set(x, y, z, y == 1 ? sh(gold, 1.12f) : gold);
+        }
+        int[][] fleurs = {{0, 0}, {6, 0}, {12, 0}, {0, 6}, {12, 6}, {0, 12}, {6, 12}, {12, 12}};
+        for (int[] f : fleurs) { v.box(f[0], 3, f[1], f[0], 4, f[1], gold); v.set(f[0], 5, f[1], sh(gold, 1.2f)); }
+        v.set(6, 1, 0, gem); v.set(6, 1, 12, gem2); v.set(0, 1, 6, gem2); v.set(12, 1, 6, gem);
+        return new ItemModels.Model(v, 6.5f, 0.5f, 6.5f);
     }
 
     private static ItemModels.Model strawHat(ItemDef d, int c) {

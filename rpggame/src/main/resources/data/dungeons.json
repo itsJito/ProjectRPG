@@ -4,7 +4,7 @@
   "goblin_hollow":     {"kind": "lair",    "theme": "WARREN", "levels": 2, "creatures": ["GOBLIN"]},
   "murk_caves":        {"kind": "lair",    "theme": "CAVE",   "levels": 2, "creatures": ["BAT"]},
   "spider_nest":       {"kind": "lair",    "theme": "CAVE",   "levels": 2, "creatures": ["GIANT_SPIDER"]},
-  "ashmaw_throat":     {"kind": "lair",    "theme": "CAVE",   "levels": 3, "creatures": ["IMP"]},
+  "ashmaw_throat":     {"kind": "lair",    "theme": "CAVE",   "levels": 3, "creatures": ["IMP", "LESSER_DEMON", "LESSER_DEMON", "GREATER_DEMON"]},
   "culvert_cave":      {"kind": "hideout", "theme": "CAVE",   "levels": 1, "creatures": []},
   "sunkissed_mine":    {"kind": "mine",    "theme": "HALL",   "levels": 2, "creatures": []},
   "marble_mine":       {"kind": "mine",    "theme": "HALL",   "levels": 2, "creatures": []},
@@ -12,5 +12,19 @@
   "crags_mine_south":  {"kind": "mine",    "theme": "HALL",   "levels": 1, "creatures": []},
   "crags_mine_west":   {"kind": "mine",    "theme": "HALL",   "levels": 1, "creatures": []},
   "loxford_graveyard": {"kind": "crypt",   "theme": "CRYPT",  "levels": 1, "creatures": []}
+ },
+ "cellars": {
+  "_about": "(0.4.8, gamefixes: a basement led nowhere) What lies beyond the door at the foot of every stair down that is not a dungeon's mouth, by the kind of volume the architecture kept there (rpg.world.shadowveil.Cellars): its name (the door's), whether its door is locked (its building's people hold the key), and how it is dressed. A dress: 'wall' pieces set against the rock in turn, 'hang' on a bare wall, 'free' standing in the middle of a big room, 'chest' the tag of the store chest in the back chamber, 'h' each piece's height in cells.",
+  "undercroft":      {"name": "Undercroft", "dress": "undercroft", "locked": true},
+  "lantern_cellars": {"name": "Cellars", "dress": "stores", "locked": false},
+  "cellar_shortcut": {"name": "Cellar", "dress": "wine", "locked": false},
+  "museum_vault":    {"name": "Vault", "dress": "archive", "locked": true},
+  "cellar":          {"name": "Cellar", "dress": "stores", "locked": false},
+  "dress": {
+   "stores":     {"wall": ["BARREL", "SHELVES", "SACKS", "CRATE", "BARREL", "WINE_RACK", "CRATE"], "hang": ["POT_RACK"], "free": ["TABLE"], "chest": "store", "h": {"SHELVES": 2, "WINE_RACK": 2}},
+   "wine":       {"wall": ["WINE_RACK", "BARREL", "WINE_RACK", "KEG", "BARREL", "SHELVES"], "free": ["TABLE"], "chest": "larder", "h": {"SHELVES": 2, "WINE_RACK": 2}},
+   "undercroft": {"wall": ["ARMOR_STAND", "SHELVES", "CRATE", "WINE_RACK", "CRATE"], "hang": ["WEAPON_RACK"], "free": ["TABLE"], "chest": "arms", "h": {"ARMOR_STAND": 2, "SHELVES": 2, "WINE_RACK": 2}},
+   "archive":    {"wall": ["SCROLL_RACK", "BOOKCASE", "DISPLAY_CABINET", "BUST", "LECTERN", "BOOKCASE"], "hang": ["TAPESTRY"], "free": ["TABLE"], "chest": "records", "h": {"BOOKCASE": 2, "SHELVES": 2, "SCROLL_RACK": 2, "DISPLAY_CABINET": 2}}
+  }
  }
 }

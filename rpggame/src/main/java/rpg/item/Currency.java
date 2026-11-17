@@ -9,9 +9,9 @@ public final class Currency {
 
     public static final int WHITE = 0xFFFFFFFF, YELLOW = 0xFFFFFF00, GREEN = 0xFF00FF80, BLUE = 0xFF40A0FF, PURPLE = 0xFFC060FF;
 
-    /** The short form for an amount: 99,999 / 150K / 12M / 1B / 2X. */
+    /** The short form for an amount: 99,999 (0.4.8: with its thousands separator) / 150K / 12M / 1B / 2X. */
     public static String text(long n) {
-        if (n < 100_000) return String.valueOf(n);
+        if (n < 100_000) return String.format("%,d", n);
         if (n < 10_000_000) return n / 1_000 + "K";
         if (n < 1_000_000_000) return n / 1_000_000 + "M";
         if (n < 2_000_000_000) return n / 1_000_000_000 + "B";

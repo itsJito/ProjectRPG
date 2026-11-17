@@ -88,7 +88,8 @@ class Gamefixes041Test {
 
     @Test @org.junit.jupiter.api.Order(4) void theBankAndTheGardensAreWhereShadowVeilPutsThem() {
         float[] bank = g.bank.customerSpot();
-        assertTrue(arch().byId("loxford_castle").contains((int) bank[0], (int) bank[1]), "the bank counter is in Loxford Castle's keep");
+        // (0.4.7) Loxford's banker keeps Loxford Bank, its own bankhouse, no longer a counter in the castle's keep
+        assertTrue(arch().byId("loxford_bank").contains((int) bank[0], (int) bank[1]), "the bank counter is in Loxford Bank");
         assertTrue(Farming.FIELDS.length >= 2, "the growers have their gardens");
         assertTrue(g.farming.ripeFor(rpg.Ids.CROP_FARMER_CITY, 0, 0) != null || g.farming.emptyFor(rpg.Ids.CROP_FARMER_CITY, 0, 0) != null || !g.objects.all().isEmpty());
     }

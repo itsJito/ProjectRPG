@@ -1017,6 +1017,8 @@ void Renderer::bankUniforms(Program& s) {
     // the bank is the horizon's colour with half its tint washed out: fog, not coloured smoke
     const float l = horizon_[0] * 0.3f + horizon_[1] * 0.55f + horizon_[2] * 0.15f;
     s.f3("uWallCol", (horizon_[0] + l) * 0.5f, (horizon_[1] + l) * 0.5f, (horizon_[2] + l) * 0.5f);
+    s.f4("uEdge", env_.edge[0], env_.edge[1], env_.edge[2], env_.edge[3]);
+    s.f1("uEdgeBand", env_.edgeBand);
     if (std::isnan(env_.fogOrigin[0])) s.f3("uFogOrigin", cam_.x, cam_.y, cam_.z); else s.f3("uFogOrigin", env_.fogOrigin[0], env_.fogOrigin[1], env_.fogOrigin[2]);
 }
 
@@ -1058,6 +1060,7 @@ bool Renderer::parse(const uint8_t* cmds, uint32_t bytes) {
                 env_.ambientFloor = c.ambient_floor;
                 std::memcpy(env_.fogOrigin, c.fog_origin, sizeof env_.fogOrigin);
                 env_.bloom = c.bloom;
+                std::memcpy(env_.edge, c.edge, sizeof env_.edge); env_.edgeBand = c.edge_band;
                 break;
             }
             case ASTRATTO_RCMD_LIGHT: {
@@ -1561,6 +1564,7 @@ void Renderer::gbufferPass(VoxelWorld* w) {
     gWorld_.f4("uLod", cam_.x, cam_.y, cam_.z, std::max(28.0f, cam_.viewDistance * 0.62f));
     gWorld_.f1("uRain", env_.wet >= 0 ? env_.wet : env_.rain);
     gWorld_.f4("uWeather", env_.snow, env_.rain, 0, 0);
+    gWorld_.f2("uRainFall", env_.rain, env_.wet >= 0 ? env_.wet : env_.rain);
     gWorld_.tex("uAtlas", 0, TEXTURE_2D_ARRAY, textures_[atlasTex_].id);
     gWorld_.tex("uNoise", 1, TEXTURE_2D, textures_.count(noiseTex_) ? textures_[noiseTex_].id : white_);
     gWorld_.tex("uLayerMat", 2, TEXTURE_2D, layerMat_);
@@ -1655,6 +1659,8 @@ void Renderer::drawModels(Program& s, bool viewmodel, VoxelWorld* w) {
         s.f1("uDissolve", (m.flags & ASTRATTO_MODEL_DISSOLVE) ? 1.0f-m.par[3] : 0.0f);
         s.f1("uFlag", m.par[4] > 0.5f ? 2.0f : (viewmodel ? 1.0f : 0.0f));
         s.f4("uMatParams", m.par[6], m.par[7], sky, blk);
+        // 2.16: the snow lying on what faces up under the open sky (never on what is in the hand)
+        s.f1("uSnowCover", viewmodel ? 0.0f : env_.snow);
         const ModelMesh& mm = meshes_[m.mesh];
         s.f3("uVoxelOrigin", (mm.extent[0]-mm.center[0])*64, (mm.extent[1]-mm.center[1])*64, (mm.extent[2]-mm.center[2])*64);
         g_.BindVertexArray(mm.vao);

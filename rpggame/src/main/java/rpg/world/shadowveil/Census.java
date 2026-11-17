@@ -90,6 +90,13 @@ public final class Census {
                 kit(g, n, Atlas.s(p, "profession", null));
             } else {
                 n.name = name;
+                // (0.4.7, gamefixes: NPCs still kept the devmap's callings - King Arthur sawing planks as its carpenter) the
+                // census's calling stands, but for the roles the quests and the law are built on; a trade that no longer
+                // fits the calling is laid down
+                if (n.role != role && !KEEP_ROLES.contains(n.role)) {
+                    n.role = role;
+                    if (n.profession != null && n.profession.family != role) n.profession = null;
+                }
                 if (n.look != null && n.look.female != female) { n.look = rpg.actor.Appearance.of(rpg.ai.AiSystem.group(n.role), n.id * 7919L + k, female); n.fitBody(); }
             }
             // the calling: the data's profession where it belongs to the person's role (their work follows it)
@@ -98,6 +105,10 @@ public final class Census {
             n.title = title + (kingdom.equals("Wilds") ? "" : " of " + kingdom);
             // (0.4.5, gamefixes: the clothing update) what they wear of the outfits
             dress(g, n, p);
+            // (0.4.7, gamefixes: King Arthur made his own) a person's own levels, arms and look, over their role's
+            own(g, n, p);
+            // (0.4.7, gamefixes: NPCs wearing gear must have the stats to wear and use it)
+            n.meetGear();
             // home and work, and their stand-ins
             String homeId = (String) p.get("home"), workId = (String) p.get("work");
             Registry.Entry home = reg == null || homeId == null ? null : reg.byId(homeId), work = reg == null || workId == null ? null : reg.byId(workId);
@@ -121,6 +132,8 @@ public final class Census {
             else { n.homeX = homeStage[0]; n.homeZ = homeStage[1]; n.homeY = Float.NaN; }
             n.postX = workStage[0]; n.postZ = workStage[1]; n.dutyX = workStage[0]; n.dutyZ = workStage[1]; n.postY = Float.NaN;
             Rooms.Site ws = work == null ? null : Rooms.site(work.id);
+            // (0.4.7) the keys of the locked doors where they live and where they work
+            for (Rooms.Site ks : new Rooms.Site[]{hs, ws}) if (ks != null) for (rpg.objects.Door kd : ks.doors) if (kd.locked) kd.keepers.add(n.id);
             Architecture.Fitting post = ws == null ? null : pickPost(ws, n, p, postsTaken);
             if (post != null) {
                 postsTaken.add(post);
@@ -152,6 +165,9 @@ public final class Census {
         if (Atlas.map(h, "byRole").get(role) instanceof List<?> l && l.size() == 2) return l.get(female ? 1 : 0) + " ";
         return "";
     }
+
+    /** (0.4.7) The devmap roles a census person taking over a body keeps (the quests', the law's and the fence's run on them). */
+    static final java.util.Set<Npc.Role> KEEP_ROLES = java.util.EnumSet.of(Npc.Role.QUEST_GIVER, Npc.Role.CONTACT, Npc.Role.THIEF, Npc.Role.UNDERTAKER, Npc.Role.LAWMAN, Npc.Role.FENCE);
 
     /** (0.4.4) The lore's roll and, after it, the people added to keep the new jails, banks and graveyards. */
     public static List<Map<String, Object>> everyone() {
@@ -273,6 +289,29 @@ public final class Census {
             }
         }
         return v;
+    }
+
+    /**
+     * (0.4.7) What the census gives one person over their role's kit: 'levels' (skills), 'wear' (items, each in its
+     * slot, replacing what was there) and 'look' (their appearance's fields: hair, hairColor, beard, beardColor, skin,
+     * eyeColor, bodyType) - a king who is unmistakably himself.
+     */
+    private static void own(rpg.Rpg g, Npc n, Map<String, Object> person) {
+        for (var e : Atlas.map(person, "levels").entrySet()) { Skill s = Skill.byName(e.getKey()); if (s != null && e.getValue() instanceof Number v) n.skills.setLevel(s, v.intValue()); }
+        for (Object o : Atlas.arr(person, "wear")) {
+            ItemDef d = Items.find(String.valueOf(o));
+            if (d == null || d.slot == null) continue;
+            n.eq.set(d.slot, new ItemStack(d, 1)); g.state.mint(d, 1);
+        }
+        Map<String, Object> look = Atlas.map(person, "look");
+        if (!look.isEmpty() && n.look != null) {
+            for (var e : look.entrySet()) {
+                if (!(e.getValue() instanceof Number v)) continue;
+                try { java.lang.reflect.Field f = rpg.actor.Appearance.class.getField(e.getKey()); if (f.getType() == int.class) f.setInt(n.look, v.intValue()); }
+                catch (ReflectiveOperationException ignored) { }
+            }
+            n.fitBody();
+        }
     }
 
     /** A made person's means and abilities, from the data's kits by role (and profession). */

@@ -55,6 +55,8 @@ private:
     int lightAt(int lx, int y, int lz) const;
     bool solidAt(int lx, int y, int lz) const;
     bool opq(int lx, int y, int lz) const;
+    /** 0.4.7: whether the air cell a face looks into is indoors (an auto-faced wall shows its inner finish there). */
+    bool indoors(int nx, int ny, int nz, int dx, int dz) const;
     bool leaf(int bid) const;
     int orientation(int bid, int lx, int y, int lz) const;
     int stairDir(int lx, int y, int lz) const;

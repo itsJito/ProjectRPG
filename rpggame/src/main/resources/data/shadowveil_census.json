@@ -357,8 +357,8 @@
     "kingdom": "Loxford",
     "role": "CIVIC",
     "female": false,
-    "home": "loxford_castle",
-    "work": "loxford_castle",
+    "home": "loxford_bank",
+    "work": "loxford_bank",
     "body": "TELLER"
    },
    {
@@ -647,7 +647,7 @@
     "role": "CIVIC",
     "female": false,
     "home": "azharad_workshop",
-    "work": "azharad_workshop",
+    "work": "artisans_guild",
     "body": "GUILD_ARTISANS"
    },
    {
@@ -744,8 +744,7 @@
     "female": false,
     "home": "karims_kitchen",
     "work": "karims_kitchen",
-    "profession": "COOK",
-    "body": "GUILD_PROVISIONERS"
+    "profession": "COOK"
    },
    {
     "name": "Mohamed",
@@ -1240,7 +1239,7 @@
     "role": "FISHERMAN",
     "female": false,
     "home": "harbor_tenement",
-    "work": "harbor_tenement",
+    "work": "mariners_guild",
     "profession": "DEEP_WATER_FISHERMAN",
     "body": "GUILD_MARINERS"
    },
@@ -1699,8 +1698,7 @@
     "role": "SCHOLAR",
     "female": false,
     "home": "hojimo_monastery",
-    "work": "hojimo_monastery",
-    "body": "GUILD_ARCANISTS"
+    "work": "hojimo_monastery"
    },
    {
     "name": "Yrsa",
@@ -1780,8 +1778,7 @@
     "female": false,
     "home": "workers_lodge",
     "work": "gorrick_woodyard",
-    "profession": "FIREWOOD_CUTTER",
-    "body": "GUILD_FORESTERS"
+    "profession": "FIREWOOD_CUTTER"
    },
    {
     "name": "Siv",
@@ -1859,7 +1856,7 @@
     "role": "FARMER",
     "female": true,
     "home": "ilva_farmhouse",
-    "work": "harlette_field_2",
+    "work": "farmers_guild",
     "profession": "CROP_FARMER",
     "body": "GUILD_FARMERS"
    },
@@ -1955,7 +1952,29 @@
     "female": false,
     "home": "camelot_keep",
     "work": "camelot_keep",
-    "body": "ARTHUR"
+    "body": "ARTHUR",
+    "levels": {
+     "ATTACK": 96,
+     "STRENGTH": 96,
+     "DEFENSE": 96,
+     "HEALTH": 96,
+     "RANGED": 60,
+     "AGILITY": 70,
+     "FAITH": 80
+    },
+    "wear": [
+     "godly_sword",
+     "godly_body",
+     "godly_legs"
+    ],
+    "look": {
+     "hair": 3,
+     "hairColor": 4,
+     "beard": 4,
+     "beardColor": 4,
+     "eyeColor": 2,
+     "bodyType": 1
+    }
    },
    {
     "name": "Guinevere",
@@ -2595,7 +2614,7 @@
     "kingdom": "Valgard",
     "role": "UNDERTAKER",
     "female": true,
-    "home": "sanctuary_jaehaerys",
+    "home": "valgard_undertaker_bunker",
     "work": "valgard_graveyard"
    },
    {
@@ -2613,7 +2632,7 @@
     "kingdom": "Gorrick",
     "role": "UNDERTAKER",
     "female": true,
-    "home": "hojimo_monastery",
+    "home": "gorrick_undertaker_bunker",
     "work": "gorrick_graveyard"
    },
    {
@@ -2631,7 +2650,7 @@
     "kingdom": "Azharad",
     "role": "UNDERTAKER",
     "female": false,
-    "home": "azharad_temple",
+    "home": "azharad_undertaker_bunker",
     "work": "azharad_graveyard"
    },
    {
@@ -2747,6 +2766,98 @@
     "home": "clamp_hut",
     "work": "charcoal_clamps",
     "profession": "FIREWOOD_CUTTER"
+   },
+   {
+    "name": "Grimbold",
+    "title": "Undertaker",
+    "kingdom": "Loxford",
+    "role": "UNDERTAKER",
+    "female": false,
+    "home": "loxford_undertaker_bunker",
+    "work": "loxford_graveyard"
+   },
+   {
+    "name": "Odo",
+    "title": "Undertaker",
+    "kingdom": "Harlette",
+    "role": "UNDERTAKER",
+    "female": false,
+    "home": "harlette_undertaker_bunker",
+    "work": "harlette_graveyard"
+   },
+   {
+    "name": "Kyrillos",
+    "title": "Undertaker",
+    "kingdom": "Severia",
+    "role": "UNDERTAKER",
+    "female": false,
+    "home": "severia_undertaker_bunker",
+    "work": "severia_graveyard"
+   },
+   {
+    "name": "Elidor",
+    "title": "Undertaker",
+    "kingdom": "Camelot",
+    "role": "UNDERTAKER",
+    "female": false,
+    "home": "camelot_undertaker_bunker",
+    "work": "camelot_graveyard"
+   },
+   {
+    "name": "Gwenna",
+    "title": "Undertaker",
+    "kingdom": "Camelot",
+    "role": "UNDERTAKER",
+    "female": true,
+    "home": "sinclair_undertaker_bunker",
+    "work": "sinclair_graves"
+   },
+   {
+    "name": "Aldred",
+    "title": "Guildmaster of the Foresters",
+    "kingdom": "Loxford",
+    "role": "CIVIC",
+    "female": false,
+    "home": "foresters_guild",
+    "work": "foresters_guild",
+    "body": "GUILD_FORESTERS"
+   },
+   {
+    "name": "Ioanna",
+    "title": "Guildmistress of the Provisioners",
+    "kingdom": "Severia",
+    "role": "CIVIC",
+    "female": true,
+    "home": "provisioners_guild",
+    "work": "provisioners_guild",
+    "body": "GUILD_PROVISIONERS"
+   },
+   {
+    "name": "Nasira",
+    "title": "Moon Chapter Scholar",
+    "kingdom": "Azharad",
+    "role": "SCHOLAR",
+    "female": true,
+    "home": "arcanists_moon_chapter",
+    "work": "arcanists_moon_chapter"
+   },
+   {
+    "name": "Merrin",
+    "title": "Arcanists' Chapter Head",
+    "kingdom": "Camelot",
+    "role": "SCHOLAR",
+    "female": false,
+    "home": "arcanists_chapter",
+    "work": "arcanists_chapter"
+   },
+   {
+    "name": "Hrodna",
+    "title": "Provisioners' Chapter Head",
+    "kingdom": "Gorrick",
+    "role": "CIVIC",
+    "female": true,
+    "home": "provisioners_chapter",
+    "work": "provisioners_chapter"
    }
   ],
   "honorifics": {
@@ -2787,7 +2898,8 @@
   "outfits": {
    "_about": "(0.4.5, gamefixes: the clothing update; everyone but the townsfolk in gear that can be seen and looted) What each person wears of the outfits (data/apparel.json), the first that applies: by name, by where they live, by calling, by role, then by kingdom (by title words, by role, else its default) for those of the kingdom not in arms. A slot the kit already filled (a guard's helm, a knight's plate) keeps what the kit put there; where an outfit has two pieces for one slot (the Desert's legs and robes), the rank decides ('robesFor').",
    "people": {
-    "Brannoc": "rogue"
+    "Brannoc": "rogue",
+    "Arthur": "pendragon"
    },
    "byHome": {
     "garmunds_camp": "pigskin"

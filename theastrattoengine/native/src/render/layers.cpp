@@ -88,6 +88,8 @@ void Renderer::foliageUniforms(Program& s, const float* pv) {
     s.f3("uCam", cam_.x, cam_.y, cam_.z);
     s.f2("uFade", foliage_.fade_start, foliage_.fade_end);
     s.f1("uSnow", foliage_.snow);
+    // 0.4.7 (gamefixes: plants did not react to rain) the rain falling now and how wet the leaves are
+    s.f2("uRainFall", env_.rain, env_.wet >= 0 ? env_.wet : env_.rain);
     s.i1("uPushN", static_cast<int>(std::min<uint32_t>(8, foliage_.push_count)));
     g_.Uniform4fv(s.loc("uPush"), 8, foliage_.push);
 }

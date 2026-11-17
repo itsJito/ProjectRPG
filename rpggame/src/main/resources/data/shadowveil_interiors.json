@@ -1200,6 +1200,38 @@
        "use": "watch_room"
       }
      ],
+     "upperCycle": [
+      [
+       {
+        "use": "watch_room"
+       }
+      ],
+      [
+       {
+        "use": "storeroom"
+       }
+      ],
+      [
+       {
+        "use": "study"
+       }
+      ],
+      [
+       {
+        "use": "armoury"
+       }
+      ],
+      [
+       {
+        "use": "chamber"
+       }
+      ],
+      [
+       {
+        "use": "library"
+       }
+      ]
+     ],
      "top": [
       {
        "use": "watch_room"
@@ -1267,6 +1299,48 @@
      ]
     },
     "stair": "front"
+   },
+   "guildhall": {
+    "wealth": "rich",
+    "beds": 1,
+    "levels": {
+     "single": [
+      {
+       "use": "guild_hall",
+       "share": 3
+      },
+      {
+       "use": "workroom",
+       "share": 2
+      }
+     ],
+     "ground": [
+      {
+       "use": "guild_hall",
+       "share": 3
+      },
+      {
+       "use": "workroom",
+       "share": 2
+      }
+     ],
+     "upper": [
+      {
+       "use": "library",
+       "share": 1
+      },
+      {
+       "use": "chamber",
+       "share": 1,
+       "door": "plain"
+      }
+     ],
+     "top": [
+      {
+       "use": "chamber"
+      }
+     ]
+    }
    }
   },
   "uses": {
@@ -1315,6 +1389,16 @@
      {
       "place": "ceiling",
       "kind": "CHANDELIER"
+     },
+     {
+      "place": "wall",
+      "kind": "COAT_RACK",
+      "chance": 0.6
+     },
+     {
+      "place": "wall",
+      "kind": "SPINNING_WHEEL",
+      "chance": 0.3
      }
     ]
    },
@@ -1415,6 +1499,21 @@
       "place": "wall",
       "kind": "PLANTER",
       "chance": 0.4
+     },
+     {
+      "place": "wall",
+      "kind": "SPINNING_WHEEL",
+      "chance": 0.4
+     },
+     {
+      "place": "wall",
+      "kind": "BUTTER_CHURN",
+      "chance": 0.3
+     },
+     {
+      "place": "wall",
+      "kind": "COAT_RACK",
+      "chance": 0.4
      }
     ]
    },
@@ -1461,6 +1560,16 @@
      {
       "place": "corner",
       "kind": "CANDELABRA"
+     },
+     {
+      "place": "wall",
+      "kind": "BARREL",
+      "chance": 0.6
+     },
+     {
+      "place": "wall",
+      "kind": "BUTTER_CHURN",
+      "chance": 0.4
      }
     ],
     "noBeds": true
@@ -1492,6 +1601,21 @@
       "place": "wall",
       "kind": "CRATE",
       "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "BARREL"
+     },
+     {
+      "place": "wall",
+      "kind": "BUTTER_CHURN",
+      "chance": 0.6
+     },
+     {
+      "place": "wall",
+      "kind": "SACKS",
+      "w": 2,
+      "chance": 0.5
      }
     ]
    },
@@ -1583,6 +1707,27 @@
       "w": 2,
       "d": 1,
       "chance": 0.6
+     },
+     {
+      "place": "wall",
+      "kind": "CRADLE",
+      "chance": 0.25
+     },
+     {
+      "place": "wall",
+      "kind": "FOLDING_SCREEN",
+      "w": 2,
+      "chance": 0.3,
+      "wealth": [
+       "rich",
+       "noble",
+       "royal"
+      ]
+     },
+     {
+      "place": "wall",
+      "kind": "COAT_RACK",
+      "chance": 0.35
      }
     ]
    },
@@ -1650,6 +1795,11 @@
      {
       "place": "wall",
       "kind": "WASHSTAND",
+      "chance": 0.5
+     },
+     {
+      "place": "wall",
+      "kind": "COAT_RACK",
       "chance": 0.5
      }
     ]
@@ -1777,6 +1927,17 @@
       "kind": "WINE_RACK",
       "h": 2,
       "chance": 0.4
+     },
+     {
+      "place": "wall",
+      "kind": "BARREL",
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "SACKS",
+      "w": 2,
+      "chance": 0.7
      }
     ]
    },
@@ -1819,6 +1980,16 @@
      {
       "place": "corner",
       "kind": "CANDELABRA"
+     },
+     {
+      "place": "hang",
+      "kind": "TOOL_RACK",
+      "w": 2
+     },
+     {
+      "place": "wall",
+      "kind": "BARREL",
+      "chance": 0.5
      }
     ]
    },
@@ -2000,6 +2171,21 @@
      {
       "place": "corner",
       "kind": "CANDELABRA"
+     },
+     {
+      "place": "wall",
+      "kind": "KEG",
+      "chance": 0.85
+     },
+     {
+      "place": "wall",
+      "kind": "BARREL",
+      "chance": 0.6
+     },
+     {
+      "place": "wall",
+      "kind": "COAT_RACK",
+      "chance": 0.5
      }
     ],
     "noBeds": true
@@ -2201,6 +2387,17 @@
       "place": "corner",
       "kind": "CANDELABRA",
       "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "DISPLAY_CABINET",
+      "h": 2,
+      "chance": 0.4
+     },
+     {
+      "place": "wall",
+      "kind": "BARREL",
+      "chance": 0.4
      }
     ]
    },
@@ -2322,6 +2519,23 @@
      {
       "place": "ceiling",
       "kind": "CHANDELIER"
+     },
+     {
+      "place": "wall",
+      "kind": "DISPLAY_CABINET",
+      "h": 2,
+      "chance": 0.6
+     },
+     {
+      "place": "wall",
+      "kind": "GLOBE",
+      "chance": 0.4
+     },
+     {
+      "place": "wall",
+      "kind": "FOLDING_SCREEN",
+      "w": 2,
+      "chance": 0.4
      }
     ]
    },
@@ -2360,6 +2574,22 @@
       "place": "rug",
       "w": 2,
       "d": 1
+     },
+     {
+      "place": "wall",
+      "kind": "LECTERN",
+      "chance": 0.6
+     },
+     {
+      "place": "wall",
+      "kind": "GLOBE",
+      "chance": 0.5
+     },
+     {
+      "place": "wall",
+      "kind": "SCROLL_RACK",
+      "h": 2,
+      "chance": 0.4
      }
     ]
    },
@@ -2400,6 +2630,21 @@
      {
       "place": "corner",
       "kind": "CANDELABRA"
+     },
+     {
+      "place": "wall",
+      "kind": "LECTERN"
+     },
+     {
+      "place": "wall",
+      "kind": "SCROLL_RACK",
+      "h": 2,
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "GLOBE",
+      "chance": 0.6
      }
     ],
     "noBeds": true
@@ -2448,6 +2693,18 @@
      {
       "place": "ceiling",
       "kind": "CHANDELIER"
+     },
+     {
+      "place": "wall",
+      "kind": "DISPLAY_CABINET",
+      "h": 2,
+      "chance": 0.5
+     },
+     {
+      "place": "wall",
+      "kind": "SCROLL_RACK",
+      "h": 2,
+      "chance": 0.4
      }
     ]
    },
@@ -2500,6 +2757,17 @@
       "place": "corner",
       "kind": "CANDELABRA",
       "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "THRONE",
+      "need": true
+     },
+     {
+      "place": "wall",
+      "kind": "DISPLAY_CABINET",
+      "h": 2,
+      "chance": 0.5
      }
     ],
     "noBeds": true
@@ -2538,6 +2806,18 @@
      {
       "place": "corner",
       "kind": "CANDELABRA"
+     },
+     {
+      "place": "centre",
+      "kind": "MAP_TABLE",
+      "w": 2,
+      "d": 1,
+      "chance": 0.5
+     },
+     {
+      "place": "wall",
+      "kind": "BARREL",
+      "chance": 0.5
      }
     ]
    },
@@ -2740,6 +3020,16 @@
      {
       "place": "corner",
       "kind": "CANDELABRA"
+     },
+     {
+      "place": "wall",
+      "kind": "LECTERN",
+      "chance": 0.5
+     },
+     {
+      "place": "wall",
+      "kind": "COAT_RACK",
+      "chance": 0.5
      }
     ],
     "sleeps": true
@@ -2828,6 +3118,17 @@
      {
       "place": "ceiling",
       "kind": "CHANDELIER"
+     },
+     {
+      "place": "wall",
+      "kind": "DISPLAY_CABINET",
+      "h": 2,
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "GLOBE",
+      "chance": 0.5
      }
     ],
     "noBeds": true
@@ -2875,6 +3176,17 @@
      {
       "place": "corner",
       "kind": "CANDELABRA"
+     },
+     {
+      "place": "wall",
+      "kind": "SCROLL_RACK",
+      "h": 2,
+      "chance": 0.6
+     },
+     {
+      "place": "wall",
+      "kind": "COAT_RACK",
+      "chance": 0.5
      }
     ]
    },
@@ -2907,6 +3219,17 @@
      {
       "place": "corner",
       "kind": "CANDELABRA"
+     },
+     {
+      "place": "wall",
+      "kind": "SCROLL_RACK",
+      "h": 2,
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "LECTERN",
+      "chance": 0.4
      }
     ],
     "noBeds": true
@@ -2970,6 +3293,17 @@
      {
       "place": "corner",
       "kind": "CANDELABRA"
+     },
+     {
+      "place": "wall",
+      "kind": "SACKS",
+      "w": 2,
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "BARREL",
+      "chance": 0.5
      }
     ]
    },
@@ -3033,6 +3367,73 @@
      }
     ],
     "noBeds": true
+   },
+   "guild_hall": {
+    "pieces": [
+     {
+      "place": "counter",
+      "kind": "COUNTER",
+      "post": "counter",
+      "need": true,
+      "depth": 0.6,
+      "fallback": {
+       "place": "wall",
+       "kind": "COUNTER",
+       "w": 3,
+       "post": "counter"
+      }
+     },
+     {
+      "place": "centre",
+      "kind": "TABLE",
+      "w": 3,
+      "d": 1,
+      "seats": "CHAIR"
+     },
+     {
+      "place": "wall",
+      "kind": "SHELVES",
+      "h": 2,
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "BOOKCASE",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "store"
+     },
+     {
+      "place": "hang",
+      "kind": "TAPESTRY",
+      "w": 2,
+      "count": 2
+     },
+     {
+      "place": "hang",
+      "kind": "PAINTING",
+      "chance": 0.5
+     },
+     {
+      "place": "wall",
+      "kind": "BENCH",
+      "w": 2,
+      "chance": 0.6
+     },
+     {
+      "place": "ceiling",
+      "kind": "CHANDELIER",
+      "minClear": 5
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ],
+    "noBeds": true
    }
   },
   "laidTables": [
@@ -3052,6 +3453,18 @@
   "sealPocket": 6,
   "chandelierApart": 4,
   "partitionMax": 16,
-  "stationMinArea": 16
+  "stationMinArea": 16,
+  "_chandeliers": "(0.4.7, gamefixes: chandeliers in every house, low enough to touch) a chandelier's candles hang 1.4 m under its ceiling: it is hung only under 'chandelierMinClear' cells of headroom, and only in buildings of these wealths (a plain house is lit by candle stands and a nightstand)",
+  "chandelierMinClear": 4,
+  "_sconces": "(0.4.7) a room with no floor to spare for a candle stand and too low a ceiling for a chandelier is lit by candle sconces on its walls: one for every 'sconcePer' cells of floor, up to three",
+  "sconcePer": 16,
+  "_lightReach": "(0.4.8, gamefixes: an interior too dark) no floor of a room further than 'lightReach' cells beyond a room light's own reach (a candle stand or a sconce its reach, a chandelier more, a hearth less, a bedside lamp nothing): a sconce goes up on the wall nearest the darkest floor, up to 'lightsAdded' more a room",
+  "lightReach": 5,
+  "lightsAdded": 6,
+  "chandelierWealth": [
+   "rich",
+   "noble",
+   "royal"
+  ]
  }
 }

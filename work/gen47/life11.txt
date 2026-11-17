@@ -1,0 +1,117 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 20.32s ({regions=856, overlays=565, variants=673, scarp=50, coast=728, erosion=403, peaks=82, lakes=62, isles=1, rivers=796, wadis=14, ground=24, roads=637, causeways=4, architecture=1371, pitsFilled=1396, pits=431, banks=75, clamp=20, cliffs=60, columns=1253, falls=16, raise=10645, trees=278, outcrops=0, ways=506, lava=0, dungeons=88, postsSunk=28, floatingRemoved=59, floating=638}), made and lit in 2.36s
+    [water] flow field grown in 1686 ms: 39016 columns moving
+    [gathering] 757 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+    [life] start: 236 people, 0 stand with 3+ others within 2 m
+
+          [stuck] Sir Andrew WORK at (265.50, 41.19, 963.50) -> (265.5, 964.5), go to goal, v (0.00, 0.00) ground false route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    [spin] Dunstan: [-0.46 351.3,957.9 SLEEP/go to goal ] [-0.59 351.5,957.7 SLEEP/go to goal ] [-1.00 351.7,957.7 SLEEP/go to goal ] [-0.89 351.7,957.6 SLEEP/go to goal ] [-0.64 351.7,957.6 SLEEP/go to goal ] [-0.40 351.7,957.5 SLEEP/go to goal ] [-0.37 351.7,957.5 SLEEP/go to goal ] [-0.37 351.7,957.5 SLEEP/go to goal ] [-0.37 351.7,957.5 SLEEP/go to goal ] [-0.37 351.7,957.5 SLEEP/go to goal ] [-0.37 351.7,957.5 SLEEP/go to goal ] [-0.37 351.7,957.5 SLEEP/go to goal ] [-0.37 351.7,957.5 SLEEP/go to goal ] [-0.37 351.7,957.5 SLEEP/go to goal ] [-0.37 351.7,957.5 SLEEP/go to goal ] [-0.37 351.8,957.5 SLEEP/go to goal ] [-1.02 351.9,957.5 SLEEP/go to goal ] [-1.45 352.5,958.5 SLEEP/go to goal ] [-1.45 352.5,958.5 SLEEP/go to goal ] [-1.24 352.5,958.4 SLEEP/go to goal ] [-0.59 352.5,958.2 SLEEP/go to goal ] [0.01 352.5,958.0 SLEEP/go to goal ] [0.01 352.5,958.0 SLEEP/go to goal ] [0.01 352.5,958.1 SLEEP/go to goal ] [0.66 352.5,958.4 SLEEP/go to goal ] [1.31 352.5,958.6 SLEEP/go to goal ] [1.96 352.5,958.9 SLEEP/go to goal ] [2.61 352.5,959.1 SLEEP/go to goal ] [3.14 352.5,959.3 SLEEP/go to goal ] [3.14 352.5,959.6 SLEEP/go to goal ] [3.14 352.5,959.8 SLEEP/go to goal ] [3.14 352.5,960.0 SLEEP/go to goal ] [3.04 352.5,960.2 SLEEP/go to goal ] [2.55 352.3,960.3 SLEEP/go to goal ] [1.99 352.1,960.3 SLEEP/go to goal ] [1.81 351.8,960.4 SLEEP/go to goal ] [1.74 351.6,960.4 SLEEP/go to goal ] [1.70 351.3,960.4 SLEEP/go to goal ] [1.70 351.1,960.4 SLEEP/go to goal ] [1.67 350.9,960.5 SLEEP/go to goal ] [1.40 350.7,960.4 SLEEP/go to goal ] [0.81 350.7,960.2 SLEEP/go to goal ] [0.27 350.7,960.0 SLEEP/go to goal ] [0.11 350.7,959.7 SLEEP/go to goal ] [0.08 350.7,959.5 SLEEP/go to goal ] [0.05 350.6,959.2 SLEEP/go to goal ] [0.05 350.6,959.0 SLEEP/go to goal ] [0.05 350.6,958.7 SLEEP/go to goal ] [0.05 350.6,958.5 SLEEP/go to goal ] [0.05 350.6,958.3 SLEEP/go to goal ]
+    [spin] Alaric: [-3.00 265.4,945.8 SLEEP/go to goal ] [-2.83 265.4,945.7 SLEEP/go to goal ] [-2.18 265.4,945.4 SLEEP/go to goal ] [-1.53 265.4,945.2 SLEEP/go to goal ] [-0.88 265.3,945.0 SLEEP/go to goal ] [-0.23 265.3,944.8 SLEEP/go to goal ] [0.06 265.3,944.6 SLEEP/go to goal ] [0.39 265.2,944.5 SLEEP/go to goal ] [0.57 265.0,944.3 SLEEP/go to goal ] [0.64 264.9,944.1 SLEEP/go to goal ] [0.68 264.7,943.9 SLEEP/go to goal ] [0.68 264.5,943.7 SLEEP/go to goal ] [0.84 264.3,943.6 SLEEP/go to goal ] [0.96 264.1,943.4 SLEEP/go to goal ] [1.00 263.9,943.3 SLEEP/go to goal ] [1.00 263.7,943.2 SLEEP/go to goal ] [1.03 263.5,943.1 SOCIALIZE/idle ] [1.03 263.4,943.0 SOCIALIZE/go to goal ] [1.11 263.5,943.1 SOCIALIZE/go to goal ] [1.44 263.6,943.2 SOCIALIZE/go to goal ] [2.09 263.8,943.3 SOCIALIZE/go to goal ] [2.74 264.0,943.5 SOCIALIZE/go to goal ] [-2.90 264.2,943.6 SOCIALIZE/go to goal ] [-2.25 264.4,943.8 SOCIALIZE/go to goal ] [-2.29 264.6,943.9 SOCIALIZE/go to goal ] [-2.46 264.7,944.1 SOCIALIZE/go to goal ] [-2.56 264.8,944.3 SOCIALIZE/go to goal ] [-2.56 265.0,944.6 SOCIALIZE/go to goal ] [-2.50 265.1,944.7 SOCIALIZE/go to goal ] [-2.17 265.2,944.7 SOCIALIZE/go to goal ] [-1.92 265.3,944.7 SOCIALIZE/go to goal ] [-1.87 265.3,944.7 SOCIALIZE/go to goal ] [-2.50 265.3,944.8 SOCIALIZE/go to goal ] [-2.92 265.4,945.1 SOCIALIZE/go to goal ] [-3.00 265.4,945.3 SOCIALIZE/go to goal ] [-3.03 265.4,945.6 SOCIALIZE/go to goal ] [-3.03 265.4,945.8 SOCIALIZE/go to goal ] [-2.84 265.5,946.0 SOCIALIZE/go to goal ] [-2.52 265.6,946.0 SOCIALIZE/go to goal ] [-2.29 265.6,946.0 SOCIALIZE/go to goal ] [-2.58 265.7,946.1 SOCIALIZE/go to goal ] [-2.87 265.7,946.1 SOCIALIZE/go to goal ] [2.91 265.6,946.2 SOCIALIZE/go to goal ] [2.46 265.6,946.2 SOCIALIZE/go to goal ] [2.24 265.5,946.3 SOCIALIZE/go to goal ] [2.16 265.4,946.3 SOCIALIZE/go to goal ] [2.13 265.4,946.4 SOCIALIZE/go to goal ] [2.10 265.3,946.4 SOCIALIZE/go to goal ] [2.10 265.2,946.5 SOCIALIZE/go to goal ] [2.07 265.1,946.5 SOCIALIZE/go to goal ]
+    [life] stop 293,977 done (32 people seen so far)
+    [life] stop 638,932 done (36 people seen so far)
+    [life] stop 166,798 done (56 people seen so far)
+    [life] stop 639,1071 done (58 people seen so far)
+    [life] stop 942,911 done (95 people seen so far)
+    [life] stop 405,820 done (100 people seen so far)
+    [life] stop 207,651 done (119 people seen so far)
+    [life] stop 619,641 done (120 people seen so far)
+    [life] stop 246,484 done (124 people seen so far)
+    [life] stop 599,160 done (154 people seen so far)
+    [life] stop 430,458 done (171 people seen so far)
+    [life] stop 871,436 done (191 people seen so far)
+    [life] stop 925,139 done (193 people seen so far)
+    [life] stop 912,602 done (196 people seen so far)
+    [life] stop 263,334 done (198 people seen so far)
+    [life] stop 480,216 done (210 people seen so far)
+          [crime] ASSAULT by Hurk against world life at (877.1, 741.4), t 481.6
+          [crime] ASSAULT by Garmund against world life at (876.5, 739.8), t 481.9
+          [crime] ASSAULT by Vark against world life at (876.1, 738.9), t 482.3
+          [crime] ASSAULT by Grisel against world life at (877.6, 740.5), t 482.7
+          [crime] ASSAULT by Wenna against world life at (876.8, 739.2), t 482.8
+          [crime] ASSAULT by Rask against world life at (876.1, 740.4), t 483.2
+          [crime] ASSAULT by Hullen against world life at (875.2, 740.4), t 483.5
+          [crime] ASSAULT by Hurk against world life at (875.6, 741.5), t 491.6
+          [crime] ASSAULT by Rask against world life at (875.7, 739.5), t 493.2
+          [crime] ASSAULT by Wenna against world life at (876.6, 739.2), t 493.8
+          [crime] ASSAULT by Hullen against world life at (875.3, 740.4), t 493.9
+          [crime] ASSAULT by Vark against world life at (876.2, 739.3), t 494.4
+          [crime] ASSAULT by Garmund against world life at (876.6, 739.2), t 494.7
+          [crime] ASSAULT by Sigrun against world life at (871.3, 742.3), t 496.0
+          [crime] ASSAULT by Grisel against world life at (877.9, 739.6), t 498.3
+          [crime] ASSAULT by Rask against world life at (875.7, 739.3), t 504.1
+          [crime] ASSAULT by Wenna against world life at (878.1, 740.8), t 504.2
+          [crime] ASSAULT by Hullen against world life at (876.2, 739.3), t 504.6
+          [crime] ASSAULT by Vark against world life at (876.4, 739.3), t 506.7
+          [crime] ASSAULT by Garmund against world life at (877.5, 739.4), t 507.8
+    [life] stop 877,740 done (218 people seen so far)
+    [life] stop 816,1033 done (220 people seen so far)
+    [life] stop 498,82 done (229 people seen so far)
+    [life] stop 224,179 done (232 people seen so far)
+    [life] stop 1032,439 done (233 people seen so far)
+    [life] stop 768,529 done (234 people seen so far)
+
+    [life] 22 stops of 1800 frames; 234 people seen
+      Maelin           SCHOLAR      seen   280 spins   0 blocked     0 still    66
+          last (177.8,58.8,636.5) PRAY: on the way to prayers
+      Dunstan          CRAFTSMAN    seen   280 spins   1 blocked     0 still     0
+          spun at (350.6,44.0,958.3) SLEEP: 
+      Alaric           PRIEST       seen   280 spins   1 blocked     0 still     0
+          spun at (265.1,39.0,946.5) SOCIALIZE: 
+      Toben            CRAFTSMAN    seen   302 spins   0 blocked     0 still    64
+          last (186.5,59.0,655.1) PRAY: on the way to prayers
+      Elidor           UNDERTAKER   seen   457 spins   0 blocked     0 still    47
+          last (850.7,61.8,456.5) PRAY: on the way to prayers
+      Gwenna           UNDERTAKER   seen   461 spins   0 blocked     0 still    47
+          last (850.8,61.9,455.5) PRAY: on the way to prayers
+      Hrodna           CIVIC        seen   280 spins   0 blocked   124 still     0
+          last (481.5,55.0,476.5) WORK: paused to reconsider a blocked route
+      never in play: Merek MINER home (140,612)
+      never in play: Orrin CRAFTSMAN home (417,702)
+    [life] 7 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 649.988 s
+
+WorldLifeProbeTest > life() FAILED
+    java.util.concurrent.TimeoutException: life() timed out after 9 minutes
+        at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+        at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+1 test completed, 1 failed
+
+> Task :probe FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':probe'.
+> There were failing tests. See the report at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/tests/probe/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 10m 54s
+9 actionable tasks: 1 executed, 8 up-to-date

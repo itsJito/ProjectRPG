@@ -123,8 +123,18 @@ public final class Snapshots {
         public final List<SoftBody> softBodies = new ArrayList<>();
         public final List<Vehicle> vehicles = new ArrayList<>();
 
-        public Mover mover(long h) { for (Mover m : movers) if (m.handle == h) return m; return null; }
-        public Ragdoll ragdoll(long h) { for (Ragdoll r : ragdolls) if (r.handle == h) return r; return null; }
+        // (2.14) by handle: every body in the game asks for its own each frame, and a search down the list each time was
+        // the square of the bodies (some 250,000 steps a frame with ShadowVeil's people and animals). Built at first ask.
+        private java.util.HashMap<Long, Mover> moverIndex;
+        private java.util.HashMap<Long, Ragdoll> ragdollIndex;
+        public Mover mover(long h) {
+            if (moverIndex == null) { moverIndex = new java.util.HashMap<>(movers.size() * 2); for (Mover m : movers) moverIndex.put(m.handle, m); }
+            return moverIndex.get(h);
+        }
+        public Ragdoll ragdoll(long h) {
+            if (ragdollIndex == null) { ragdollIndex = new java.util.HashMap<>(ragdolls.size() * 2 + 1); for (Ragdoll r : ragdolls) ragdollIndex.put(r.handle, r); }
+            return ragdollIndex.get(h);
+        }
         public SoftBody softBody(long h) { for (SoftBody s : softBodies) if (s.handle == h) return s; return null; }
         public Vehicle vehicle(long h) { for (Vehicle v : vehicles) if (v.handle == h) return v; return null; }
 
@@ -249,7 +259,12 @@ public final class Snapshots {
     public static final class Agents {
         public final List<Agent> agents = new ArrayList<>();
 
-        public Agent agent(long h) { for (Agent a : agents) if (a.handle == h) return a; return null; }
+        // (2.14) by handle, built at first ask (every agent asks for its own each frame)
+        private java.util.HashMap<Long, Agent> agentIndex;
+        public Agent agent(long h) {
+            if (agentIndex == null) { agentIndex = new java.util.HashMap<>(agents.size() * 2 + 1); for (Agent a : agents) agentIndex.put(a.handle, a); }
+            return agentIndex.get(h);
+        }
 
         static Agents read(ByteBuffer b, int bytes) {
             Agents out = new Agents();

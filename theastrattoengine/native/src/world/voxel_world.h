@@ -94,6 +94,19 @@ public:
     const uint8_t* light() const { return light_.data(); }
     const uint8_t* pristine() const { return pristine_.empty() ? nullptr : pristine_.data(); }
     uint64_t edits() const { return edits_; }
+    /** (2.14) A recent edit's box (cells, inclusive) and its number in the edit count. */
+    struct EditBox { uint64_t seq = 0; int x0 = 0, y0 = 0, z0 = 0, x1 = -1, y1 = -1, z1 = -1; };
+    static constexpr int EDIT_RING = 128;
+    /**
+     * (2.14) The boxes of every edit after edit number 'from', handed to f in order; false (and nothing handed over) when
+     * they are no longer all held - too many since, or a clear - so the caller treats the whole world as changed.
+     */
+    template <class F> bool editsSince(uint64_t from, F&& f) const {
+        if (edits_ < from || edits_ - from > static_cast<uint64_t>(EDIT_RING)) return false;
+        for (uint64_t s = from + 1; s <= edits_; s++) if (editRing_[s % EDIT_RING].seq != s) return false;
+        for (uint64_t s = from + 1; s <= edits_; s++) f(editRing_[s % EDIT_RING]);
+        return true;
+    }
     uint32_t lightVersion() const { return lightVersion_; }
     uint64_t litCells() const { return litCells_; }
 
@@ -120,6 +133,10 @@ private:
     std::unordered_set<uint64_t> sealed_;
     uint32_t navVersion_ = 0, lightVersion_ = 0;
     uint64_t edits_ = 0, litCells_ = 0;
+    EditBox editRing_[EDIT_RING]{};
+    /** An edit made: its count, and its box kept in the ring (a whole-world change keeps no box: nobody can narrow it). */
+    void noteEdit(int x0, int y0, int z0, int x1, int y1, int z1) { edits_++; editRing_[edits_ % EDIT_RING] = EditBox{edits_, x0, y0, z0, x1, y1, z1}; }
+    void noteWholeEdit() { edits_++; editRing_[edits_ % EDIT_RING] = EditBox{}; }
     std::vector<uint32_t> queue_;
     size_t head_ = 0;
     std::vector<uint8_t> dirty_;

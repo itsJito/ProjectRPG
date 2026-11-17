@@ -1,0 +1,231 @@
+Initialized native services in: C:\Users\John\.gradle\native
+Initialized jansi services in: C:\Users\John\.gradle\native
+The client will now receive all logging from the daemon (pid: 6300). The daemon log file: C:\Users\John\.gradle\daemon\8.14.3\daemon-6300.out.log
+Starting 46th build in daemon [uptime: 1 hrs 28 mins 26.947 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 17% of 384 MiB]
+Using 6 worker leases.
+Now considering [C:\Users\John\Documents\ProjectRPG\rpggame, C:\Users\John\Documents\ProjectRPG\theastrattoengine] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\John\Documents\ProjectRPG\rpggame\settings.gradle'.
+Now considering [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame] as hierarchies to watch
+Projects loaded. Root project using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Included projects: [root project 'rpggame']
+
+> Configure project :theastrattoengine
+Evaluating project ':theastrattoengine' using build file 'C:\Users\John\Documents\ProjectRPG\theastrattoengine\build.gradle'.
+Resolved plugin [id: 'java-library']
+Registering project ':theastrattoengine' in composite build. Will substitute for module 'astratto:theastrattoengine'.
+
+> Configure project :
+Evaluating root project 'rpggame' using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Resolved plugin [id: 'application']
+All projects evaluated.
+Task name matched 'test'
+Selected primary task 'test' from project :
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':test']
+Tasks that were excluded: []
+Resolve mutations for :processResources (Thread[#2495,included builds Thread 2,5,main]) started.
+Resolve mutations for :theastrattoengine:compileJava (Thread[#2496,Execution worker,5,main]) started.
+destroyer locations for task group 0 (Thread[#2497,Execution worker Thread 2,5,main]) started.
+:processResources (Thread[#2495,included builds Thread 2,5,main]) started.
+:theastrattoengine:compileJava (Thread[#2496,Execution worker,5,main]) started.
+
+> Task :theastrattoengine:compileJava UP-TO-DATE
+Caching disabled for task ':theastrattoengine:compileJava' because:
+  Build cache is disabled
+Skipping task ':theastrattoengine:compileJava' as it is up-to-date.
+other build task :theastrattoengine:compileJava (Thread[#2496,Execution worker,5,main]) started.
+Resolve mutations for :theastrattoengine:buildNative (Thread[#2497,Execution worker Thread 2,5,main]) started.
+work action resolve main (project :theastrattoengine) (Thread[#2497,Execution worker Thread 2,5,main]) started.
+:theastrattoengine:buildNative (Thread[#2497,Execution worker Thread 2,5,main]) started.
+
+> Task :processResources UP-TO-DATE
+Caching disabled for task ':processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':processResources' as it is up-to-date.
+Resolve mutations for :compileJava (Thread[#2495,included builds Thread 2,5,main]) started.
+:compileJava (Thread[#2495,included builds Thread 2,5,main]) started.
+
+> Task :compileJava UP-TO-DATE
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
+Skipping task ':compileJava' as it is up-to-date.
+Resolve mutations for :classes (Thread[#2495,included builds Thread 2,5,main]) started.
+:classes (Thread[#2495,included builds Thread 2,5,main]) started.
+
+> Task :classes UP-TO-DATE
+Skipping task ':classes' as it has no actions.
+Resolve mutations for :compileTestJava (Thread[#2495,included builds Thread 2,5,main]) started.
+:compileTestJava (Thread[#2495,included builds Thread 2,5,main]) started.
+
+> Task :compileTestJava UP-TO-DATE
+Caching disabled for task ':compileTestJava' because:
+  Build cache is disabled
+Skipping task ':compileTestJava' as it is up-to-date.
+Resolve mutations for :processTestResources (Thread[#2495,included builds Thread 2,5,main]) started.
+:processTestResources (Thread[#2495,included builds Thread 2,5,main]) started.
+
+> Task :processTestResources NO-SOURCE
+Skipping task ':processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :testClasses (Thread[#2498,Execution worker Thread 3,5,main]) started.
+:testClasses (Thread[#2500,Execution worker Thread 5,5,main]) started.
+
+> Task :testClasses UP-TO-DATE
+Skipping task ':testClasses' as it has no actions.
+
+> Task :theastrattoengine:buildNative
+Caching disabled for task ':theastrattoengine:buildNative' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Task ':theastrattoengine:buildNative' is not up-to-date because:
+  Output property '$1' file C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\bin\windows-x64\astratto.dll has changed.
+Starting process 'command 'cmd''. Working directory: C:\Users\John\Documents\ProjectRPG\theastrattoengine Command: cmd /c C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\build.bat game
+Successfully started process 'command 'cmd''
+'vswhere.exe' is not recognized as an internal or external command,
+operable program or batch file.
+ai_service.cpp
+c_api.cpp
+audio_device.cpp
+audio_service.cpp
+chemistry_service.cpp
+engine.cpp
+collide.cpp
+impulsis_service.cpp
+space.cpp
+module_host.cpp
+pathfinder.cpp
+walkability.cpp
+sight.cpp
+bodies.cpp
+physics_service.cpp
+ragdoll.cpp
+sydney.cpp
+chunk_mesher.cpp
+layers.cpp
+renderer.cpp
+voxel_world.cpp
+   Creating library C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\obj\astratto.lib and object C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\obj\astratto.exp
+Resolve mutations for :theastrattoengine:engineResources (Thread[#2497,Execution worker Thread 2,5,main]) started.
+:theastrattoengine:engineResources (Thread[#2497,Execution worker Thread 2,5,main]) started.
+
+> Task :theastrattoengine:engineResources
+Caching disabled for task ':theastrattoengine:engineResources' because:
+  Build cache is disabled
+  Not worth caching
+Task ':theastrattoengine:engineResources' is not up-to-date because:
+  Input property 'rootSpec$1$3' file C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\bin\windows-x64\astratto.dll has changed.
+Resolve mutations for :theastrattoengine:processResources (Thread[#2497,Execution worker Thread 2,5,main]) started.
+:theastrattoengine:processResources (Thread[#2497,Execution worker Thread 2,5,main]) started.
+
+> Task :theastrattoengine:processResources
+Caching disabled for task ':theastrattoengine:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Task ':theastrattoengine:processResources' is not up-to-date because:
+  Input property 'rootSpec$1' file C:\Users\John\Documents\ProjectRPG\theastrattoengine\build\generated\engine-resources\astratto\natives\windows-x64\astratto.dll has changed.
+file or directory 'C:\Users\John\Documents\ProjectRPG\theastrattoengine\java\src\main\resources', not found
+Resolve mutations for :theastrattoengine:classes (Thread[#2497,Execution worker Thread 2,5,main]) started.
+:theastrattoengine:classes (Thread[#2497,Execution worker Thread 2,5,main]) started.
+
+> Task :theastrattoengine:classes
+Skipping task ':theastrattoengine:classes' as it has no actions.
+Resolve mutations for :theastrattoengine:jar (Thread[#2497,Execution worker Thread 2,5,main]) started.
+:theastrattoengine:jar (Thread[#2497,Execution worker Thread 2,5,main]) started.
+
+> Task :theastrattoengine:jar
+Caching disabled for task ':theastrattoengine:jar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':theastrattoengine:jar' is not up-to-date because:
+  Input property 'rootSpec$1' file C:\Users\John\Documents\ProjectRPG\theastrattoengine\build\resources\main\astratto\natives\windows-x64\astratto.dll has changed.
+other build task :theastrattoengine:jar (Thread[#2497,Execution worker Thread 2,5,main]) started.
+work action resolve theastrattoengine-2.0.0.jar (project :theastrattoengine) (Thread[#2497,Execution worker Thread 2,5,main]) started.
+Resolve mutations for :test (Thread[#2497,Execution worker Thread 2,5,main]) started.
+:test (Thread[#2497,Execution worker Thread 2,5,main]) started.
+Gradle Test Executor 51 started executing tests.
+Gradle Test Executor 50 started executing tests.
+
+> Task :test
+Caching disabled for task ':test' because:
+  Build cache is disabled
+Task ':test' is not up-to-date because:
+  Task has failed previously.
+Starting process 'Gradle Test Executor 50'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Djunit.jupiter.execution.timeout.default=4 m -Djunit.jupiter.execution.timeout.mode=enabled -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\test\work --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath11384857219731659029txt -Xmx2g -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 50'
+Starting process 'Gradle Test Executor 51'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Djunit.jupiter.execution.timeout.default=4 m -Djunit.jupiter.execution.timeout.mode=enabled -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\test\work --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath775767378488828229txt -Xmx2g -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 51'
+Successfully started process 'Gradle Test Executor 50'
+Successfully started process 'Gradle Test Executor 51'
+
+Gradle Test Executor 51 finished executing tests.
+
+> Task :test
+
+MonsterFightTest > aGroundedRangedMonsterClimbsToReachableHighGround() STANDARD_OUT
+    TRACE 120 29.09,6.43,26.50 ladder true gr false goal 30.50,8.00,26.50 legAt 4/5 vy 3.20 stall 0.1 nudges 0
+    TRACE 126 29.10,6.75,26.50 ladder true gr false goal 30.50,8.00,26.50 legAt 4/5 vy 3.20 stall 0.0 nudges 0
+    TRACE 132 29.11,7.07,26.50 ladder true gr false goal 30.50,8.00,26.50 legAt 4/5 vy 3.20 stall 0.1 nudges 0
+    TRACE 138 29.11,7.39,26.50 ladder true gr false goal 30.50,8.00,26.50 legAt 4/5 vy 3.20 stall 0.0 nudges 0
+    TRACE 144 29.12,7.71,26.50 ladder true gr false goal 30.50,8.00,26.50 legAt 5/5 vy 3.20 stall 0.1 nudges 0
+    TRACE 150 29.12,8.03,26.50 ladder true gr false goal 30.50,8.00,26.50 legAt 5/5 vy 3.20 stall 0.0 nudges 0
+    TRACE 156 29.14,8.31,26.50 ladder true gr false goal 30.50,8.00,26.50 legAt 5/5 vy 1.73 stall 0.1 nudges 0
+    TRACE 162 29.22,8.38,26.50 ladder true gr false goal 30.50,8.00,26.50 legAt 5/5 vy -0.47 stall 0.2 nudges 0
+    TRACE 168 29.35,8.26,26.50 ladder true gr false goal 30.50,8.00,26.50 legAt 5/5 vy -1.40 stall 0.3 nudges 0
+    TRACE 174 29.53,8.16,26.50 ladder true gr false goal 30.50,8.00,26.50 legAt 5/5 vy 3.20 stall 0.1 nudges 0
+    TRACE 180 29.63,8.38,26.50 ladder true gr false goal 30.50,8.00,26.50 legAt 5/5 vy 1.00 stall 0.2 nudges 0
+    TRACE 186 29.79,8.38,26.50 ladder true gr false goal 30.50,8.00,26.50 legAt 5/5 vy -1.20 stall 0.1 nudges 0
+    TRACE 192 29.93,8.18,26.50 ladder true gr false goal 30.50,8.00,26.50 legAt 5/5 vy -1.40 stall 0.0 nudges 0
+    TRACE 198 29.96,8.16,26.50 ladder true gr false goal 30.50,8.00,26.50 legAt 5/5 vy -1.40 stall 0.1 nudges 0
+    TRACE 204 29.97,8.18,26.50 ladder true gr false goal 30.50,8.00,26.50 legAt 5/5 vy -3.20 stall 0.2 nudges 0
+    TRACE 210 29.98,8.18,26.50 ladder true gr false goal 30.50,8.00,26.50 legAt 5/5 vy -3.20 stall 0.3 nudges 0
+    TRACE 216 29.98,8.18,26.50 ladder true gr false goal 30.50,8.00,26.50 legAt 5/5 vy -3.20 stall 0.4 nudges 0
+    TRACE 222 29.99,8.18,26.50 ladder true gr false goal 30.50,8.00,26.50 legAt 5/5 vy -3.20 stall 0.5 nudges 0
+    TRACE 228 29.99,8.18,26.50 ladder true gr false goal 30.50,8.00,26.50 legAt 5/5 vy -3.20 stall 0.6 nudges 0
+    TRACE 234 30.00,8.18,26.50 ladder false gr false goal 30.50,8.00,26.50 legAt 5/5 vy -3.38 stall 0.7 nudges 0
+    TRACE 240 30.08,8.01,26.50 ladder false gr true goal 30.50,8.00,26.50 legAt 5/5 vy 0.00 stall 0.8 nudges 0
+    TRACE 246 30.24,8.00,26.50 ladder false gr true goal 30.50,8.00,26.50 legAt 5/5 vy 0.00 stall 0.9 nudges 0
+    TRACE 252 30.25,8.00,26.50 ladder false gr true goal 30.50,8.00,26.50 legAt 5/5 vy 0.00 stall 1.0 nudges 0
+    TRACE 258 30.25,8.00,26.50 ladder false gr true goal 30.50,8.00,26.50 legAt 5/5 vy 0.00 stall 1.1 nudges 0
+    TRACE 264 30.25,8.00,26.50 ladder false gr true goal 30.50,8.00,26.50 legAt 5/5 vy 0.00 stall 1.2 nudges 0
+    TRACE 270 30.25,8.00,26.50 ladder false gr true goal 30.50,8.00,26.50 legAt 5/5 vy 0.00 stall 1.3 nudges 0
+    TRACE 276 30.25,8.00,26.50 ladder false gr true goal 30.50,8.00,26.50 legAt 5/5 vy 0.00 stall 1.4 nudges 0
+    TRACE 282 30.25,8.00,26.50 ladder false gr true goal 30.50,8.00,26.50 legAt 5/5 vy 0.00 stall 1.5 nudges 0
+    TRACE 288 30.25,8.00,26.50 ladder false gr true goal 30.50,8.00,26.50 legAt 5/5 vy 0.00 stall 1.6 nudges 0
+    TRACE 294 30.25,8.00,26.50 ladder false gr true goal 30.50,8.00,26.50 legAt 5/5 vy 0.00 stall 1.7 nudges 0
+    TRACE 300 30.25,8.00,26.50 ladder false gr true goal 30.50,8.00,26.50 legAt 5/5 vy 0.00 stall 1.8 nudges 0
+    TRACE 306 30.25,8.00,26.50 ladder false gr true goal 30.50,8.00,26.50 legAt 5/5 vy 0.00 stall 1.9 nudges 0
+    TRACE 312 30.25,8.00,26.50 ladder false gr true goal 30.50,8.00,26.50 legAt 5/5 vy 0.00 stall 2.0 nudges 0
+    TRACE 318 30.25,8.00,26.50 ladder false gr true goal 30.50,8.00,26.50 legAt 5/5 vy 0.00 stall 2.1 nudges 0
+    TRACE 324 30.25,8.00,26.50 ladder false gr true goal 30.50,8.00,26.50 legAt 5/5 vy 0.00 stall 2.2 nudges 0
+    TRACE 330 30.25,8.00,26.50 ladder false gr true goal 30.50,8.00,26.50 legAt 5/5 vy 0.00 stall 2.3 nudges 0
+
+MonsterFightTest > aBatCirclesOutOfReachAndSwoopsInToBite() STANDARD_OUT
+    bat: 8 dives, 58% of the time out of reach overhead
+
+MonsterFightTest > aGuardWaitsForABatToDiveInsteadOfSwingingAtTheAir() STANDARD_OUT
+    guard: 0 swings at a bat out of reach, 154 frames waiting for the dive
+
+MonsterFightTest > goblinsSpreadRoundTheirTargetAndDartInByTurns() STANDARD_OUT
+    goblins: at most 2 darting at once, widest gap round the player 150 degrees
+
+Gradle Test Executor 50 finished executing tests.
+
+> Task :test
+Finished generating test XML results (0.003 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\test-results\test
+Generating HTML test report...
+Finished generating test html results (0.01 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\tests\test
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 17s
+9 actionable tasks: 5 executed, 4 up-to-date
+Watched directory hierarchies: [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame]

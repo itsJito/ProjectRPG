@@ -25,6 +25,9 @@ public final class Animal extends Actor implements Interactable {
     public enum Goal { IDLE, GRAZE, DRINK, REST, WANDER, FOLLOW, ALERT, WARN, FLEE, DEFEND, HUNT, FEED, MATE, NEST, SEEK, PLAY, GROOM, STAY }
 
     public final Species species;
+    /** (0.4.8) When its next hoof print falls, and which side. */
+    public double nextPrint;
+    public float printSide = 1;
     public long trappedBy;
     astratto.ai.TaskNetwork<Animal> needs;
     float needStep;
@@ -149,6 +152,13 @@ public final class Animal extends Actor implements Interactable {
      * called for a surge of the wings.
      */
     public float wingPhase, flightSpeed, flightHeight = 99;
+    /** (0.4.7) A flier's flight (Flight): its stage, where it is going, the circle it soars round, its timings. */
+    public int flightMode, nextMode;
+    public float fx, fy, fz, circleX, circleZ, circleR, circleA;
+    public double flightUntil, nextFlight, nextFlightCheck, perchUntil;
+    public boolean landAfter;
+    public float stuckX, stuckY, stuckZ;
+    public double stuckSince;
     public double surgeAt = -99;
     public final rpg.item.Inventory bags = new rpg.item.Inventory(6, 4);
 
@@ -213,6 +223,7 @@ public final class Animal extends Actor implements Interactable {
 
     // ------------------------------------------------------------------ Interactable
     @Override public long id() { return id; }
+    @Override public int levelTag() { return alive && !carcass() ? skills.combatLevel() : -1; }
     @Override public String label() { return carcass() ? kind() + " carcass" : (owned() ? kind() + " (owned)" : kind()); }
     @Override public float ax() { return x; }
     @Override public float ay() { return y + (carcass() ? 0.25f : height * 0.6f); }

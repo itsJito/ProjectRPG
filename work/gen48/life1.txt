@@ -1,0 +1,218 @@
+Initialized native services in: C:\Users\John\.gradle\native
+Initialized jansi services in: C:\Users\John\.gradle\native
+The client will now receive all logging from the daemon (pid: 21672). The daemon log file: C:\Users\John\.gradle\daemon\8.14.3\daemon-21672.out.log
+Starting 68th build in daemon [uptime: 3 hrs 58 mins 27.915 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 17% of 384 MiB]
+Using 6 worker leases.
+Now considering [C:\Users\John\Documents\ProjectRPG\rpggame, C:\Users\John\Documents\ProjectRPG\theastrattoengine] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\John\Documents\ProjectRPG\rpggame\settings.gradle'.
+Now considering [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame] as hierarchies to watch
+Projects loaded. Root project using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Included projects: [root project 'rpggame']
+
+> Configure project :theastrattoengine
+Evaluating project ':theastrattoengine' using build file 'C:\Users\John\Documents\ProjectRPG\theastrattoengine\build.gradle'.
+Resolved plugin [id: 'java-library']
+Registering project ':theastrattoengine' in composite build. Will substitute for module 'astratto:theastrattoengine'.
+
+> Configure project :
+Evaluating root project 'rpggame' using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Resolved plugin [id: 'application']
+All projects evaluated.
+Task name matched 'probe'
+Selected primary task 'probe' from project :
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':probe']
+Tasks that were excluded: []
+Resolve mutations for :processResources (Thread[#3086,included builds Thread 2,5,main]) started.
+Resolve mutations for :theastrattoengine:compileJava (Thread[#3085,included builds,5,main]) started.
+destroyer locations for task group 0 (Thread[#3089,Execution worker Thread 3,5,main]) started.
+:processResources (Thread[#3086,included builds Thread 2,5,main]) started.
+:theastrattoengine:compileJava (Thread[#3085,included builds,5,main]) started.
+
+> Task :theastrattoengine:compileJava UP-TO-DATE
+Caching disabled for task ':theastrattoengine:compileJava' because:
+  Build cache is disabled
+Skipping task ':theastrattoengine:compileJava' as it is up-to-date.
+Resolve mutations for :theastrattoengine:buildNative (Thread[#3085,included builds,5,main]) started.
+other build task :theastrattoengine:compileJava (Thread[#3089,Execution worker Thread 3,5,main]) started.
+:theastrattoengine:buildNative (Thread[#3085,included builds,5,main]) started.
+
+> Task :theastrattoengine:buildNative UP-TO-DATE
+Caching disabled for task ':theastrattoengine:buildNative' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Skipping task ':theastrattoengine:buildNative' as it is up-to-date.
+Resolve mutations for :theastrattoengine:engineResources (Thread[#3085,included builds,5,main]) started.
+:theastrattoengine:engineResources (Thread[#3085,included builds,5,main]) started.
+
+> Task :theastrattoengine:engineResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:engineResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:engineResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:processResources (Thread[#3085,included builds,5,main]) started.
+:theastrattoengine:processResources (Thread[#3085,included builds,5,main]) started.
+
+> Task :theastrattoengine:processResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:processResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:classes (Thread[#3085,included builds,5,main]) started.
+:theastrattoengine:classes (Thread[#3085,included builds,5,main]) started.
+
+> Task :theastrattoengine:classes UP-TO-DATE
+Skipping task ':theastrattoengine:classes' as it has no actions.
+Resolve mutations for :theastrattoengine:jar (Thread[#3085,included builds,5,main]) started.
+:theastrattoengine:jar (Thread[#3085,included builds,5,main]) started.
+
+> Task :theastrattoengine:jar UP-TO-DATE
+Caching disabled for task ':theastrattoengine:jar' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:jar' as it is up-to-date.
+work action resolve main (project :theastrattoengine) (Thread[#3090,Execution worker Thread 4,5,main]) started.
+other build task :theastrattoengine:jar (Thread[#3089,Execution worker Thread 3,5,main]) started.
+work action resolve theastrattoengine-2.0.0.jar (project :theastrattoengine) (Thread[#3089,Execution worker Thread 3,5,main]) started.
+
+> Task :processResources UP-TO-DATE
+Caching disabled for task ':processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':processResources' as it is up-to-date.
+Resolve mutations for :compileJava (Thread[#3086,included builds Thread 2,5,main]) started.
+:compileJava (Thread[#3086,included builds Thread 2,5,main]) started.
+
+> Task :compileJava UP-TO-DATE
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
+Skipping task ':compileJava' as it is up-to-date.
+Resolve mutations for :classes (Thread[#3086,included builds Thread 2,5,main]) started.
+:classes (Thread[#3086,included builds Thread 2,5,main]) started.
+
+> Task :classes UP-TO-DATE
+Skipping task ':classes' as it has no actions.
+Resolve mutations for :compileTestJava (Thread[#3086,included builds Thread 2,5,main]) started.
+:compileTestJava (Thread[#3086,included builds Thread 2,5,main]) started.
+
+> Task :compileTestJava UP-TO-DATE
+Caching disabled for task ':compileTestJava' because:
+  Build cache is disabled
+Skipping task ':compileTestJava' as it is up-to-date.
+Resolve mutations for :processTestResources (Thread[#3086,included builds Thread 2,5,main]) started.
+:processTestResources (Thread[#3086,included builds Thread 2,5,main]) started.
+
+> Task :processTestResources NO-SOURCE
+Skipping task ':processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :testClasses (Thread[#3086,included builds Thread 2,5,main]) started.
+:testClasses (Thread[#3086,included builds Thread 2,5,main]) started.
+
+> Task :testClasses UP-TO-DATE
+Skipping task ':testClasses' as it has no actions.
+Resolve mutations for :probe (Thread[#3086,included builds Thread 2,5,main]) started.
+:probe (Thread[#3086,included builds Thread 2,5,main]) started.
+Gradle Test Executor 34 started executing tests.
+
+> Task :probe
+Caching disabled for task ':probe' because:
+  Build cache is disabled
+Task ':probe' is not up-to-date because:
+  Task.upToDateWhen is false.
+Starting process 'Gradle Test Executor 34'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Djunit.jupiter.execution.timeout.default=9 m -Djunit.jupiter.execution.timeout.mode=enabled -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\probe\work -Drpg.probeFrames=1800 --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath14354571773988913244txt -Xmx2g -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 34'
+Successfully started process 'Gradle Test Executor 34'
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 22.05s ({regions=900, overlays=494, variants=586, scarp=48, coast=432, erosion=370, peaks=77, lakes=59, isles=1, rivers=740, wadis=13, ground=22, roads=594, causeways=4, architecture=1403, pitsFilled=1396, pits=460, banks=75, clamp=13, cliffs=50, columns=1252, falls=19, raise=12125, trees=268, outcrops=0, ways=596, lava=0, dungeons=104, cellars=573, postsSunk=4, floatingRemoved=41, floating=721}), made and lit in 2.38s
+    [water] flow field grown in 1403 ms: 39016 columns moving
+    [gathering] 760 wild herb patches, flax and berry bushes
+    [monsters] 4 wilderness territories (passed over: 8 wet or road, 29 in a realm, 79 near the settled, 16 by a road, 33 by their biome's chances; 1150 settled points)
+    [life] start: 236 people, 0 stand with 3+ others within 2 m
+
+    [spin] Alaric: [-3.00 265.4,945.8 SLEEP/go to goal ] [-2.83 265.4,945.7 SLEEP/go to goal ] [-2.18 265.4,945.4 SLEEP/go to goal ] [-1.53 265.4,945.2 SLEEP/go to goal ] [-0.88 265.3,945.0 SLEEP/go to goal ] [-0.23 265.3,944.8 SLEEP/go to goal ] [0.07 265.3,944.6 SLEEP/go to goal ] [0.39 265.2,944.4 SLEEP/go to goal ] [0.57 265.0,944.3 SLEEP/go to goal ] [0.47 265.0,944.2 SLEEP/go to goal ] [0.29 265.0,944.2 SLEEP/go to goal ] [0.21 265.0,944.2 SLEEP/go to goal ] [0.21 265.0,944.2 SLEEP/go to goal ] [-0.01 265.1,944.1 SLEEP/go to goal ] [-0.06 265.1,944.0 SLEEP/go to goal ] [0.26 265.0,943.9 SLEEP/go to goal ] [0.69 264.9,943.8 SOCIALIZE/go to goal ] [0.92 264.7,943.7 SOCIALIZE/go to goal ] [1.19 264.6,943.7 SOCIALIZE/go to goal ] [1.83 264.7,943.8 SOCIALIZE/go to goal ] [2.48 264.8,944.0 SOCIALIZE/go to goal ] [3.13 264.9,944.2 SOCIALIZE/go to goal ] [-2.77 264.9,944.3 SOCIALIZE/go to goal ] [-2.77 265.0,944.5 SOCIALIZE/go to goal ] [-2.64 265.1,944.7 SOCIALIZE/go to goal ] [-2.25 265.2,944.7 SOCIALIZE/go to goal ] [-1.95 265.3,944.7 SOCIALIZE/go to goal ] [-1.81 265.3,944.7 SOCIALIZE/go to goal ] [-2.38 265.3,944.8 SOCIALIZE/go to goal ] [-2.92 265.4,945.0 SOCIALIZE/go to goal ] [-3.00 265.4,945.3 SOCIALIZE/go to goal ] [-3.03 265.4,945.5 SOCIALIZE/go to goal ] [-2.94 265.5,945.7 SOCIALIZE/go to goal ] [-2.86 265.5,945.8 SOCIALIZE/go to goal ] [-2.97 265.5,945.9 SOCIALIZE/go to goal ] [2.92 265.5,946.0 SOCIALIZE/go to goal ] [2.45 265.3,946.1 SOCIALIZE/go to goal ] [2.73 265.3,946.2 SOCIALIZE/go to goal ] [2.90 265.3,946.3 SOCIALIZE/go to goal ] [-2.80 265.4,946.3 SOCIALIZE/go to goal ] [-2.15 265.5,946.3 SOCIALIZE/go to goal ] [-1.50 265.5,946.2 SOCIALIZE/go to goal ] [-0.97 265.6,946.2 SOCIALIZE/go to goal ] [-0.79 265.6,946.1 SOCIALIZE/go to goal ] [-0.71 265.6,946.1 SOCIALIZE/go to goal ] [-0.71 265.6,946.1 SOCIALIZE/go to goal ] [-0.71 265.5,946.1 SOCIALIZE/go to goal ] [-0.71 265.5,946.2 SOCIALIZE/go to goal ] [-0.71 265.4,946.2 SOCIALIZE/go to goal ] [-0.71 265.4,946.2 SOCIALIZE/go to goal ]
+          [stuck] Garvin SOCIALIZE at (265.50, 42.05, 963.50) -> (264.5, 963.5), go to goal, v (0.00, 0.00) ground false route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    [life] stop 293,977 done (32 people seen so far)
+    [life] stop 638,932 done (36 people seen so far)
+    [life] stop 166,798 done (56 people seen so far)
+    [life] stop 639,1071 done (58 people seen so far)
+    [life] stop 942,911 done (95 people seen so far)
+    [life] stop 405,820 done (100 people seen so far)
+    [life] stop 207,651 done (119 people seen so far)
+    [life] stop 619,641 done (120 people seen so far)
+    [life] stop 246,484 done (124 people seen so far)
+    [life] stop 599,160 done (154 people seen so far)
+    [life] stop 430,458 done (171 people seen so far)
+    [life] stop 871,436 done (191 people seen so far)
+    [life] stop 925,139 done (193 people seen so far)
+    [life] stop 912,602 done (196 people seen so far)
+    [life] stop 263,334 done (198 people seen so far)
+    [life] stop 480,216 done (210 people seen so far)
+          [crime] ASSAULT by Wenna against world life at (878.0, 740.4), t 482.1
+          [crime] ASSAULT by Garmund against world life at (876.8, 739.1), t 482.2
+          [crime] ASSAULT by Hurk against world life at (878.0, 740.5), t 482.3
+          [crime] ASSAULT by Grisel against world life at (877.8, 740.7), t 482.8
+          [crime] ASSAULT by Rask against world life at (875.4, 740.4), t 483.2
+          [crime] ASSAULT by Vark against world life at (877.5, 739.5), t 483.5
+          [crime] ASSAULT by Hullen against world life at (875.3, 739.5), t 483.5
+          [crime] ASSAULT by Wenna against world life at (878.0, 740.5), t 492.4
+          [crime] ASSAULT by Garmund against world life at (877.6, 741.1), t 492.9
+          [crime] ASSAULT by Hurk against world life at (876.5, 741.9), t 493.0
+          [crime] ASSAULT by Vark against world life at (877.6, 742.1), t 493.6
+          [crime] ASSAULT by Grisel against world life at (876.6, 741.9), t 494.4
+          [crime] ASSAULT by Rask against world life at (876.8, 742.0), t 495.2
+          [crime] ASSAULT by Hullen against world life at (877.6, 741.3), t 495.4
+          [crime] ASSAULT by Garmund against world life at (876.0, 741.5), t 503.3
+          [crime] ASSAULT by Hurk against world life at (877.6, 741.5), t 503.6
+          [crime] ASSAULT by Wenna against world life at (878.1, 740.8), t 503.6
+          [crime] ASSAULT by Vark against world life at (877.3, 740.9), t 503.8
+          [crime] ASSAULT by Grisel against world life at (876.1, 741.6), t 504.4
+          [crime] ASSAULT by Rask against world life at (877.9, 740.3), t 508.6
+          [crime] ASSAULT by Hullen against world life at (877.5, 741.8), t 509.5
+    [life] stop 877,740 done (218 people seen so far)
+    [life] stop 816,1033 done (220 people seen so far)
+    [life] stop 498,82 done (229 people seen so far)
+    [life] stop 224,179 done (232 people seen so far)
+    [life] stop 1032,439 done (233 people seen so far)
+    [life] stop 768,529 done (234 people seen so far)
+
+    [life] 22 stops of 1800 frames; 234 people seen
+      Maelin           SCHOLAR      seen   280 spins   0 blocked     0 still   114
+          last (177.8,58.8,636.5) PRAY: on the way to prayers
+      Danek            CRAFTSMAN    seen   280 spins   0 blocked     0 still    44
+          last (190.5,41.0,818.3) SOCIALIZE: on the way
+      Sella            CIVIC        seen   280 spins   0 blocked     0 still    76
+          last (190.5,41.0,818.8) SLEEP: on the way
+      Alaric           PRIEST       seen   280 spins   1 blocked     0 still     0
+          spun at (265.4,39.0,946.2) SOCIALIZE: 
+      Elidor           UNDERTAKER   seen   457 spins   0 blocked     0 still    47
+          last (850.7,61.9,456.5) PRAY: on the way to prayers
+      Gwenna           UNDERTAKER   seen   461 spins   0 blocked     0 still    47
+          last (850.8,61.9,455.5) PRAY: on the way to prayers
+      never in play: Merek MINER home (140,612)
+      never in play: Orrin CRAFTSMAN home (417,702)
+    [life] 6 people with trouble
+
+
+Gradle Test Executor 34 finished executing tests.
+
+> Task :probe
+  slow: rpg.probe.WorldLifeProbeTest.life() 478.572 s
+Finished generating test XML results (0.003 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\test-results\probe
+Generating HTML test report...
+Finished generating test html results (0.012 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\tests\probe
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 8m 4s
+9 actionable tasks: 1 executed, 8 up-to-date
+Watched directory hierarchies: [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame]

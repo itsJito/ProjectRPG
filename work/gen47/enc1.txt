@@ -1,0 +1,56 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources
+> Task :compileJava UP-TO-DATE
+> Task :classes
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+> Task :test
+
+EncounterTest > definitionsAreWhole() FAILED
+    org.opentest4j.AssertionFailedError: highwaymen_toll: no item leather_body ==> expected: not <null>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertNotNull.failNull(AssertNotNull.java:49)
+        at app//org.junit.jupiter.api.AssertNotNull.assertNotNull(AssertNotNull.java:35)
+        at app//org.junit.jupiter.api.Assertions.assertNotNull(Assertions.java:312)
+        at app//rpg.encounter.EncounterTest.definitionsAreWhole(EncounterTest.java:63)
+  slow: rpg.encounter.EncounterTest.highwaymenAskTheirTollAndArePaid() 34.656 s
+
+EncounterTest > theDirectorIsReproducibleAndRegional() FAILED
+    org.opentest4j.AssertionFailedError: the heath and the lowlands each have their own commonest encounter ==> expected: not equal but was: <traveller_news>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertNotEquals.failEqual(AssertNotEquals.java:277)
+        at app//org.junit.jupiter.api.AssertNotEquals.assertNotEquals(AssertNotEquals.java:263)
+        at app//org.junit.jupiter.api.Assertions.assertNotEquals(Assertions.java:2832)
+        at app//rpg.encounter.EncounterTest.theDirectorIsReproducibleAndRegional(EncounterTest.java:185)
+
+6 tests completed, 2 failed
+
+> Task :test FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 2m 8s
+9 actionable tasks: 3 executed, 6 up-to-date

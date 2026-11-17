@@ -120,6 +120,7 @@ public final class Weather {
     /** Puts the weather where it is going at once (loading a save, a test, the console's "now"). */
     public void snap() {
         rain = tRain; snow = tSnow; fog = tFog; overcast = tCloud; wind = tWind;
+        if (rain > 0 && snow > 0) { if (rain >= snow) snow = 0; else rain = 0; }
         hail = tHail; sand = tSand; storm = tStorm; drift = tDrift; dark = tDark; tintR = tTintR; tintG = tTintG; tintB = tTintB;
         wetness = tRain > 0 ? 1 : 0; snowCover = tSnow > 0 || tDrift > 0.3f ? 0.85f : 0;
     }
@@ -130,7 +131,14 @@ public final class Weather {
         if (dt <= 0) return;
         time += dt;
         float step = dt / Math.max(1f, transition);
-        rain = toward(rain, tRain, step); snow = toward(snow, tSnow, step); fog = toward(fog, tFog, step);
+        // (2.16) rain and snow never fall together: a weather asking for both falls as the greater, and a change from
+        // one to the other lets the first thin out and stop before the second begins
+        float wantRain = tRain, wantSnow = tSnow;
+        if (wantRain > 0 && wantSnow > 0) { if (wantRain >= wantSnow) wantSnow = 0; else wantRain = 0; }
+        if (wantSnow > 0 && rain > 0.01f) wantSnow = 0;
+        if (wantRain > 0 && snow > 0.01f) wantRain = 0;
+        rain = toward(rain, wantRain, step); snow = toward(snow, wantSnow, step);
+        fog = toward(fog, tFog, step);
         overcast = toward(overcast, tCloud, step); wind = toward(wind, tWind, step * 1.5f);
         hail = toward(hail, tHail, step * 1.5f); sand = toward(sand, tSand, step); storm = toward(storm, tStorm, step); drift = toward(drift, tDrift, step);
         dark = toward(dark, tDark, step); tintR = toward(tintR, tTintR, step); tintG = toward(tintG, tTintG, step); tintB = toward(tintB, tTintB, step);

@@ -1,0 +1,183 @@
+    [enc] highwaymen_toll: started highwaymen_toll #1 at 273,985 (player 280,1020)
+    [enc]   robber   Merrit             at 35 m unseen  y 39.0 stand 39.0
+    [enc]   robber   Sten               at 34 m unseen  y 39.0 stand 39.0
+    [enc]   robber   Torvald            at 35 m unseen  y 39.0 stand 39.0
+    [enc]   robber   Yorick             at 34 m unseen  y 39.0 stand 39.0
+    [enc]   robber   Merrit             moved 0.3 m, now 35 m off, ENCOUNTER / hide loaded true  STILL
+    [enc]   robber   Sten               moved 0.0 m, now 34 m off, ENCOUNTER / hide loaded true  STILL
+    [enc]   robber   Torvald            moved 0.3 m, now 35 m off, ENCOUNTER / hide loaded true  STILL
+    [enc]   robber   Yorick             moved 0.0 m, now 34 m off, ENCOUNTER / hide loaded true  STILL
+    [enc]   stage lurk
+    [enc] night_ambush: started night_ambush #2 at 278,1041 (player 280,1019)
+    [enc]   ambusher Brisa              at 22 m unseen  y 40.0 stand 40.0
+    [enc]   ambusher Ulric              at 23 m unseen  y 40.0 stand 40.0
+    [enc]   ambusher Holt               at 23 m unseen  y 40.0 stand 40.0
+    [enc]   ambusher Jory               at 23 m unseen  y 40.0 stand 40.0
+    [enc]   ambusher Brisa              moved 0.0 m, now 22 m off, ENCOUNTER / hide loaded true  STILL
+    [enc]   ambusher Ulric              moved 0.0 m, now 23 m off, ENCOUNTER / hide loaded true  STILL
+    [enc]   ambusher Holt               moved 0.0 m, now 23 m off, ENCOUNTER / hide loaded true  STILL
+    [enc]   ambusher Jory               moved 0.0 m, now 23 m off, ENCOUNTER / hide loaded true  STILL
+    [enc]   stage wait
+    [enc] false_guide: started false_guide #3 at 318,984 (player 280,1019)
+    [enc]   guide    Tove               at 52 m unseen  y 40.0 stand 40.0
+    [enc]   waiting  Mattias            at 84 m unseen  y 40.0 stand 40.0
+    [enc]   waiting  Rook               at 89 m unseen  y 40.0 stand 40.0
+    [enc]   guide    Tove               moved 0.0 m, now 52 m off, ENCOUNTER / approach loaded true  STILL
+    [enc]   waiting  Mattias            moved 0.0 m, now 84 m off, ENCOUNTER / hide loaded true  STILL
+    [enc]   waiting  Rook               moved 0.0 m, now 89 m off, ENCOUNTER / hide loaded true  STILL
+    [enc]   stage meet
+    [enc] traveller_news: started traveller_news #4 at 320,979 (player 280,1019)
+    [enc]   traveller Merrit             at 57 m unseen  y 40.0 stand 40.0
+    [enc]   traveller Cade               at 56 m unseen  y 40.0 stand 40.0
+    [enc]   traveller Merrit             moved 37.5 m, now 27 m off, ENCOUNTER / approach loaded true
+    [enc]   traveller Cade               moved 33.6 m, now 28 m off, ENCOUNTER / approach loaded true
+    [enc]   stage walk
+    [enc] pedlar: started pedlar #5 at 318,984 (player 280,1019)
+    [enc]   pedlar   Kestrel            at 52 m unseen  y 40.0 stand 40.0
+    [enc]   mule     Horse              at 52 m unseen  y 40.0 stand 40.0
+    [enc]   pedlar   Kestrel            moved 37.5 m, now 25 m off, ENCOUNTER / approach loaded true
+    [enc]   mule     Horse              moved 25.6 m, now 70 m off, Animal
+    [enc]   stage walk
+    [enc] courier: started courier #6 at 246,1062 (player 280,1019)
+    [enc]   courier  Torvald            at 54 m unseen  y 39.0 stand 39.0
+    [enc]   courier  #2014 gone
+    [enc]   stage done (ended)
+    [enc] pilgrims: started pilgrims #7 at 319,982 (player 280,1019)
+    [enc]   pilgrim  Cade               at 53 m unseen  y 40.0 stand 40.0
+    [enc]   pilgrim  Ulric              at 51 m unseen  y 40.0 stand 40.0
+    [enc]   pilgrim  Ilsa               at 57 m unseen  y 40.0 stand 40.0
+    [enc]   pilgrim  Cade               moved 35.1 m, now 26 m off, ENCOUNTER / approach loaded true
+    [enc]   pilgrim  Ulric              moved 34.7 m, now 26 m off, ENCOUNTER / approach loaded true
+    [enc]   pilgrim  Ilsa               moved 35.3 m, now 27 m off, ENCOUNTER / approach loaded true
+    [enc]   stage walk
+    [enc] injured_traveller: started injured_traveller #8 at 318,984 (player 280,1019)
+    [enc]   hurt     Mattias            at 52 m unseen  y 40.0 stand 40.0
+    [enc]   hurt     Mattias            moved 0.0 m, now 52 m off, ENCOUNTER / plead loaded true  STILL
+    [enc]   stage down
+    [enc] roadside_dispute: started roadside_dispute #9 at 320,979 (player 280,1019)
+    [enc]   debtor   Varn               at 57 m unseen  y 40.0 stand 40.0
+    [enc]   creditor Cade               at 57 m unseen  y 40.0 stand 40.0
+    [enc]   debtor   Varn               moved 0.3 m, now 57 m off, ENCOUNTER / hold loaded true  STILL
+    [enc]   creditor Cade               moved 0.3 m, now 57 m off, ENCOUNTER / hold loaded true  STILL
+    [enc]   stage argue
+    [enc] realm_patrol: started realm_patrol #10 at 299,988 (player 280,1019)
+    [enc]   patrol   Yorick             at 37 m unseen  y 39.0 stand 39.0
+    [enc]   patrol   Nell               at 36 m unseen  y 39.0 stand 39.0
+    [enc]   patrol   Brisa              at 39 m unseen  y 39.0 stand 39.0
+    [enc]   patrol   Yorick             moved 30.4 m, now 7 m off, ENCOUNTER / hold loaded true
+    [enc]   patrol   Nell               moved 30.9 m, now 6 m off, ENCOUNTER / hold loaded true
+    [enc]   patrol   Brisa              moved 30.5 m, now 9 m off, ENCOUNTER / hold loaded true
+    [enc]   stage greet
+    [enc] prisoner_transport: started prisoner_transport #11 at 309,986 (player 280,1019)
+    [enc]   escort   Rook               at 46 m unseen  y 39.0 stand 39.0
+    [enc]   escort   Brisa              at 45 m unseen  y 39.0 stand 39.0
+    [enc]   prisoner Torvald            at 44 m unseen  y 39.0 stand 39.0
+    [enc]   escort   Rook               moved 36.8 m, now 11 m off, ENCOUNTER / approach loaded true
+    [enc]   escort   Brisa              moved 36.0 m, now 10 m off, ENCOUNTER / approach loaded true
+    [enc]   prisoner Torvald            moved 32.9 m, now 15 m off, ENCOUNTER / follow loaded true
+    [enc]   stage march
+    [enc] fugitive: started fugitive #12 at 315,1040 (player 280,1019)
+    [enc]   runner   Merrit             at 40 m unseen  y 39.0 stand 39.0
+    [enc]   hunters  Sunniva            at 58 m unseen  y 40.0 stand 40.0
+    [enc]   hunters  Ulric              at 57 m unseen  y 39.0 stand 39.0
+    [enc]   hunters  Wenna              at 53 m unseen  y 39.0 stand 39.0
+    [enc]   runner   Merrit             moved 44.5 m, now 33 m off, ENCOUNTER / approach loaded true
+    [enc]   hunters  Sunniva            moved 0.0 m, now 58 m off, ENCOUNTER / hold loaded true  STILL
+    [enc]   hunters  Ulric              moved 0.0 m, now 57 m off, ENCOUNTER / hold loaded true  STILL
+    [enc]   hunters  Wenna              moved 0.0 m, now 53 m off, ENCOUNTER / hold loaded true  STILL
+    [enc]   stage run
+    [enc] bounty_hunter: started bounty_hunter #13 at 256,1049 (player 280,1019)
+    [enc]   hunter   Hesta              at 39 m unseen  y 40.0 stand 40.0
+    [enc]   hunter   Mattias            at 40 m unseen  y 40.0 stand 40.0
+    [enc]   hunter   Hesta              moved 47.6 m, now 28 m off, ENCOUNTER / approach loaded true
+    [enc]   hunter   Mattias            moved 46.2 m, now 28 m off, ENCOUNTER / approach loaded true
+    [enc]   stage track
+    [enc] assassin: started assassin #14 at 319,982 (player 280,1019)
+    [enc]   killer   Torvald            at 54 m unseen  y 40.0 stand 40.0
+    [enc]   killer   Torvald            moved 36.9 m, now 26 m off, ENCOUNTER / approach loaded true
+    [enc]   stage approach
+    [enc] kidnapping: started kidnapping #15 at 309,986 (player 280,1019)
+    [enc]   taken    Brisa              at 44 m unseen  y 39.0 stand 39.0
+    [enc]   takers   Hesta              at 48 m unseen  y 39.0 stand 39.0
+    [enc]   takers   Holt               at 43 m unseen  y 39.0 stand 39.0
+    [enc]   takers   Jory               at 45 m unseen  y 39.0 stand 39.0
+    [enc]   taken    Brisa              moved 44.2 m, now 88 m off, ENCOUNTER / follow loaded true
+    [enc]   takers   Hesta              moved 43.1 m, now 90 m off, RETURN / drift loaded true
+    [enc]   takers   Holt               moved 42.9 m, now 86 m off, RETURN / drift loaded true
+    [enc]   takers   Jory               moved 42.3 m, now 87 m off, RETURN / drift loaded true
+    [enc]   stage drag
+    [enc] skirmish: started skirmish #16 at 276,981 (player 280,1019)
+    [enc]   watch    Kestrel            at 40 m unseen  y 39.0 stand 39.0
+    [enc]   watch    Tove               at 42 m unseen  y 39.0 stand 39.0
+    [enc]   outlaws  Mattias            at 36 m unseen  y 39.0 stand 39.0
+    [enc]   outlaws  Rook               at 37 m unseen  y 39.0 stand 39.0
+    [enc]   watch    Kestrel            moved 2.2 m, now 39 m off, IDLE / attack loaded true
+    [enc]   watch    Tove               moved 5.5 m, now 37 m off, IDLE / attack loaded true
+    [enc]   outlaws  Mattias            moved 0.5 m, now 37 m off, IDLE / attack loaded true
+    [enc]   outlaws  Rook               moved 27.2 m, now 46 m off, IDLE / attack loaded true
+    [enc]   stage brawl
+    [enc] migrating_herd: started migrating_herd #17 at 243,957 (player 280,1019)
+    [enc]   herd     Deer               at 74 m unseen  y 39.0 stand 39.0
+    [enc]   herd     Deer               at 72 m unseen  y 39.0 stand 39.0
+    [enc]   herd     Deer               at 70 m unseen  y 39.0 stand 39.0
+    [enc]   herd     Deer               at 76 m unseen  y 39.0 stand 39.0
+    [enc]   herd     Deer               at 70 m unseen  y 39.0 stand 39.0
+    [enc]   herd     Deer               at 73 m unseen  y 39.0 stand 39.0
+    [enc]   herd     Deer               moved 0.0 m, now 74 m off, Animal  STILL
+    [enc]   herd     Deer               moved 0.0 m, now 72 m off, Animal  STILL
+    [enc]   herd     Deer               moved 0.4 m, now 70 m off, Animal  STILL
+    [enc]   herd     Deer               moved 2.0 m, now 75 m off, Animal
+    [enc]   herd     Deer               moved 0.4 m, now 71 m off, Animal  STILL
+    [enc]   herd     Deer               moved 0.0 m, now 73 m off, Animal  STILL
+    [enc]   stage cross
+    [enc] wolves_on_the_hunt: started wolves_on_the_hunt #18 at 219,952 (player 280,1019)
+    [enc]   prey     Deer               at 88 m unseen  y 40.0 stand 40.0
+    [enc]   prey     Deer               at 90 m unseen  y 40.0 stand 40.0
+    [enc]   pack     Wolf               at 107 m unseen  y 40.0 stand 40.0
+    [enc]   pack     Wolf               at 102 m unseen  y 40.0 stand 40.0
+    [enc]   pack     Wolf               at 105 m unseen  y 40.0 stand 40.0
+    [enc]   pack     Wolf               at 102 m unseen  y 40.0 stand 40.0
+    [enc]   prey     #2083 gone
+    [enc]   prey     #2084 gone
+    [enc]   pack     Wolf               moved 8.6 m, now 115 m off, Animal
+    [enc]   pack     Wolf               moved 8.6 m, now 110 m off, Animal
+    [enc]   pack     Wolf               moved 8.6 m, now 114 m off, Animal
+    [enc]   pack     Wolf               moved 9.2 m, now 111 m off, Animal
+    [enc]   stage feast
+    [enc] carrion_feast: started carrion_feast #19 at 287,930 (player 280,1019)
+    [enc]   carcass  Deer               at 90 m unseen  y 39.0 stand 39.0
+    [enc]   crows    Crow               at 93 m unseen  y 39.0 stand 39.0
+    [enc]   crows    Crow               at 92 m unseen  y 39.0 stand 39.0
+    [enc]   crows    Crow               at 90 m unseen  y 39.0 stand 39.0
+    [enc]   crows    Crow               at 89 m unseen  y 39.0 stand 39.0
+    [enc]   carcass  Deer               moved 1.5 m, now 90 m off, Animal
+    [enc]   crows    Crow               moved 57.7 m, now 151 m off, Animal
+    [enc]   crows    Crow               moved 41.7 m, now 130 m off, Animal
+    [enc]   crows    Crow               moved 20.6 m, now 111 m off, Animal
+    [enc]   crows    Crow               moved 16.7 m, now 79 m off, Animal
+    [enc]   stage feed
+    [enc] bear_at_berries: started bear_at_berries #20 at 336,994 (player 280,1019)
+    [enc]   bear     Brown bear         at 61 m unseen  y 40.0 stand 40.0
+    [enc]   bear     Brown bear         moved 1.6 m, now 60 m off, Animal
+    [enc]   stage forage
+    [enc] goblin_raiders: started goblin_raiders #21 at 248,1005 (player 280,1019)
+    [enc]   raiders  Goblin             at 37 m unseen  y 40.0 stand 40.0
+    [enc]   raiders  Goblin             at 37 m unseen  y 39.0 stand 39.0
+    [enc]   raiders  Goblin             at 39 m unseen  y 39.0 stand 39.0
+    [enc]   raiders  Goblin             at 37 m unseen  y 39.0 stand 39.0
+    [enc]   raiders  Goblin             at 37 m unseen  y 39.0 stand 39.0
+    [enc]   raiders  Goblin             moved 2.2 m, now 38 m off, IDLE / hide loaded true
+    [enc]   raiders  Goblin             moved 6.6 m, now 44 m off, IDLE / hide loaded true
+    [enc]   raiders  Goblin             moved 10.0 m, now 49 m off, IDLE / hide loaded true
+    [enc]   raiders  Goblin             moved 0.4 m, now 38 m off, IDLE / hide loaded true
+    [enc]   raiders  Goblin             moved 10.2 m, now 41 m off, IDLE / hide loaded true
+    [enc]   stage creep
+    [enc] monster_hunters: started monster_hunters #22 at 253,974 (player 280,1019)
+    [enc]   hunters  Ulric              at 52 m unseen  y 39.0 stand 39.0
+    [enc]   hunters  Holt               at 56 m unseen  y 39.0 stand 39.0
+    [enc]   beast    Orc                at 47 m unseen  y 39.0 stand 39.0
+    [enc]   hunters  Ulric              moved 25.1 m, now 28 m off, ENCOUNTER / travel loaded true
+    [enc]   hunters  Holt               moved 28.1 m, now 29 m off, ENCOUNTER / travel loaded true
+    [enc]   beast    Orc                moved 7.1 m, now 50 m off, IDLE / - loaded true
+    [enc]   stage over (ended)
+    [enc] SUMMARY: in sight within 70 m 0, within 30 m 4, standing still 22

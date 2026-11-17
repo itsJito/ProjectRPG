@@ -33,12 +33,16 @@ public class Npc extends Actor implements Interactable {
      * bought, until when they stay, when they next talk with the table; when the last market errand was done (game minutes).
      */
     public boolean seated;
+    /** (0.4.8) Down on their knees (an injured traveller pleading at the roadside): drawn kneeling. */
+    public boolean kneeling;
     public float seat, seatYaw;
     /**
      * (0.3.9) The seat they are in (its middle, and the floor under it; NaN x when none), where they stood to sit down
      * (and step back out to), when they sat and when their behaviour last asked for the seat (see Seating).
      */
     public float seatX = Float.NaN, seatY, seatZ, standX, standZ;
+    /** (0.4.7) The piece of furniture they sit on (0: a seat that is not one, or none). */
+    public long seatFurniture;
     /**
      * (0.3.9, gamefixes: recruitable allies) whose companion they are (0: their own), since when; the order they are under,
      * its place and its foe; what their abilities wait on (game time each is ready again), and the abilities' effects
@@ -57,7 +61,8 @@ public class Npc extends Actor implements Interactable {
     public rpg.item.ItemDef holdingFare;
     public enum Role { MERCHANT, LAWMAN, GUARD, WORKER, VILLAGER, THIEF, CARTER, QUEST_GIVER, CONTACT, BANDIT, BRUTE, FARMER, UNDERTAKER, FENCE, BEGGAR, HEALER, PRIEST, HUNTER, SCHOLAR, FISHERMAN, MINER, CRAFTSMAN, KNIGHT, CIVIC, MONSTER }
 
-    public final Role role;
+    /** (0.4.7) Not final: ShadowVeil's census sets the calling of a devmap person it takes over (a carpenter there, a king here). */
+    public Role role;
     /** Not before then does the bank see them again (an errand done, or the bank found shut). */
     public double bankAgain;
     /** (0.2.2) Its pack is full: off to sell what it carries, or to bank it, before the work can go on. */
@@ -72,6 +77,8 @@ public class Npc extends Actor implements Interactable {
     public rpg.combat.Spells.Book spellBook = rpg.combat.Spells.Book.SUN;
     public String title;
     public Profession profession;
+    /** (0.4.7) Their part in an encounter (rpg.encounter.Encounters), or null: someone of the world's own. */
+    public rpg.encounter.Encounters.Part encounter;
     astratto.ai.TaskNetwork<Npc> job;
     public long dutyTarget;
     /** (0.2.9) the node this worker is headed for or working, the cell it stands in to do it, and when it said so. */
@@ -167,8 +174,14 @@ public class Npc extends Actor implements Interactable {
     public double offerAgain = -99;
     public boolean asleep() {
         return alive && !reacting && goal == Brain.Goal.SLEEP && !cs.busy()
-                && Math.hypot(x - homeX, z - homeZ) <= 1.2 && Math.hypot(vx, vz) < 0.12;
+                && Math.hypot(x - homeX, z - homeZ) <= BED_REACH && Math.hypot(vx, vz) < 0.12;
     }
+    /**
+     * (0.4.8, gamefixes: NPCs could not complete their daily tasks - a woman whose bed stands long side to the wall got
+     * as close as its open side lets anyone, two metres from its middle, and stood there all night) how near a bed's
+     * middle counts as in it (m).
+     */
+    static final float BED_REACH = rpg.Tuning.f("ai.bedReach", 2.4f);
     /** A confirmed identification, carried only by its eyewitness and people they actually tell. */
     public record Sighting(long witness, float x, float z, float vx, float vz, double at) {}
     public long navRevision=-1;
@@ -269,6 +282,8 @@ public class Npc extends Actor implements Interactable {
     public float stallX = -1e6f, stallZ = -1e6f, stallBest;
     /** (0.3.3) Where the body stood when the present stall window opened: real movement along a winding route is progress too. */
     public float stallPX = -1e6f, stallPZ = -1e6f;
+    /** (0.4.7) The height the body had when its progress was last seen (a climb up a ladder is headway too). */
+    public float stallPY = -1e6f;
     /** Routes given up for want of headway, and found missing altogether (counts, for the probes and the inspector). */
     public int stalls, noRoutes;
     /** (0.3.3) Since when an archer has been stepping aside for a clear shot without one (-1: not). */
@@ -384,6 +399,7 @@ public class Npc extends Actor implements Interactable {
 
     // ------------------------------------------------------------------ Interactable
     @Override public String label() { return name + (alive ? "" : " (dead)"); }
+    @Override public int levelTag() { return alive ? skills.combatLevel() : -1; }
     @Override public float ax() { return x; }
     @Override public float ay() { return y + 1.1f; }
     @Override public float az() { return z; }

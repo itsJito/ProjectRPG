@@ -15,8 +15,10 @@ public final class DecalAtlas {
 
     public static final int N = 64;
     public static final int DIRT_STREAK = 0, MOSS = 1, CRACK = 2, PATCH = 3, RUST = 4, LEAVES = 5, OIL = 6, SCORCH = 7, BLOOD = 8, BULLET = 9,
-            WATER_STAIN = 10, GRIME = 11, MUD = 12, PAPER = 13, WALL_CRACK = 14, KINDS = 15;
-    public static final int[] VARIANTS = {4, 4, 4, 3, 3, 3, 2, 2, 4, 2, 3, 3, 2, 3, 3};
+            WATER_STAIN = 10, GRIME = 11, MUD = 12, PAPER = 13, WALL_CRACK = 14,
+            // 2.16: prints left where a foot or a hoof came down (pressed into snow, wet on soaked ground)
+            FOOTPRINT = 15, HOOFPRINT = 16, KINDS = 17;
+    public static final int[] VARIANTS = {4, 4, 4, 3, 3, 3, 2, 2, 4, 2, 3, 3, 2, 3, 3, 2, 2};
     public static final int[] FIRST = new int[KINDS];
     public static final int LAYERS;
 
@@ -164,6 +166,39 @@ public final class DecalAtlas {
                     if (a > 0.02f) px[x + y * N] = argb(Math.min(0.7f, a), tone(0x24201C, 0.8f + 0.4f * n));
                 }
                 for (int k = 0; k < 4; k++) { int sx = 4 + r.nextInt(N - 8), sy = N - 10 - r.nextInt(20), len = 4 + r.nextInt(9); for (int i = 0; i < len; i++) if (sx + i < N) px[sx + i + sy * N] = argb(0.4f, 0x1A1816); }
+            }
+            case FOOTPRINT -> {
+                // a shod sole along the picture's height, toe up: a broad forefoot and a narrower heel, the waist between them
+                // shallow, its edge soft, a few cross lines of tread; the second variant a little longer and narrower
+                float len = variant == 0 ? 0.80f : 0.86f, wide = variant == 0 ? 0.30f : 0.27f;
+                for (int y = 0; y < N; y++) for (int x = 0; x < N; x++) {
+                    float u = (x + 0.5f) / N - 0.5f, v = 0.5f - (y + 0.5f) / N;            // v: + toward the toe
+                    float along = v / (len * 0.5f);
+                    if (Math.abs(along) > 1) continue;
+                    // the sole's half-width along its length: forefoot, waist, heel
+                    float half = wide * 0.5f * (along > 0.15f ? 1.0f - 0.35f * (float) Math.pow((along - 0.15f) / 0.85f, 2.2) : along > -0.35f ? 0.78f + 0.22f * (along + 0.35f) / 0.5f : 0.86f - 0.3f * (float) Math.pow((-0.35f - along) / 0.65f, 2));
+                    float d = Math.abs(u) / Math.max(1e-3f, half);
+                    if (d > 1.15f) continue;
+                    float n = vnoise(r, grid, gs, x * 0.35f, y * 0.35f);
+                    float a = Math.min(1, (1.15f - d) / 0.35f) * (0.78f + 0.22f * n);
+                    boolean waist = along > -0.35f && along < 0.15f;
+                    if (waist) a *= 0.55f;                                                   // the arch presses less
+                    boolean tread = !waist && Math.floorMod((int) (v * N), 4) == 0;
+                    px[x + y * N] = argb(Math.min(1, a), tread ? 0xC8C8C8 : 0xFFFFFF);
+                }
+            }
+            case HOOFPRINT -> {
+                // a horse's shoe: a round print, open at the heel, the frog a shallow wedge in the middle
+                for (int y = 0; y < N; y++) for (int x = 0; x < N; x++) {
+                    float u = (x + 0.5f) / N - 0.5f, v = 0.5f - (y + 0.5f) / N;
+                    float d = (float) Math.hypot(u / 0.30f, (v - 0.03f) / 0.34f);
+                    if (d > 1.1f) continue;
+                    if (v < -0.18f && Math.abs(u) < 0.12f) continue;                         // the open heel
+                    float n = vnoise(r, grid, gs, x * 0.4f, y * 0.4f);
+                    float rim = d > 0.68f ? 1 : 0.45f;
+                    if (Math.abs(u) < 0.06f && v < 0.1f && v > -0.2f) rim = 0.75f;          // the frog
+                    px[x + y * N] = argb(Math.min(1, (1.1f - d) / 0.25f) * rim * (0.8f + 0.2f * n), 0xFFFFFF);
+                }
             }
             default -> { }
         }

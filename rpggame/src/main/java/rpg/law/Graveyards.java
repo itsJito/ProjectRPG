@@ -22,9 +22,27 @@ public final class Graveyards {
             stone.burialPlot = plot.id; g.objects.add(stone);
         }
     }
+    /**
+     * (0.4.7, gamefixes: aggressive optimization) each plot's stones, gathered once while the world's objects stand as
+     * they are: every undertaker's every decision scanned all the world's objects once a plot, twice over.
+     */
+    private final java.util.Map<String, List<Container>> stones = new java.util.HashMap<>();
+    private int stonesOf = -1;
+    private List<Container> stonesOf(Plot plot) {
+        int count = g.objects.everything().size();
+        if (count != stonesOf) { stones.clear(); stonesOf = count; }
+        List<Container> got = stones.get(plot.id);
+        if (got == null) {
+            ensureSlots(plot);
+            got = new ArrayList<>();
+            for (var object : g.objects.all()) if (object instanceof Container stone && stone.kind.equals("memorial") && plot.id.equals(stone.burialPlot)) got.add(stone);
+            stonesOf = g.objects.everything().size();
+            stones.put(plot.id, got);
+        }
+        return got;
+    }
     private Container vacant(Plot plot) {
-        ensureSlots(plot);
-        for (var object : g.objects.all()) if (object instanceof Container stone && stone.kind.equals("memorial") && !stone.buried && stone.burialPlot.equals(plot.id)) return stone;
+        for (Container stone : stonesOf(plot)) if (!stone.buried && !stone.removed) return stone;
         return null;
     }
     public float[] destination(Plot plot) {

@@ -78,6 +78,32 @@ final class Fitout {
         }
     }
 
+    /** (0.4.7) The movable pieces a station may push out of its way. */
+    private static final java.util.Set<String> MOVABLE = java.util.Set.of("CRATE", "SHELVES", "CUPBOARD", "SIDEBOARD", "DRESSER", "PLANTER", "WINE_RACK", "ARMOR_STAND");
+
+    /** (0.4.7) Takes one movable piece out of a room (its cells open again); false if there is none left. */
+    private boolean clearOne(Architecture.Structure s, Storey st, Room r, Architecture.Fitted fitted) {
+        Plan p = st.plan;
+        for (int k = ar.pieces.size() - 1; k >= 0; k--) {
+            Architecture.Piece pc = ar.pieces.get(k);
+            if (!pc.owner().equals(s.id) || pc.y() != st.walk() || !MOVABLE.contains(pc.kind())) continue;
+            List<int[]> cells = new ArrayList<>();
+            for (int u = r.u0; u <= r.u1; u++) for (int v = r.v0; v <= r.v1; v++) {
+                int x = p.f.wx(u, v), z = p.f.wz(u, v);
+                if (x >= pc.x0() && x <= pc.x1() && z >= pc.z0() && z <= pc.z1()) cells.add(new int[]{u, v});
+            }
+            if (cells.isEmpty()) continue;
+            for (int x = pc.x0(); x <= pc.x1(); x++) for (int z = pc.z0(); z <= pc.z1(); z++)
+                for (int y = 0; y < Math.max(1, Math.min(pc.h(), 2)); y++) if (c.get(x, st.walk() + y, z) == furnitureBlock(pc.kind())) c.set(x, st.walk() + y, z, Blocks.AIR);
+            for (int[] q : cells) if (st.g[q[0]][q[1]] == FURN) st.g[q[0]][q[1]] = OPEN;
+            ar.pieces.remove(k);
+            fitted.pieces.remove(pc.kind().toLowerCase(java.util.Locale.ROOT));
+            pieces--;
+            return true;
+        }
+        return false;
+    }
+
     /** Whether a building is fitted out (enterable, above ground, with rooms). */
     private boolean indoors(String id) {
         Registry.Entry e = reg == null ? null : reg.byId(id);
@@ -109,6 +135,15 @@ final class Fitout {
                 if (st.ladder) continue;
                 if (placeWall(st, (Room) o[2], fitted, Map.of("station", k, "post", "station:" + k), false)) { done = true; break; }
             }
+            // (0.4.7) a calling's station before the room's odds and ends: a crate, a set of shelves or a dresser against a
+            // wall of the ground storey gives way to the anvil or the furnace, one at a time until it stands
+            for (Object[] o : order) {
+                if (done) break;
+                Storey st = (Storey) o[1];
+                if (st.ladder || all.indexOf(st) != 0) continue;
+                while (!done && clearOne(s, st, (Room) o[2], fitted))
+                    done = placeWall(st, (Room) o[2], fitted, Map.of("station", k, "post", "station:" + k), false);
+            }
             if (!done) {
                 boolean fromHome = false;
                 for (String prof : trades.getOrDefault(s.id, List.of())) if (homeTrades.contains(s.id + "|" + prof) && Atlas.arr(table, prof).contains(k)) fromHome = true;
@@ -127,7 +162,7 @@ final class Fitout {
      * painting is a sideboard under a painting, a tall one hides it.
      */
     private void unhangBehind(Architecture.Structure s, int from, Architecture.Fitted fitted) {
-        java.util.Set<String> hung = java.util.Set.of("PAINTING", "TAPESTRY", "MIRROR", "WEAPON_RACK", "POT_RACK");
+        java.util.Set<String> hung = java.util.Set.of("PAINTING", "TAPESTRY", "MIRROR", "WEAPON_RACK", "POT_RACK", "SCONCE");
         for (int k = ar.pieces.size() - 1; k >= from; k--) {
             Architecture.Piece pc = ar.pieces.get(k);
             if (!pc.owner().equals(s.id) || !hung.contains(pc.kind())) continue;
@@ -178,7 +213,17 @@ final class Fitout {
             for (int i = 0; i + 1 < p.levels.size(); i++) stair(p, i, fitted);
             for (int i = 0; i < p.levels.size(); i++) {
                 Storey st = p.levels.get(i);
-                List<Map<String, Object>> specs = Atlas.list(Atlas.map(vp, "levels"), levelRole(i, p.levels.size()));
+                String role = levelRole(i, p.levels.size());
+                List<Map<String, Object>> specs = Atlas.list(Atlas.map(vp, "levels"), role);
+                // (0.4.8, gamefixes: every floor of the tower at 630, 70, 552 a repeat of the last) the upper storeys may
+                // take their turn through a cycle of programmes ("upperCycle"), started where the building's hash says,
+                // so no two storeys running up a tower (and no two towers) are fitted alike
+                List<?> cycle = Atlas.arr(Atlas.map(vp, "levels"), "upperCycle");
+                if (role.equals("upper") && !cycle.isEmpty()) {
+                    int start = (int) (Noise.hash(ar.a.seed, s.id.hashCode(), k, 811) * cycle.size());
+                    @SuppressWarnings("unchecked") List<Map<String, Object>> turn = (List<Map<String, Object>>) cycle.get((start + i - 1) % cycle.size());
+                    specs = turn;
+                }
                 if (specs.isEmpty()) specs = Atlas.list(Atlas.map(vp, "levels"), i == 0 ? "ground" : "upper");
                 if (specs.isEmpty()) specs = List.of(Map.of("use", "hall"));
                 layout(p, st, specs, fitted);
@@ -642,6 +687,7 @@ final class Fitout {
         up.entries.add(new int[]{last[0], last[1]});
         for (int[] d : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) keep(up, last[0] + d[0], last[1] + d[1]);
         // the rail round the opening, on the upper floor's own cells beside it (never across the head)
+        List<int[]> rails = new ArrayList<>();
         for (int k = 0; k < rise - 1; k++) {
             if (up.g[path[k][0]][path[k][1]] != VOID) continue;
             for (int[] d : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
@@ -653,6 +699,23 @@ final class Fitout {
                 up.g[a][b] = WALL;
                 if (reach(up, null).size() < before - 1) { up.g[a][b] = OPEN; continue; }
                 c.set(p.f.wx(a, b), up.floorY + 1, p.f.wz(a, b), Blocks.FENCE);
+                rails.add(new int[]{a, b});
+            }
+        }
+        // (0.4.7, gamefixes: railings round stairwells did not join) where two rails meet at the opening's corner - one
+        // beside it across, one along - the corner cell between them takes a rail too, so the railing turns unbroken
+        for (int pass = 0; pass < 2; pass++) for (int i = 0, n = rails.size(); i < n; i++) for (int j = 0; j < n; j++) {
+            int[] r1 = rails.get(i), r2 = rails.get(j);
+            if (Math.abs(r1[0] - r2[0]) != 1 || Math.abs(r1[1] - r2[1]) != 1) continue;
+            for (int[] cnr : new int[][]{{r1[0], r2[1]}, {r2[0], r1[1]}}) {
+                int[] other = cnr[0] == r1[0] ? new int[]{r2[0], r1[1]} : new int[]{r1[0], r2[1]};
+                if (!p.in(cnr[0], cnr[1]) || !p.in(other[0], other[1]) || up.g[cnr[0]][cnr[1]] != OPEN || up.g[other[0]][other[1]] != VOID) continue;
+                if (Math.abs(cnr[0] - last[0]) + Math.abs(cnr[1] - last[1]) <= 1) continue;
+                int before = reach(up, null).size();
+                up.g[cnr[0]][cnr[1]] = WALL;
+                if (reach(up, null).size() < before - 1) { up.g[cnr[0]][cnr[1]] = OPEN; continue; }
+                c.set(p.f.wx(cnr[0], cnr[1]), up.floorY + 1, p.f.wz(cnr[0], cnr[1]), Blocks.FENCE);
+                rails.add(cnr);
             }
         }
     }
@@ -773,8 +836,7 @@ final class Fitout {
         boolean whole = reach(st, null).size() >= before - walkLine && !st.entries.isEmpty() && groups(st) <= groupsBefore;
         for (int a = a0; a <= a1; a++) { int u = alongV ? a : at, v = alongV ? at : a; st.g[u][v] = saved[a - a0]; }
         if (!whole) return null;
-        int wallMat = BuildingKit.innerFinish(p.s.style.b("wall"));
-        if (wallMat == p.s.style.b("wall") && p.s.style.b("wall") == Blocks.TIMBER_FRAME) wallMat = Blocks.PLASTER;
+        int wallMat = partitionMat(p);
         int top = st.floorY + Math.min(st.clear, 6);
         String doorKind = Atlas.s(back, "door", "none");
         for (int a = a0; a <= a1; a++) {
@@ -885,20 +947,62 @@ final class Fitout {
             }
             if (made == 0 && Boolean.TRUE.equals(pc0.get("need"))) fitted.defects.add("the " + r.use + " (storey " + p.levels.indexOf(st) + ") has no room for its " + label(pc));
         }
-        // every room lit: if its pieces gave it no light, candles in a corner, else a lamp hung from the ceiling
+        // every room lit: if its pieces gave it no light, candles in a corner, a chandelier, sconces on its walls, a lamp
+        // (0.4.7, gamefixes: chandeliers in every house, some low enough to strike a head) a plain house's room is lit by
+        // candles and sconces; a chandelier is a fine house's, a hall's or a great building's, and hangs only
+        // where its candles clear a tall man's head ('chandelierMinClear' cells of headroom)
+        boolean fine = chandelierWealth().contains(fitted.wealth);
         if (!rec.lit) {
+            // a candle stand in a corner or on a wall; a fine house's chandelier; else sconces on the walls (no floor taken
+            // from a workshop's anvil or a shop's counter); a nightstand's lamp or a narrow stand; a lamp by the stairs last
             if (!placeWall(st, r, fitted, Map.of("kind", "CANDELABRA", "place", "corner"), true) && !placeWall(st, r, fitted, Map.of("kind", "CANDELABRA"), false)
-                    && !placeCeiling(st, r, fitted, Map.of("kind", "CHANDELIER", "minClear", 3)) && !placeWall(st, r, fitted, Map.of("kind", "NIGHTSTAND"), false))
-                placeCeiling(st, r, fitted, Map.of("kind", "CHANDELIER", "minClear", 3, "nearStairs", true));
+                    && !(fine && placeCeiling(st, r, fitted, Map.of("kind", "CHANDELIER")))) {
+                for (int sc = 0; sc < Math.max(1, Math.min(3, r.area() / Atlas.i(data, "sconcePer", 16))); sc++)
+                    if (!placeHang(st, r, fitted, Map.of("kind", "SCONCE", "h", 3), 40 + sc)) break;
+                if (!rec.lit && !placeWall(st, r, fitted, Map.of("kind", "NIGHTSTAND"), false) && !placeWall(st, r, fitted, Map.of("kind", "CANDELABRA", "w", 1), false))
+                    placeCeiling(st, r, fitted, Map.of("kind", "CHANDELIER", "nearStairs", true));
+            }
         }
         if (!rec.lit) fitted.defects.add("the " + r.use + " (storey " + p.levels.indexOf(st) + ") has no light");
         // (0.4.4, review: a great hall or a palace kitchen lit by one candle stand was dark past it) a big room is lit
         // through: a chandelier hung over its middle under a tall ceiling, and a candle stand on its walls for each
         // stretch of floor ('lightPer' cells, at most 'lightsMost'), whatever its hearth or forge already gives
         int per = Atlas.i(data, "lightPer", 24), most = Atlas.i(data, "lightsMost", 4);
-        if (r.area() >= per * 2) placeCeiling(st, r, fitted, Map.of("kind", "CHANDELIER", "minClear", 4));
+        if (r.area() >= per * 2 && fine) placeCeiling(st, r, fitted, Map.of("kind", "CHANDELIER"));
         for (int lamp = 0, extra = Math.min(most, r.area() / per); lamp < extra; lamp++)
             if (!placeWall(st, r, fitted, Map.of("kind", "CANDELABRA", "place", "corner"), true)) break;   // corners only: never narrowing a way through
+        coverLight(st, r, fitted);
+    }
+
+    /**
+     * (0.4.8, gamefixes: the Drunken Duck's interior at 324, 40, 994 too dark) a room lit through, not merely lit: no
+     * floor of it further than 'lightReach' cells from a room's light (a candle stand, a chandelier, a sconce; a hearth
+     * counts for less, being lit only while it burns, and a bedside or desk lamp not at all). Where the darkest floor is
+     * still out of reach a sconce goes on the wall nearest it, up to 'lightsAdded' more.
+     */
+    private void coverLight(Storey st, Room r, Architecture.Fitted fitted) {
+        Plan p = st.plan;
+        int reach = Atlas.i(data, "lightReach", 5), most = Atlas.i(data, "lightsAdded", 6);
+        for (int added = 0; added <= most; added++) {
+            List<float[]> lamps = new ArrayList<>();
+            for (Architecture.Piece pc : ar.pieces) {
+                if (!pc.owner().equals(p.s.id) || pc.y() != st.walk()) continue;
+                float r0 = switch (pc.kind()) { case "CHANDELIER" -> reach * 1.6f; case "CANDELABRA", "SCONCE" -> reach; case "FIREPLACE" -> reach * 0.6f; default -> 0; };
+                if (r0 > 0) lamps.add(new float[]{(pc.x0() + pc.x1() + 1) / 2f, (pc.z0() + pc.z1() + 1) / 2f, r0});
+            }
+            float worst = 0; int du = -1, dv = -1;
+            for (int u = r.u0; u <= r.u1; u++) for (int v = r.v0; v <= r.v1; v++) {
+                if (!r.holds(u, v) || !walk(st.g[u][v]) && st.g[u][v] != FURN) continue;
+                float x = p.f.wx(u, v) + 0.5f, z = p.f.wz(u, v) + 0.5f, dark = Float.MAX_VALUE;
+                for (float[] l : lamps) dark = Math.min(dark, (float) Math.hypot(x - l[0], z - l[1]) - l[2]);
+                if (dark > worst) { worst = dark; du = u; dv = v; }
+            }
+            if (du < 0) return;                         // every floor in reach
+            if (added == most || !placeHang(st, r, fitted, Map.of("kind", "SCONCE", "h", 3, "nearU", du, "nearV", dv), 60 + added)) {
+                fitted.defects.add("the " + r.use + " (storey " + p.levels.indexOf(st) + ") is dark " + String.format("%.0f", worst) + " cells past its lights");
+                return;
+            }
+        }
     }
 
     private static String label(Map<String, Object> pc) {
@@ -918,6 +1022,20 @@ final class Fitout {
         return d[1] > 0 ? 0 : d[0] > 0 ? 1 : d[1] < 0 ? 2 : 3;
     }
 
+    /**
+     * (0.4.7) What a building's inner walls are built of: its territory's auto-faced walling where it has one (its interior
+     * finish on both sides), else the inside finish of its walls (plaster for timber framing).
+     */
+    private static int partitionMat(Plan p) {
+        int wall = p.s.style.b("wall"), auto = Blocks.autoOf(wall);
+        if (auto > 0) return auto;
+        int mat = BuildingKit.innerFinish(wall);
+        return mat == Blocks.TIMBER_FRAME ? Blocks.PLASTER : mat;
+    }
+
+    /** (0.4.7, gamefixes: paintings hung on doors) a door's or a gate's cell is never a wall to hang or stand against. */
+    private static boolean doorway(int block) { return block == Blocks.DOOR || block == Blocks.LOCKED_DOOR || block == Blocks.AIR; }
+
     /** The walls a cell of a room stands against (local directions toward solid wall, not glass), in order. */
     private List<int[]> wallsBeside(Storey st, int u, int v, boolean tall) {
         Plan p = st.plan;
@@ -929,12 +1047,12 @@ final class Fitout {
                 int x = p.f.wx(u, v) + p.f.dir(d[0], d[1])[0], z = p.f.wz(u, v) + p.f.dir(d[0], d[1])[1];
                 int at = c.get(x, st.walk(), z), over = c.get(x, st.walk() + 1, z);
                 wall = solid(at) && solid(over) && !Blocks.glass(at) && (!tall || !Blocks.glass(over));
-                if (at == Blocks.FENCE) wall = false;
+                if (at == Blocks.FENCE || doorway(at) || doorway(over)) wall = false;
             } else {
                 if (st.g[a][b] != WALL) continue;
                 int x = p.f.wx(a, b), z = p.f.wz(a, b);
                 int at = c.get(x, st.walk(), z), over = c.get(x, st.walk() + 1, z);
-                wall = solid(at) && solid(over) && !Blocks.glass(at) && at != Blocks.FENCE && (!tall || !Blocks.glass(over));
+                wall = solid(at) && solid(over) && !Blocks.glass(at) && at != Blocks.FENCE && !doorway(at) && !doorway(over) && (!tall || !Blocks.glass(over));
             }
             if (wall) out.add(d);
         }
@@ -1031,7 +1149,7 @@ final class Fitout {
         return any;
     }
 
-    private static boolean light(String kind) { return kind != null && (kind.equals("CANDELABRA") || kind.equals("CHANDELIER") || kind.equals("DESK") || kind.equals("NIGHTSTAND") || kind.equals("FIREPLACE")); }
+    private static boolean light(String kind) { return kind != null && (kind.equals("CANDELABRA") || kind.equals("CHANDELIER") || kind.equals("DESK") || kind.equals("NIGHTSTAND") || kind.equals("FIREPLACE") || kind.equals("SCONCE")); }
 
     private static int stationBlock(String station) {
         return switch (station) { case "FURNACE" -> Blocks.FURNACE; case "ANVIL" -> Blocks.ANVIL; case "RANGE" -> Blocks.RANGE; case "CRAFT_TABLE" -> Blocks.CRAFT_TABLE; case "SAWBENCH" -> Blocks.SAWBENCH; default -> Blocks.TABLE; };
@@ -1212,7 +1330,9 @@ final class Fitout {
                     int u = alongU ? u0 + a : (side < 0 ? u0 - 1 : u0 + lu), v = alongU ? (side < 0 ? v0 - 1 : v0 + lv) : v0 + a;
                     line.add(new int[]{u, v});
                 }
-                int fac = alongU ? facing(p, 0, -side) : facing(p, -side, 0);
+                // (0.4.7, gamefixes: chairs faced away from their tables) a piece's facing is the side its back is on
+                // (Furnishings: front toward -z at facing 0), so a seat's back is away from the table, its front to it
+                int fac = alongU ? facing(p, 0, side) : facing(p, side, 0);
                 if (seat.equals("BENCH")) {
                     // its far side from the table walked past
                     if (commit(st, line, List.of())) { piece(p, st, fitted, "BENCH", rectOf(p, line), 1, fac, ""); seats += line.size(); r.solid++; }
@@ -1221,7 +1341,7 @@ final class Fitout {
             // a chair at each end too, at a dining table
             if (seat.equals("CHAIR")) for (int end : new int[]{-1, 1}) {
                 int u = alongU ? (end < 0 ? u0 - 1 : u0 + lu) : u0 + (lu - 1) / 2, v = alongU ? v0 + (lv - 1) / 2 : (end < 0 ? v0 - 1 : v0 + lv);
-                if (r.holds(u, v) && st.g[u][v] == OPEN && commit(st, List.of(new int[]{u, v}), List.of())) { piece(p, st, fitted, "CHAIR", rectOf(p, List.of(new int[]{u, v})), 1, alongU ? facing(p, -end, 0) : facing(p, 0, -end), ""); r.solid++; }
+                if (r.holds(u, v) && st.g[u][v] == OPEN && commit(st, List.of(new int[]{u, v}), List.of())) { piece(p, st, fitted, "CHAIR", rectOf(p, List.of(new int[]{u, v})), 1, alongU ? facing(p, end, 0) : facing(p, 0, end), ""); r.solid++; }
             }
             if (Atlas.s(pc, "post", null) != null) {
                 int[] q = {u0 - (alongU ? 0 : 1), v0 - (alongU ? 1 : 0)};
@@ -1403,33 +1523,66 @@ final class Fitout {
     private boolean placeHang(Storey st, Room r, Architecture.Fitted fitted, Map<String, Object> pc, int n) {
         Plan p = st.plan;
         int w = Atlas.i(pc, "w", 1);
+        // (0.4.7) a sconce sits high on the wall, over a bed's head or a table as well as open floor
+        boolean high = Atlas.s(pc, "kind", "PAINTING").equals("SCONCE");
         List<int[]> cand = new ArrayList<>();
         for (int u = r.u0; u <= r.u1; u++) for (int v = r.v0; v <= r.v1; v++) {
             byte b = st.g[u][v];
             // (0.4.5, gamefixes: a tapestry hung behind a suit of armour, a trophy behind a wardrobe) only on a wall
             // with open floor before it - never behind something already standing there
-            if (!walk(b)) continue;
+            if (!walk(b) && !(high && b == FURN && lowAt(st, u, v))) continue;
             for (int[] wd : wallsBeside(st, u, v, true)) cand.add(new int[]{u, v, wd[0], wd[1]});
         }
         if (cand.isEmpty()) return false;
         int start = (int) (Noise.hash(ar.a.seed, p.s.id.hashCode() + n * 17, st.floorY + r.u0, 144) * cand.size());
+        // (0.4.8) a light sought for a dark corner: the walls nearest it first
+        boolean near = pc.containsKey("nearU");
+        if (near) { int nu = Atlas.i(pc, "nearU", 0), nv = Atlas.i(pc, "nearV", 0); cand.sort(java.util.Comparator.comparingInt(c -> (c[0] - nu) * (c[0] - nu) + (c[1] - nv) * (c[1] - nv))); }
         for (int t = 0; t < cand.size(); t++) {
-            int[] q = cand.get(pick(start, t, 11, cand.size()));
+            int[] q = cand.get(near ? t : pick(start, t, 11, cand.size()));
             int au = -q[3], av = q[2];
             List<int[]> cells = new ArrayList<>();
             boolean ok = true;
-            for (int i = 0; i < w; i++) { int u = q[0] + au * i, v = q[1] + av * i; if (!r.holds(u, v) || !walk(st.g[u][v]) || st.hung.contains(u + "," + v + "," + q[2] + "," + q[3])) { ok = false; break; } cells.add(new int[]{u, v}); }
+            // (0.4.7, gamefixes: a tapestry hung half over a door) every cell of a wide piece has the same wall behind it
+            for (int i = 0; i < w; i++) { int u = q[0] + au * i, v = q[1] + av * i; if (!r.holds(u, v) || !walk(st.g[u][v]) && !(high && st.g[u][v] == FURN && lowAt(st, u, v)) || st.hung.contains(u + "," + v + "," + q[2] + "," + q[3]) && !(high && takeDown(st, u, v, q[2], q[3], fitted)) || !hasWall(st, u, v, q[2], q[3])) { ok = false; break; } cells.add(new int[]{u, v}); }
             if (!ok) continue;
             for (int[] cc : cells) st.hung.add(cc[0] + "," + cc[1] + "," + q[2] + "," + q[3]);
             int[] rect = rectOf(p, cells);
             String kind = Atlas.s(pc, "kind", "PAINTING");
             ar.pieces.add(new Architecture.Piece(p.s.id, kind, rect[0], rect[1], rect[2], rect[3], st.walk(), Math.min(st.clear, Atlas.i(pc, "h", 3)), facing(p, q[2], q[3]), ""));
             fitted.pieces.add(kind.toLowerCase(java.util.Locale.ROOT));
+            if (light(kind)) fitted.rooms.get(fitted.rooms.size() - 1).lit = true;
             pieces++;
             return true;
         }
         return false;
     }
+
+    /**
+     * (0.4.7) A room's light before its pictures: a painting, a tapestry, a mirror or a trophy hung on this cell's wall
+     * (local direction du, dv) is taken down to give a sconce its place. False if what hangs there is not decoration.
+     */
+    private boolean takeDown(Storey st, int u, int v, int du, int dv, Architecture.Fitted fitted) {
+        Plan p = st.plan;
+        int x = p.f.wx(u, v), z = p.f.wz(u, v), fac = facing(p, du, dv);
+        java.util.Set<String> decor = java.util.Set.of("PAINTING", "TAPESTRY", "MIRROR", "WEAPON_RACK");
+        for (int k = ar.pieces.size() - 1; k >= 0; k--) {
+            Architecture.Piece pc = ar.pieces.get(k);
+            if (!pc.owner().equals(p.s.id) || pc.y() != st.walk() || pc.facing() != fac || !decor.contains(pc.kind())) continue;
+            if (x < pc.x0() || x > pc.x1() || z < pc.z0() || z > pc.z1()) continue;
+            ar.pieces.remove(k);
+            fitted.pieces.remove(pc.kind().toLowerCase(java.util.Locale.ROOT));
+            pieces--;
+            st.hung.remove(u + "," + v + "," + du + "," + dv);
+            return true;
+        }
+        return false;
+    }
+
+    /** (0.4.7) Whether what stands on a cell is low (a bed, a table: nothing a cell up), so a sconce shows over it. */
+    private boolean lowAt(Storey st, int u, int v) { return open(c.get(st.plan.f.wx(u, v), st.walk() + 1, st.plan.f.wz(u, v))); }
+
+    private boolean hasWall(Storey st, int u, int v, int du, int dv) { for (int[] d : wallsBeside(st, u, v, true)) if (d[0] == du && d[1] == dv) return true; return false; }
 
     /** A rug on the floor in the room's open middle (no cells: walked over). */
     private boolean placeRug(Storey st, Room r, Architecture.Fitted fitted, Map<String, Object> pc) {
@@ -1452,7 +1605,7 @@ final class Fitout {
      */
     private boolean placeCeiling(Storey st, Room r, Architecture.Fitted fitted, Map<String, Object> pc) {
         Plan p = st.plan;
-        if (st.clear < Atlas.i(pc, "minClear", 4)) return false;
+        if (st.clear < Math.max(Atlas.i(pc, "minClear", 4), Atlas.i(data, "chandelierMinClear", 4))) return false;
         int apart = Atlas.i(data, "chandelierApart", 4);
         double mu = r.u0 + (r.w() - 1) / 2.0, mv = r.v0 + (r.d() - 1) / 2.0;
         int[] best = null; double bestD = 1e9;
@@ -1460,6 +1613,8 @@ final class Fitout {
             if (!walk(st.g[u][v]) && st.g[u][v] != FURN) continue;
             double d = Math.hypot(u - mu, v - mv);
             if (d >= bestD || !hangable(st, u, v, apart, Boolean.TRUE.equals(pc.get("nearStairs")))) continue;
+            // (0.4.7) the head room under this very cell, not the storey's at its tallest (a beam, a lower ceiling)
+            if (headroom(st, u, v) < Atlas.i(data, "chandelierMinClear", 4)) continue;
             bestD = d; best = new int[]{u, v};
         }
         if (best == null) return false;
@@ -1471,6 +1626,9 @@ final class Fitout {
         pieces++;
         return true;
     }
+
+    /** (0.4.7) The buildings' wealths that hang chandeliers (interiors data 'chandelierWealth'). */
+    private java.util.List<?> chandelierWealth() { List<?> l = Atlas.arr(data, "chandelierWealth"); return l.isEmpty() ? List.of("rich", "noble", "royal") : l; }
 
     /** Whether a chandelier may hang over a cell: its ceiling the storey's own slab, no step beside it, none hung near. */
     private boolean hangable(Storey st, int u, int v, int apart, boolean nearStairs) {
@@ -1510,8 +1668,7 @@ final class Fitout {
         Set<Long> got = reach(st, null);
         Plan p = st.plan;
         Set<Long> seen = new HashSet<>();
-        int wallMat = BuildingKit.innerFinish(p.s.style.b("wall"));
-        if (wallMat == Blocks.TIMBER_FRAME) wallMat = Blocks.PLASTER;
+        int wallMat = partitionMat(p);
         for (int u = 0; u < p.W; u++) for (int v = 0; v < p.D; v++) {
             if (!walk(st.g[u][v]) || got.contains(key(u, v)) || seen.contains(key(u, v))) continue;
             // the pocket: its cells, flooding out from here

@@ -1,0 +1,34 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+StairPointsProbeTest > walk() STANDARD_OUT
+    [Load] ShadowVeil grown in 19.92s ({regions=840, overlays=504, variants=468, scarp=47, coast=440, erosion=453, peaks=75, lakes=58, isles=1, rivers=1147, wadis=12, ground=21, roads=655, causeways=3, architecture=1160, pitsFilled=1396, pits=447, banks=85, clamp=14, cliffs=54, columns=1333, falls=15, raise=10354, trees=259, outcrops=0, ways=511, lava=0, dungeons=94, postsSunk=28, floatingRemoved=59, floating=820}), made and lit in 2.31s
+    [water] flow field grown in 835 ms: 39016 columns moving
+    [gathering] 757 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+    [stairs] 625.5,33,947.5;620.5,33,947.5;618.5,33,945.5;619.5,32,945.5;620.5,31,945.5;621.5,30,945.5;622.5,29,945.5;622.5,28,946.5;622.5,27,947.5;622.5,26,948.5;622.5,25,949.5;621.5,24,949.5;620.5,23,949.5;619.5,22,949.5;618.5,21,949.5;618.5,20,948.5;618.5,19,947.5;618.5,18,946.5;618.5,17,945.5;619.5,16,945.5;620.5,15,945.5;615.5,15,949.5 -> null (at 615.64,15.00,949.38)
+    [stairs] reversed -> stuck before point 15 of 21 (622.5,29.0,945.5) at 622.50,15.00,946.30 (at 622.50,15.00,946.30)
+  slow: rpg.world.StairPointsProbeTest.walk() 37.813 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 42s
+9 actionable tasks: 1 executed, 8 up-to-date

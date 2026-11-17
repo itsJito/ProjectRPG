@@ -78,6 +78,10 @@ final class Kit {
         }
         /** A two-faced wall cell: outside material out, its inside finish toward the room (local inward du, dv). */
         void wall(int u, int y, int v, int outer, int du, int dv) {
+            // (0.4.7, gamefixes: interiors did not use the two-faced blocks fully) a territory's own walling carries its
+            // interior finish (limewash, painted plaster, linenfold, clay render, zellige, fresco) on whichever side is indoors
+            int auto = Blocks.autoOf(outer);
+            if (auto > 0) { put(u, y, v, auto); return; }
             // (0.4.2) on ShadowVeil a timber-framed wall is plastered inside too (the devmap's own walls keep theirs)
             int inner = outer == Blocks.TIMBER_FRAME ? Blocks.PLASTER : BuildingKit.innerFinish(outer);
             if (inner == outer) { put(u, y, v, outer); return; }
@@ -154,6 +158,12 @@ final class Kit {
         /** Boxes {x0, y0, z0, x1, y1, z1} kept empty for what comes later (rooms; dungeons below). */
         final List<int[]> reserved = new ArrayList<>();
         final List<String> reservedKind = new ArrayList<>();
+        /**
+         * (0.4.8) Every stair down that ends at a door (stairDown): {door x, z, second door x, z, foot Y (the cell the feet
+         * stand in at the door), the way on (x, z), the lining block} in world cells, with the volume kind kept beyond it.
+         */
+        final List<int[]> cellars = new ArrayList<>();
+        final List<String> cellarKind = new ArrayList<>();
         /** Trees the structure plants (an orchard, a grove): {x, z} and the species. */
         final List<int[]> trees = new ArrayList<>();
         final List<String> treeSpecies = new ArrayList<>();
@@ -417,6 +427,11 @@ final class Kit {
             for (int k = 0; k < dw; k++) for (int y = P + 1; y <= P + 2; y++) { f.put(du + k, y, dv, Blocks.AIR); f.put(du + k, y, dv + 1, Blocks.AIR); }
             out.door(f, du, dv, dw, P, 0, -1);
             f.put(du, P + 3, dv, trim); if (dw > 1) f.put(du + 1, P + 3, dv, trim);
+            // (0.4.8, gamefixes: wall and door not attached at 627, 52, 552) a round tower's rim curves away from the door:
+            // the jamb either side of it is walled up to the lintel wherever the curve left it open, so the leaves hang in
+            // the wall rather than beside a gap
+            for (int ju : new int[]{du - 1, du + dw}) for (int y = P + 1; y <= P + 3; y++)
+                if (!inside.test(ju, dv) && f.get(ju, y, dv) == Blocks.AIR) f.put(ju, y, dv, y == P + 3 ? trim : y == P + 1 ? base : wall);
         }
         out.reserve(round ? "interior_round" : "interior", f, 1, P + 1, 1, w - 2, P + H - 1, d - 2);
         if (H >= 12) out.reserve("stair", f, su, P + 1, sv, su + 1, P + H - 1, sv + 1);
@@ -783,6 +798,11 @@ final class Kit {
         int footV = v + dv * (len + 1), footY = P - len + 1;
         for (int a = 0; a <= 1; a++) { f.put(u + a, footY - 1, footV, lining); f.put(u + a, footY, footV, Blocks.AIR); f.put(u + a, footY + 1, footV, Blocks.AIR); f.put(u + a, footY + 2, footV, Blocks.AIR); }
         for (int a = 0; a <= 1; a++) for (int y = footY; y <= footY + 1; y++) f.put(u + a, y, footV + dv, Blocks.LOCKED_DOOR);
+        // (0.4.8, gamefixes: the basement at 644, 40, 552 led nowhere) the door at the foot is recorded, so the cellars
+        // beyond it are cut and fitted (rpg.world.shadowveil.Cellars) and the door hung as a door
+        int[] onward = f.dir(0, dv);
+        out.cellars.add(new int[]{f.wx(u, footV + dv), f.wz(u, footV + dv), f.wx(u + 1, footV + dv), f.wz(u + 1, footV + dv), footY, onward[0], onward[1], lining});
+        out.cellarKind.add(kind);
         f.put(u - 1, P + 1, v, s.b("post")); f.put(u + 2, P + 1, v, s.b("post"));
         // (0.4.2) the stair's head is the way in (an opening, no door: the sealed door is at its foot)
         out.gate(f, u, v, 2, P, 0, -dv);

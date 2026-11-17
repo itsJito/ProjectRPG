@@ -1,0 +1,99 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+
+> Task :theastrattoengine:buildNative
+'vswhere.exe' is not recognized as an internal or external command,
+operable program or batch file.
+audio_service.cpp
+audio_device.cpp
+c_api.cpp
+ai_service.cpp
+
+> Task :processResources
+
+> Task :theastrattoengine:buildNative
+chemistry_service.cpp
+engine.cpp
+collide.cpp
+impulsis_service.cpp
+space.cpp
+module_host.cpp
+pathfinder.cpp
+walkability.cpp
+sight.cpp
+bodies.cpp
+physics_service.cpp
+ragdoll.cpp
+sydney.cpp
+chunk_mesher.cpp
+layers.cpp
+renderer.cpp
+voxel_world.cpp
+   Creating library C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\obj\astratto.lib and object C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\obj\astratto.exp
+
+> Task :theastrattoengine:engineResources
+> Task :theastrattoengine:processResources
+> Task :theastrattoengine:classes
+> Task :theastrattoengine:jar
+> Task :compileJava UP-TO-DATE
+> Task :classes
+
+> Task :shadowveil
+ShadowVeil grown and surveyed in 27.5s -> C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\shadowveil
+  highest ground Y97
+  5103 trees, 60 ore rocks, 62 roads
+  loxford median Y39 (target 36-42)
+  harlette median Y40 (target 37-44)
+  harlette_manor median Y47 (target 45-48)
+  valgard median Y53 (target 48-58)
+  gorrick median Y55 (target 54-58)
+  azharad median Y36 (target 34-39)
+  camelot median Y61 (target 58-64)
+  severia median Y36 (target 32-40)
+  severia_east median Y38 (target 34-42)
+  ashmaw top Y97 (design 92)
+  gallows_tor top Y92 (design 89)
+  hollow_crags_north top Y84 (design 84)
+  crag_pass_shoulder top Y81 (design 74)
+  lantern_isle top Y51 (design 55)
+  gorge_overlook top Y53 (design 56)
+  bone_orchard_rise top Y54 (design 52)
+  shore belt reached: 100%
+  district loxford_houses: 13 houses
+  district loxford_cottages: 22 houses
+  district harlette_cottages: 7 houses
+  district valgard_homes: 39 houses
+  district azharad_homes: 90 houses
+  district azharad_south_quarter: 8 houses
+  district severia_homes: 170 houses
+  district severia_east_housing: 50 houses
+  mere_shack: no lane to a road within reach
+  hesta_farmhouse: no lane to a road within reach
+  terrace_garden: no lane to a road within reach
+  resin_camp: no lane to a road within reach
+  valgard_homes_32: no lane to a road within reach
+  azharad_homes_58: no lane to a road within reach
+  gorrick_graveyard: no lane to a road within reach
+  azharad_graveyard: no lane to a road within reach
+  560 lanes laid from doors to the roads
+  374 cells of bridge parapet
+  186 street lamps
+  607 structures, 593 doorways, 955 reserved volumes
+  unlit_lantern lantern_cellars: 146 water samples inside its reserved volume (its roof must hold them out)
+  orrins_leanto: no room at home for a craft table (its user works at the nearest)
+  1481 rooms fitted out in 526 buildings: 7365 pieces, 478 staircases
+  606 exterior pieces dressed (99 of them furniture); cells refused: {no ground=9, occupied=48, road=14}
+  485 door steps laid where doorways stood above their ground
+  538 structures ready for their interiors
+  607 structures planned
+PASSED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 2m 19s
+8 actionable tasks: 6 executed, 2 up-to-date

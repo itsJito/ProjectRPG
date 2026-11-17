@@ -34,7 +34,15 @@ public final class Furniture extends WorldObject {
         SHELVES("Pantry shelves", Blocks.TABLE), WINE_RACK("Wine rack", Blocks.TABLE), FOURPOSTER("Four-poster bed", Blocks.BED), BATHTUB("Bathtub", Blocks.TABLE),
         WASHSTAND("Washstand", Blocks.TABLE), FIREPLACE("Fireplace", Blocks.HEADSTONE), CHANDELIER("Chandelier", Blocks.AIR), CANDELABRA("Candelabrum", Blocks.TABLE),
         RUG("Rug", Blocks.AIR), PAINTING("Painting", Blocks.AIR), TAPESTRY("Tapestry", Blocks.AIR), MIRROR("Mirror", Blocks.AIR), WEAPON_RACK("Weapon trophy", Blocks.AIR),
-        POT_RACK("Pot rack", Blocks.AIR), ARMOR_STAND("Suit of armour", Blocks.TABLE), PLANTER("Potted fern", Blocks.TABLE), BUST("Marble bust", Blocks.HEADSTONE);
+        POT_RACK("Pot rack", Blocks.AIR), ARMOR_STAND("Suit of armour", Blocks.TABLE), PLANTER("Potted fern", Blocks.TABLE), BUST("Marble bust", Blocks.HEADSTONE),
+        /** (0.4.7) A candle sconce on the wall: a low room's light, where a chandelier would strike a head (no cells). */
+        SCONCE("Wall sconce", Blocks.AIR),
+        // (0.4.8, gamefixes: fifteen new interior models, fully destructible) the cellar's and the storeroom's, the study's
+        // and the library's, the nursery's and the great house's
+        BARREL("Barrel", Blocks.TABLE), KEG("Keg", Blocks.TABLE), LECTERN("Lectern", Blocks.TABLE), SPINNING_WHEEL("Spinning wheel", Blocks.TABLE),
+        SCROLL_RACK("Scroll rack", Blocks.TABLE), THRONE("Throne", Blocks.TABLE), CRADLE("Cradle", Blocks.TABLE), COAT_RACK("Coat rack", Blocks.TABLE),
+        BUTTER_CHURN("Butter churn", Blocks.TABLE), GLOBE("Globe", Blocks.TABLE), TOOL_RACK("Tool rack", Blocks.AIR), MAP_TABLE("Map table", Blocks.TABLE),
+        DISPLAY_CABINET("Display cabinet", Blocks.TABLE), FOLDING_SCREEN("Folding screen", Blocks.TABLE), SACKS("Sacks", Blocks.TABLE);
         public final String title;
         public final int block;
         Kind(String title, int block) { this.title = title; this.block = block; }
@@ -50,6 +58,7 @@ public final class Furniture extends WorldObject {
             return switch (this) {
                 case CHANDELIER -> new float[]{11, 4.2f, 2.9f, 1.45f, -1.05f};
                 case CANDELABRA -> new float[]{7, 3.0f, 2.05f, 0.95f, 1.7f};
+                case SCONCE -> new float[]{6.5f, 2.6f, 1.8f, 0.82f, 1.85f};
                 case FIREPLACE -> new float[]{8, 3.2f, 1.6f, 0.55f, 0.5f};
                 case DESK, NIGHTSTAND -> new float[]{3.2f, 1.5f, 1.0f, 0.45f, 0.95f};
                 default -> null;
@@ -91,6 +100,18 @@ public final class Furniture extends WorldObject {
     }
 
     public float yaw() { return facing * (float) Math.PI / 2; }
+    /**
+     * (0.4.7, gamefixes: people pull a chair out to sit and push it back when they rise) how far a chair stands out from
+     * its table (0 tucked under, 1 drawn right out: CHAIR_PULL m back from the table), eased toward pullTarget; and who
+     * sits in it (0: no one).
+     */
+    public transient float pull, pullTarget;
+    public transient long sitter;
+    public static final float CHAIR_PULL = 0.45f;
+    /** Whether a person sits on it (a chair, a stool, a bench, an armchair, a settee). */
+    public boolean seat() { return kind == Kind.CHAIR || kind == Kind.STOOL || kind == Kind.BENCH || kind == Kind.ARMCHAIR || kind == Kind.SOFA; }
+    /** The way a seat faces (toward its table): {x, z}. */
+    public float[] front() { return new float[]{(float) -Math.sin(yaw()), (float) -Math.cos(yaw())}; }
     public float width() { return x1 - x0 + 1; }
     public float depth() { return z1 - z0 + 1; }
 

@@ -217,10 +217,13 @@ void ImpulsisService::syncMovers(Engine& e, float dt) {
         b.push = V3(); b.pushSteps = 0;
         b.update();
     });
-    // movers that are gone
+    // movers that are gone. (2.14, rpg: aggressive optimization) looked up in the sorted list of those seen: a search down
+    // the list for every proxy was the square of the bodies, some 250,000 steps a frame among ShadowVeil's people
+    seenSorted_.assign(seen_.begin(), seen_.end());
+    std::sort(seenSorted_.begin(), seenSorted_.end());
     for (size_t i = 0; i < space_->count();) {
         Body& b = space_->body(static_cast<int>(i));
-        if (b.proxy && std::find(seen_.begin(), seen_.end(), b.handle) == seen_.end()) { space_->remove(static_cast<int>(i)); continue; }
+        if (b.proxy && !std::binary_search(seenSorted_.begin(), seenSorted_.end(), b.handle)) { space_->remove(static_cast<int>(i)); continue; }
         i++;
     }
     (void)dt;
@@ -261,9 +264,19 @@ void ImpulsisService::step(Engine& e, float dt) {
     const VoxelWorld* w = e.active();
     if (w != world_) { world_ = w; for (size_t i = 0; i < space_->count(); i++) space_->body(static_cast<int>(i)).wake(); }
     if (w && w->edits() != worldEdits_) {
-        // the world changed under the bodies: whatever rests on it looks again
+        // the world changed under the bodies: whatever rests on it looks again. (2.14, rpg: aggressive optimization) only
+        // what rests near the cells that changed - a door swinging in one street woke every crate, barrel and chair in
+        // the world, so nothing ever slept in a busy town; the whole world only when the changes are no longer known
+        const bool known = w->editsSince(worldEdits_, [&](const VoxelWorld::EditBox& box) {
+            for (size_t i = 0; i < space_->count(); i++) {
+                Body& b = space_->body(static_cast<int>(i));
+                if (b.awake || !b.dynamic() || b.proxy) continue;
+                const float m = b.shape.boundRadius + 1.5f;
+                if (b.p.x + m >= box.x0 && b.p.x - m <= box.x1 + 1 && b.p.y + m >= box.y0 && b.p.y - m <= box.y1 + 1 && b.p.z + m >= box.z0 && b.p.z - m <= box.z1 + 1) b.wake();
+            }
+        });
+        if (!known) for (size_t i = 0; i < space_->count(); i++) { Body& b = space_->body(static_cast<int>(i)); if (b.dynamic() && !b.proxy) b.wake(); }
         worldEdits_ = w->edits();
-        for (size_t i = 0; i < space_->count(); i++) { Body& b = space_->body(static_cast<int>(i)); if (b.dynamic() && !b.proxy) b.wake(); }
     }
     // kinematic bodies with a place to be by the end of the frame move there at an even speed
     for (size_t i = 0; i < space_->count(); i++) {

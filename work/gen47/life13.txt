@@ -1,0 +1,432 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 21.80s ({regions=848, overlays=537, variants=674, scarp=52, coast=623, erosion=353, peaks=80, lakes=59, isles=1, rivers=1187, wadis=13, ground=23, roads=720, causeways=4, architecture=1313, pitsFilled=1396, pits=431, banks=72, clamp=14, cliffs=53, columns=1268, falls=16, raise=11747, trees=282, outcrops=0, ways=711, lava=0, dungeons=94, postsSunk=28, floatingRemoved=59, floating=567}), made and lit in 2.20s
+    [water] flow field grown in 1185 ms: 39016 columns moving
+    [gathering] 757 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+    [life] start: 236 people, 0 stand with 3+ others within 2 m
+
+    [trace]    30 Elidor     (821.50,61.04,462.50) yaw 0.00 want NaN v 0.00,0.00 goal HOME(Solday: getting up) act - working null gp true 821.5,61.0,464.5 legs 0/32 st 0 nu 0 ss 0.5 na 0.0 t 0.5 | getting up and dressed
+    [trace]    40 Elidor     (821.50,61.00,462.53) yaw 0.00 want NaN v 0.00,0.93 goal HOME(Solday: getting up) act go to goal working null gp true 821.5,61.0,464.5 legs 0/32 st 0 nu 0 ss 0.5 na 0.0 t 0.7 | getting up and dressed
+    [trace]    50 Elidor     (821.50,61.00,462.85) yaw 0.87 want NaN v 0.00,2.45 goal HOME(Solday: getting up) act go to goal working null gp true 821.5,61.0,469.5 legs 1/32 st 0 nu 0 ss 0.5 na 0.0 t 0.9 | getting up and dressed
+    [trace]    60 Elidor     (821.50,61.00,463.26) yaw 1.95 want NaN v 0.00,2.45 goal HOME(Solday: getting up) act go to goal working null gp true 821.5,61.0,469.5 legs 1/32 st 0 nu 0 ss 0.5 na 0.0 t 1.0 | getting up and dressed
+    [trace]    70 Elidor     (821.50,61.00,463.66) yaw 3.03 want NaN v 0.00,2.45 goal HOME(Solday: getting up) act go to goal working null gp true 821.5,61.0,469.5 legs 1/32 st 0 nu 0 ss 0.5 na 0.0 t 1.2 | getting up and dressed
+    [trace]    80 Elidor     (821.50,61.00,464.07) yaw 3.14 want NaN v 0.00,2.45 goal HOME(Solday: getting up) act go to goal working null gp true 821.5,61.0,469.5 legs 1/32 st 0 nu 0 ss 1.3 na 0.0 t 1.4 | getting up and dressed
+    [trace]    90 Elidor     (821.50,61.00,464.48) yaw 3.14 want NaN v 0.00,2.45 goal HOME(Solday: getting up) act go to goal working null gp true 821.5,61.0,469.5 legs 1/32 st 0 nu 0 ss 1.3 na 0.0 t 1.5 | getting up and dressed
+    [trace]   100 Elidor     (821.50,61.00,464.89) yaw 3.14 want NaN v 0.00,2.45 goal HOME(Solday: getting up) act go to goal working null gp true 821.5,61.0,469.5 legs 1/32 st 0 nu 0 ss 1.3 na 0.0 t 1.7 | getting up and dressed
+    [trace]   110 Elidor     (821.50,61.00,465.30) yaw 3.14 want NaN v 0.00,2.45 goal HOME(Solday: getting up) act go to goal working null gp true 821.5,61.0,469.5 legs 1/32 st 0 nu 0 ss 1.8 na 0.0 t 1.9 | getting up and dressed
+    [trace]   120 Elidor     (821.50,61.00,465.71) yaw 3.14 want NaN v 0.00,2.45 goal HOME(Solday: getting up) act go to goal working null gp true 821.5,61.0,469.5 legs 1/32 st 0 nu 0 ss 1.8 na 0.0 t 2.0 | getting up and dressed
+    [trace]   130 Elidor     (821.50,61.00,466.11) yaw 3.14 want NaN v 0.00,2.45 goal HOME(Solday: getting up) act go to goal working null gp true 821.5,61.0,469.5 legs 1/32 st 0 nu 0 ss 1.8 na 0.0 t 2.2 | getting up and dressed
+    [trace]   140 Elidor     (821.50,61.00,466.52) yaw 3.14 want NaN v 0.00,2.45 goal HOME(Solday: getting up) act go to goal working null gp true 821.5,61.0,469.5 legs 1/32 st 0 nu 0 ss 2.3 na 0.0 t 2.4 | getting up and dressed
+    [trace]   150 Elidor     (821.50,61.00,466.93) yaw 3.14 want NaN v 0.00,2.45 goal HOME(Solday: getting up) act go to goal working null gp true 821.5,61.0,469.5 legs 1/32 st 0 nu 0 ss 2.3 na 0.0 t 2.5 | getting up and dressed
+    [trace]   160 Elidor     (821.50,61.00,467.34) yaw 3.14 want NaN v 0.00,2.45 goal HOME(Solday: getting up) act go to goal working null gp true 821.5,61.0,469.5 legs 1/32 st 0 nu 0 ss 2.3 na 0.0 t 2.7 | getting up and dressed
+    [trace]   170 Elidor     (821.50,61.00,467.75) yaw 3.14 want NaN v 0.00,2.45 goal HOME(Solday: getting up) act go to goal working null gp true 827.5,61.0,469.5 legs 2/32 st 0 nu 0 ss 2.8 na 0.0 t 2.9 | getting up and dressed
+    [trace]   180 Elidor     (821.50,61.00,468.16) yaw 3.14 want NaN v 0.00,2.45 goal HOME(Solday: getting up) act go to goal working null gp true 827.5,61.0,469.5 legs 2/32 st 0 nu 0 ss 2.8 na 0.0 t 3.0 | getting up and dressed
+    [trace]   190 Elidor     (821.50,61.00,468.56) yaw 3.14 want NaN v 0.00,2.45 goal HOME(Solday: getting up) act go to goal working null gp true 827.5,61.0,469.5 legs 2/32 st 0 nu 0 ss 2.8 na 0.0 t 3.2 | getting up and dressed
+    [trace]   200 Elidor     (821.51,61.00,468.96) yaw 3.14 want NaN v 0.53,1.99 goal HOME(Solday: getting up) act go to goal working null gp true 827.5,61.0,469.5 legs 2/32 st 0 nu 0 ss 3.3 na 0.0 t 3.4 | getting up and dressed
+    [trace]   210 Elidor     (821.70,61.00,469.19) yaw -2.57 want NaN v 0.00,0.91 goal HOME(Solday: getting up) act go to goal working null gp true 827.5,61.0,469.5 legs 2/32 st 0 nu 0 ss 3.3 na 0.0 t 3.5 | getting up and dressed
+    [trace]   220 Elidor     (821.70,61.00,469.30) yaw -2.87 want NaN v 0.12,0.40 goal HOME(Solday: getting up) act go to goal working null gp true 827.5,61.0,469.5 legs 2/32 st 0 nu 0 ss 3.3 na 0.0 t 3.7 | getting up and dressed
+    [trace]   230 Elidor     (821.90,61.00,469.34) yaw -1.99 want NaN v 2.43,0.07 goal HOME(Solday: getting up) act go to goal working null gp true 827.5,61.0,469.5 legs 2/32 st 0 nu 0 ss 3.3 na 0.0 t 3.9 | getting up and dressed
+    [trace]   240 Elidor     (822.31,61.00,469.35) yaw -1.65 want NaN v 2.45,0.07 goal HOME(Solday: getting up) act go to goal working null gp true 827.5,61.0,469.5 legs 2/32 st 0 nu 0 ss 3.3 na 0.0 t 4.0 | getting up and dressed
+    [trace]   250 Elidor     (822.72,61.00,469.37) yaw -1.62 want NaN v 2.45,0.07 goal HOME(Solday: getting up) act go to goal working null gp true 827.5,61.0,469.5 legs 2/32 st 0 nu 0 ss 4.2 na 0.0 t 4.2 | getting up and dressed
+    [trace]   260 Elidor     (823.12,61.00,469.38) yaw -1.62 want NaN v 2.45,0.07 goal HOME(Solday: getting up) act go to goal working null gp true 827.5,61.0,469.5 legs 2/32 st 0 nu 0 ss 4.2 na 0.0 t 4.4 | getting up and dressed
+    [trace]   270 Elidor     (823.53,61.00,469.39) yaw -1.62 want NaN v 2.45,0.07 goal HOME(Solday: getting up) act go to goal working null gp true 827.5,61.0,469.5 legs 2/32 st 0 nu 0 ss 4.2 na 0.0 t 4.5 | getting up and dressed
+    [trace]   280 Elidor     (823.94,61.00,469.40) yaw -1.62 want NaN v 2.45,0.07 goal HOME(Solday: getting up) act go to goal working null gp true 827.5,61.0,469.5 legs 2/32 st 0 nu 0 ss 4.2 na 0.0 t 4.7 | getting up and dressed
+    [trace]   290 Elidor     (824.35,61.00,469.41) yaw -1.62 want NaN v 2.45,0.07 goal HOME(Solday: getting up) act go to goal working null gp true 827.5,61.0,469.5 legs 2/32 st 0 nu 0 ss 4.7 na 0.0 t 4.9 | getting up and dressed
+    [trace]   300 Elidor     (824.76,61.00,469.42) yaw -1.62 want NaN v 2.45,0.07 goal HOME(Solday: getting up) act go to goal working null gp true 827.5,61.0,469.5 legs 2/32 st 0 nu 0 ss 4.7 na 0.0 t 5.0 | getting up and dressed
+    [trace]   310 Elidor     (825.16,61.00,469.44) yaw -1.62 want NaN v 2.45,0.07 goal HOME(Solday: getting up) act go to goal working null gp true 827.5,61.0,469.5 legs 2/32 st 0 nu 0 ss 4.7 na 0.0 t 5.2 | chores at home
+    [trace]   320 Elidor     (825.57,61.00,469.45) yaw -1.62 want NaN v 2.45,0.07 goal HOME(Solday: getting up) act go to goal working null gp true 827.5,61.0,469.5 legs 2/32 st 0 nu 0 ss 5.2 na 0.0 t 5.4 | chores at home
+    [trace]   330 Elidor     (825.98,61.00,469.46) yaw -1.62 want NaN v 2.45,0.07 goal HOME(Solday: getting up) act go to goal working null gp true 827.5,61.0,468.5 legs 3/32 st 0 nu 0 ss 5.2 na 0.0 t 5.5 | chores at home
+    [trace]   340 Elidor     (826.39,61.00,469.47) yaw -1.62 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 828.5,61.0,468.5 legs 2/35 st 0 nu 0 ss 5.7 na 0.0 t 5.7 | on the way to prayers
+    [trace]   350 Elidor     (826.79,61.00,469.48) yaw -1.62 want NaN v 2.36,-0.15 goal PRAY(Solday: worship) act go to goal working null gp true 828.5,61.0,468.5 legs 2/35 st 0 nu 0 ss 5.7 na 0.0 t 5.9 | on the way to prayers
+    [trace]   360 Elidor     (827.15,61.00,469.32) yaw -1.23 want NaN v 2.09,-1.27 goal PRAY(Solday: worship) act go to goal working null gp true 828.5,61.0,464.5 legs 3/35 st 0 nu 0 ss 5.7 na 0.0 t 6.0 | on the way to prayers
+    [trace]   370 Elidor     (827.49,61.00,469.23) yaw -1.23 want NaN v 1.99,-1.43 goal PRAY(Solday: worship) act go to goal working null gp true 828.5,61.0,464.5 legs 3/35 st 0 nu 0 ss 5.7 na 0.0 t 6.2 | on the way to prayers
+    [trace]   380 Elidor     (827.74,61.00,468.95) yaw -0.81 want NaN v 0.59,-2.25 goal PRAY(Solday: worship) act go to goal working null gp true 828.5,61.0,464.5 legs 3/35 st 0 nu 0 ss 6.2 na 0.0 t 6.4 | on the way to prayers
+    [trace]   390 Elidor     (827.81,61.00,468.55) yaw -0.31 want NaN v 0.41,-2.42 goal PRAY(Solday: worship) act go to goal working null gp true 828.5,61.0,464.5 legs 3/35 st 0 nu 0 ss 6.5 na 0.0 t 6.5 | on the way to prayers
+    [trace]   400 Elidor     (827.88,61.00,468.14) yaw -0.21 want NaN v 0.41,-2.42 goal PRAY(Solday: worship) act go to goal working null gp true 828.5,61.0,464.5 legs 3/35 st 0 nu 0 ss 6.6 na 0.0 t 6.7 | on the way to prayers
+    [trace]   410 Elidor     (827.95,61.00,467.74) yaw -0.18 want NaN v 0.41,-2.42 goal PRAY(Solday: worship) act go to goal working null gp true 828.5,61.0,464.5 legs 3/35 st 0 nu 0 ss 6.9 na 0.0 t 6.9 | on the way to prayers
+    [trace]   420 Elidor     (828.02,61.00,467.34) yaw -0.18 want NaN v 0.41,-2.42 goal PRAY(Solday: worship) act go to goal working null gp true 828.5,61.0,464.5 legs 3/35 st 0 nu 0 ss 7.0 na 0.0 t 7.0 | on the way to prayers
+    [trace]   430 Elidor     (828.09,61.00,466.94) yaw -0.18 want NaN v 0.41,-2.42 goal PRAY(Solday: worship) act go to goal working null gp true 828.5,61.0,464.5 legs 3/35 st 0 nu 0 ss 7.1 na 0.0 t 7.2 | on the way to prayers
+    [trace]   440 Elidor     (828.15,61.00,466.53) yaw -0.18 want NaN v 0.41,-2.42 goal PRAY(Solday: worship) act go to goal working null gp true 828.5,61.0,464.5 legs 3/35 st 0 nu 0 ss 7.3 na 0.0 t 7.4 | on the way to prayers
+    [trace]   450 Elidor     (828.23,61.00,466.13) yaw -0.18 want NaN v 0.76,-2.11 goal PRAY(Solday: worship) act go to goal working null gp true 830.5,61.0,464.5 legs 4/35 st 0 nu 0 ss 7.4 na 0.0 t 7.5 | on the way to prayers
+    [trace]   460 Elidor     (828.49,61.00,465.87) yaw -0.67 want NaN v 2.03,-1.38 goal PRAY(Solday: worship) act go to goal working null gp true 830.5,61.0,464.5 legs 4/35 st 0 nu 0 ss 7.6 na 0.0 t 7.7 | on the way to prayers
+    [trace]   470 Elidor     (828.83,61.00,465.64) yaw -0.90 want NaN v 2.03,-1.38 goal PRAY(Solday: worship) act go to goal working null gp true 830.5,61.0,464.5 legs 4/35 st 0 nu 0 ss 7.7 na 0.0 t 7.9 | on the way to prayers
+    [trace]   480 Elidor     (829.16,61.00,465.40) yaw -0.93 want NaN v 1.52,-1.86 goal PRAY(Solday: worship) act go to goal working null gp true 830.5,61.0,463.5 legs 5/35 st 0 nu 0 ss 7.9 na 0.0 t 8.0 | on the way to prayers
+    [trace]   490 Elidor     (829.39,61.00,465.07) yaw -0.69 want NaN v 1.41,-2.00 goal PRAY(Solday: worship) act go to goal working null gp true 830.5,61.0,463.5 legs 5/35 st 0 nu 0 ss 8.1 na 0.0 t 8.2 | on the way to prayers
+    [trace]   500 Elidor     (829.63,61.00,464.73) yaw -0.66 want NaN v 1.41,-2.00 goal PRAY(Solday: worship) act go to goal working null gp true 831.5,61.0,463.5 legs 6/35 st 0 nu 0 ss 8.2 na 0.0 t 8.4 | on the way to prayers
+    [trace]   510 Elidor     (829.94,61.00,464.48) yaw -0.85 want NaN v 2.08,-1.30 goal PRAY(Solday: worship) act go to goal working null gp true 831.5,61.0,463.5 legs 6/35 st 0 nu 0 ss 8.4 na 0.0 t 8.5 | on the way to prayers
+    [trace]   520 Elidor     (830.28,61.00,464.26) yaw -0.97 want NaN v 2.08,-1.30 goal PRAY(Solday: worship) act go to goal working null gp true 831.5,61.0,460.5 legs 7/35 st 0 nu 0 ss 8.6 na 0.0 t 8.7 | on the way to prayers
+    [trace]   530 Elidor     (830.59,61.00,464.02) yaw -0.90 want NaN v 1.09,-1.91 goal PRAY(Solday: worship) act go to goal working null gp true 831.5,61.0,460.5 legs 7/35 st 0 nu 0 ss 8.8 na 0.0 t 8.9 | on the way to prayers
+    [trace]   540 Elidor     (830.71,61.00,463.64) yaw -0.45 want NaN v 0.60,-2.38 goal PRAY(Solday: worship) act go to goal working null gp true 831.5,61.0,460.5 legs 7/35 st 0 nu 0 ss 9.0 na 0.0 t 9.0 | on the way to prayers
+    [trace]   550 Elidor     (830.81,61.00,463.24) yaw -0.29 want NaN v 0.60,-2.38 goal PRAY(Solday: worship) act go to goal working null gp true 831.5,61.0,460.5 legs 7/35 st 0 nu 0 ss 9.2 na 0.0 t 9.2 | on the way to prayers
+    [trace]   560 Elidor     (830.91,61.00,462.85) yaw -0.26 want NaN v 0.60,-2.38 goal PRAY(Solday: worship) act go to goal working null gp true 831.5,61.0,460.5 legs 7/35 st 0 nu 0 ss 9.3 na 0.0 t 9.4 | on the way to prayers
+    [trace]   570 Elidor     (831.01,61.00,462.45) yaw -0.26 want NaN v 0.60,-2.38 goal PRAY(Solday: worship) act go to goal working null gp true 831.5,61.0,460.5 legs 7/35 st 0 nu 0 ss 9.4 na 0.0 t 9.5 | on the way to prayers
+    [trace]   580 Elidor     (831.12,61.00,462.06) yaw -0.26 want NaN v 1.20,-2.01 goal PRAY(Solday: worship) act go to goal working null gp true 832.5,61.0,460.5 legs 8/35 st 0 nu 0 ss 9.7 na 0.0 t 9.7 | on the way to prayers
+    [trace]   590 Elidor     (831.38,61.00,461.76) yaw -0.61 want NaN v 1.63,-1.83 goal PRAY(Solday: worship) act go to goal working null gp true 832.5,61.0,459.5 legs 9/35 st 0 nu 0 ss 9.8 na 0.0 t 9.9 | on the way to prayers
+    [trace]   600 Elidor     (831.65,61.00,461.45) yaw -0.68 want NaN v 1.63,-1.83 goal PRAY(Solday: worship) act go to goal working null gp true 832.5,61.0,459.5 legs 9/35 st 0 nu 0 ss 10.0 na 0.0 t 10.0 | on the way to prayers
+    [trace]   610 Elidor     (831.84,61.00,461.09) yaw -0.52 want NaN v 0.93,-2.27 goal PRAY(Solday: worship) act go to goal working null gp true 833.5,61.0,459.5 legs 10/35 st 0 nu 0 ss 10.1 na 0.0 t 10.2 | on the way to prayers
+    [trace]   620 Elidor     (832.00,61.00,460.72) yaw -0.42 want NaN v 0.93,-2.27 goal PRAY(Solday: worship) act go to goal working null gp true 833.5,61.0,459.5 legs 10/35 st 0 nu 0 ss 10.3 na 0.0 t 10.4 | on the way to prayers
+    [trace]   630 Elidor     (832.18,61.00,460.36) yaw -0.46 want NaN v 1.42,-2.00 goal PRAY(Solday: worship) act go to goal working null gp true 833.5,61.0,458.5 legs 11/35 st 0 nu 0 ss 10.5 na 0.0 t 10.5 | on the way to prayers
+    [trace]   640 Elidor     (832.42,61.00,460.02) yaw -0.57 want NaN v 1.42,-2.00 goal PRAY(Solday: worship) act go to goal working null gp true 833.5,61.0,458.5 legs 11/35 st 0 nu 0 ss 10.7 na 0.0 t 10.7 | on the way to prayers
+    [trace]   650 Elidor     (832.66,61.00,459.69) yaw -0.60 want NaN v 1.42,-2.00 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 10.8 na 0.0 t 10.9 | on the way to prayers
+    [trace]   660 Elidor     (832.92,61.00,459.39) yaw -0.72 want NaN v 2.13,-1.20 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 11.0 na 0.0 t 11.0 | on the way to prayers
+    [trace]   670 Elidor     (833.28,61.00,459.19) yaw -0.96 want NaN v 2.13,-1.20 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 11.0 na 0.0 t 11.2 | on the way to prayers
+    [trace]   680 Elidor     (833.63,61.00,458.99) yaw -1.03 want NaN v 2.13,-1.20 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 11.3 na 0.0 t 11.4 | on the way to prayers
+    [trace]   690 Elidor     (833.70,61.00,458.81) yaw -0.61 want NaN v 0.00,-0.88 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 11.3 na 0.0 t 11.5 | on the way to prayers
+    [trace]   700 Elidor     (833.70,61.00,458.70) yaw -0.26 want NaN v 0.12,-0.39 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 11.6 na 0.0 t 11.7 | on the way to prayers
+    [trace]   710 Elidor     (833.90,61.00,458.66) yaw -1.16 want NaN v 2.42,-0.06 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 11.6 na 0.0 t 11.9 | on the way to prayers
+    [trace]   720 Elidor     (834.31,61.00,458.65) yaw -1.50 want NaN v 2.45,-0.05 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 11.6 na 0.0 t 12.0 | on the way to prayers
+    [trace]   730 Elidor     (834.72,61.00,458.64) yaw -1.53 want NaN v 2.45,-0.05 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 11.6 na 0.0 t 12.2 | on the way to prayers
+    [trace]   740 Elidor     (835.12,61.00,458.64) yaw -1.53 want NaN v 2.45,-0.05 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 12.3 na 0.0 t 12.4 | on the way to prayers
+    [trace]   750 Elidor     (835.53,61.00,458.63) yaw -1.53 want NaN v 2.45,-0.05 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 12.3 na 0.0 t 12.5 | on the way to prayers
+    [trace]   760 Elidor     (835.94,61.00,458.62) yaw -1.53 want NaN v 2.45,-0.05 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 12.3 na 0.0 t 12.7 | on the way to prayers
+    [trace]   770 Elidor     (836.35,61.00,458.61) yaw -1.53 want NaN v 2.45,-0.05 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 12.8 na 0.0 t 12.9 | on the way to prayers
+    [trace]   780 Elidor     (836.76,61.00,458.60) yaw -1.53 want NaN v 2.45,-0.05 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 12.8 na 0.0 t 13.0 | on the way to prayers
+    [trace]   790 Elidor     (837.16,61.00,458.59) yaw -1.53 want NaN v 2.45,-0.05 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 12.8 na 0.0 t 13.2 | on the way to prayers
+    [trace]   800 Elidor     (837.57,61.00,458.58) yaw -1.53 want NaN v 2.45,-0.05 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 13.3 na 0.0 t 13.4 | on the way to prayers
+    [trace]   810 Elidor     (837.98,61.00,458.58) yaw -1.53 want NaN v 2.45,-0.05 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 13.3 na 0.0 t 13.5 | on the way to prayers
+    [trace]   820 Elidor     (838.39,61.00,458.57) yaw -1.53 want NaN v 2.45,-0.05 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 13.3 na 0.0 t 13.7 | on the way to prayers
+    [trace]   830 Elidor     (838.79,61.00,458.56) yaw -1.53 want NaN v 2.45,-0.05 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 13.9 na 0.0 t 13.9 | on the way to prayers
+    [trace]   840 Elidor     (839.20,61.00,458.55) yaw -1.53 want NaN v 2.45,-0.05 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 13.9 na 0.0 t 14.0 | on the way to prayers
+    [trace]   850 Elidor     (839.61,61.00,458.54) yaw -1.53 want NaN v 2.45,-0.05 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,458.5 legs 12/35 st 0 nu 0 ss 13.9 na 0.0 t 14.2 | on the way to prayers
+    [trace]   860 Elidor     (840.00,61.00,458.47) yaw -1.39 want NaN v 2.06,-1.33 goal PRAY(Solday: worship) act go to goal working null gp true 841.5,61.0,457.5 legs 13/35 st 0 nu 0 ss 13.9 na 0.0 t 14.4 | on the way to prayers
+    [trace]   870 Elidor     (840.34,61.00,458.25) yaw -1.11 want NaN v 2.06,-1.33 goal PRAY(Solday: worship) act go to goal working null gp true 846.5,61.0,457.5 legs 14/35 st 0 nu 0 ss 14.4 na 0.0 t 14.5 | on the way to prayers
+    [trace]   880 Elidor     (840.68,61.00,458.03) yaw -1.04 want NaN v 2.17,-0.88 goal PRAY(Solday: worship) act go to goal working null gp true 846.5,61.0,457.5 legs 14/35 st 0 nu 0 ss 14.4 na 0.0 t 14.7 | on the way to prayers
+    [trace]   890 Elidor     (841.08,61.00,457.98) yaw -1.33 want NaN v 2.44,-0.22 goal PRAY(Solday: worship) act go to goal working null gp true 846.5,61.0,457.5 legs 14/35 st 0 nu 0 ss 14.4 na 0.0 t 14.9 | on the way to prayers
+    [trace]   900 Elidor     (841.49,61.00,457.94) yaw -1.44 want NaN v 2.44,-0.22 goal PRAY(Solday: worship) act go to goal working null gp true 846.5,61.0,457.5 legs 14/35 st 0 nu 0 ss 14.9 na 0.0 t 15.0 | on the way to prayers
+    [trace]   910 Elidor     (841.89,61.00,457.91) yaw -1.47 want NaN v 2.44,-0.22 goal PRAY(Solday: worship) act go to goal working null gp true 846.5,61.0,457.5 legs 14/35 st 0 nu 0 ss 14.9 na 0.0 t 15.2 | on the way to prayers
+    [trace]   920 Elidor     (842.30,61.00,457.87) yaw -1.47 want NaN v 2.44,-0.22 goal PRAY(Solday: worship) act go to goal working null gp true 846.5,61.0,457.5 legs 14/35 st 0 nu 0 ss 14.9 na 0.0 t 15.4 | on the way to prayers
+    [trace]   930 Elidor     (842.71,61.00,457.83) yaw -1.47 want NaN v 2.44,-0.22 goal PRAY(Solday: worship) act go to goal working null gp true 846.5,61.0,457.5 legs 14/35 st 0 nu 0 ss 15.4 na 0.0 t 15.5 | on the way to prayers
+    [trace]   940 Elidor     (843.11,61.00,457.80) yaw -1.47 want NaN v 2.44,-0.22 goal PRAY(Solday: worship) act go to goal working null gp true 846.5,61.0,457.5 legs 14/35 st 0 nu 0 ss 15.4 na 0.0 t 15.7 | on the way to prayers
+    [trace]   950 Elidor     (843.52,61.00,457.76) yaw -1.47 want NaN v 2.44,-0.22 goal PRAY(Solday: worship) act go to goal working null gp true 846.5,61.0,457.5 legs 14/35 st 0 nu 0 ss 15.4 na 0.0 t 15.9 | on the way to prayers
+    [trace]   960 Elidor     (843.93,61.00,457.73) yaw -1.47 want NaN v 2.44,-0.22 goal PRAY(Solday: worship) act go to goal working null gp true 846.5,61.0,457.5 legs 14/35 st 0 nu 0 ss 16.0 na 0.0 t 16.0 | on the way to prayers
+    [trace]   970 Elidor     (844.33,61.00,457.69) yaw -1.47 want NaN v 2.44,-0.22 goal PRAY(Solday: worship) act go to goal working null gp true 846.5,61.0,457.5 legs 14/35 st 0 nu 0 ss 16.0 na 0.0 t 16.2 | on the way to prayers
+    [trace]   980 Elidor     (844.74,61.00,457.65) yaw -1.47 want NaN v 2.44,-0.21 goal PRAY(Solday: worship) act go to goal working null gp true 846.5,61.0,457.5 legs 14/35 st 0 nu 0 ss 16.0 na 0.0 t 16.4 | on the way to prayers
+    [trace]   990 Elidor     (845.10,61.00,457.50) yaw -1.20 want NaN v 1.99,-1.42 goal PRAY(Solday: worship) act go to goal working null gp true 848.5,61.0,456.5 legs 16/35 st 0 nu 0 ss 16.5 na 0.0 t 16.5 | on the way to prayers
+    [trace]  1000 Elidor     (845.43,61.00,457.26) yaw -1.03 want NaN v 1.99,-1.42 goal PRAY(Solday: worship) act go to goal working null gp true 848.5,61.0,456.5 legs 16/35 st 0 nu 0 ss 16.5 na 0.0 t 16.7 | on the way to prayers
+    [trace]  1010 Elidor     (845.78,61.00,457.07) yaw -1.07 want NaN v 2.40,-0.50 goal PRAY(Solday: worship) act go to goal working null gp true 848.5,61.0,456.5 legs 16/35 st 0 nu 0 ss 16.5 na 0.0 t 16.9 | on the way to prayers
+    [trace]  1020 Elidor     (846.18,61.00,456.98) yaw -1.27 want NaN v 2.40,-0.50 goal PRAY(Solday: worship) act go to goal working null gp true 848.5,61.0,456.5 legs 16/35 st 0 nu 0 ss 17.0 na 0.0 t 17.0 | on the way to prayers
+    [trace]  1030 Elidor     (846.58,61.00,456.90) yaw -1.34 want NaN v 2.40,-0.50 goal PRAY(Solday: worship) act go to goal working null gp true 848.5,61.0,456.5 legs 16/35 st 0 nu 0 ss 17.0 na 0.0 t 17.2 | on the way to prayers
+    [trace]  1040 Elidor     (846.98,61.00,456.83) yaw -1.37 want NaN v 2.44,-0.23 goal PRAY(Solday: worship) act go to goal working null gp true 851.5,62.0,456.5 legs 17/35 st 0 nu 0 ss 17.0 na 0.0 t 17.4 | on the way to prayers
+    [trace]  1050 Elidor     (847.39,61.00,456.79) yaw -1.44 want NaN v 2.44,-0.23 goal PRAY(Solday: worship) act go to goal working null gp true 851.5,62.0,456.5 legs 17/35 st 0 nu 0 ss 17.5 na 0.0 t 17.5 | on the way to prayers
+    [trace]  1060 Elidor     (847.79,61.00,456.75) yaw -1.44 want NaN v 2.44,-0.23 goal PRAY(Solday: worship) act go to goal working null gp true 851.5,62.0,456.5 legs 17/35 st 0 nu 0 ss 17.5 na 0.0 t 17.7 | on the way to prayers
+    [trace]  1070 Elidor     (848.20,61.00,456.72) yaw -1.47 want NaN v 2.44,-0.23 goal PRAY(Solday: worship) act go to goal working null gp true 851.5,62.0,456.5 legs 17/35 st 0 nu 0 ss 17.5 na 0.0 t 17.9 | on the way to prayers
+    [trace]  1080 Elidor     (848.61,61.00,456.68) yaw -1.47 want NaN v 2.44,-0.23 goal PRAY(Solday: worship) act go to goal working null gp true 851.5,62.0,456.5 legs 17/35 st 0 nu 0 ss 17.5 na 0.0 t 18.0 | on the way to prayers
+    [trace]  1090 Elidor     (849.01,61.00,456.64) yaw -1.47 want NaN v 2.44,-0.23 goal PRAY(Solday: worship) act go to goal working null gp true 851.5,62.0,456.5 legs 17/35 st 0 nu 0 ss 18.0 na 0.0 t 18.2 | on the way to prayers
+    [trace]  1100 Elidor     (849.42,61.00,456.60) yaw -1.47 want NaN v 2.44,-0.23 goal PRAY(Solday: worship) act go to goal working null gp true 851.5,62.0,456.5 legs 17/35 st 0 nu 0 ss 18.0 na 0.0 t 18.4 | on the way to prayers
+    [trace]  1110 Elidor     (849.82,61.00,456.56) yaw -1.47 want NaN v 2.44,-0.23 goal PRAY(Solday: worship) act go to goal working null gp true 851.5,62.0,456.5 legs 17/35 st 0 nu 0 ss 18.0 na 0.0 t 18.5 | on the way to prayers
+    [trace]  1120 Elidor     (850.23,61.00,456.53) yaw -1.47 want NaN v 2.45,-0.07 goal PRAY(Solday: worship) act go to goal working null gp true 851.5,62.0,456.5 legs 17/35 st 0 nu 0 ss 18.6 na 0.0 t 18.7 | on the way to prayers
+    [trace]  1130 Elidor     (850.64,61.00,456.52) yaw -1.51 want NaN v 2.45,-0.07 goal PRAY(Solday: worship) act go to goal working null gp true 851.5,62.0,456.5 legs 17/35 st 0 nu 0 ss 18.6 na 0.0 t 18.9 | on the way to prayers
+    [trace]  1140 Elidor     (850.68,61.85,456.52) yaw -1.54 want NaN v 2.45,-0.01 goal HIDE(hiding from world life (last seen 9s ago)) act hold/face working null gp false 853.5,62.0,456.5 legs - st 0 nu 0 ss 18.6 na 0.0 t 19.0 | running from world life
+    [trace]  1150 Elidor     (850.95,62.21,456.51) yaw -1.54 want NaN v 1.98,-0.01 goal HIDE(hiding from world life (last seen 9s ago)) act hold/face working null gp false 853.5,62.0,456.5 legs - st 0 nu 0 ss 18.6 na 0.0 t 19.2 | running from world life
+    [trace]  1160 Elidor     (851.24,62.01,456.51) yaw -1.54 want NaN v 1.24,-0.01 goal HIDE(hiding from world life (last seen 9s ago)) act sprint to goal working null gp true 860.5,62.0,454.5 legs 0/1 st 0 nu 0 ss 19.4 na 0.0 t 19.4 | running from world life
+    [trace]  1170 Elidor     (851.63,62.00,456.47) yaw -1.50 want NaN v 3.49,-0.57 goal HIDE(hiding from world life (last seen 9s ago)) act sprint to goal working null gp true 861.5,62.0,455.5 legs 0/1 st 0 nu 0 ss 19.5 na 0.0 t 19.5 | running from world life
+    [trace]  1180 Elidor     (852.39,62.00,456.33) yaw -1.40 want NaN v 5.74,-1.20 goal HIDE(hiding from world life (last seen 9s ago)) act sprint to goal working null gp true 862.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 19.7 na 0.0 t 19.7 | running from world life
+    [trace]  1190 Elidor     (853.48,62.00,456.15) yaw -1.40 want NaN v 7.16,-0.16 goal HIDE(hiding from world life (last seen 0s ago)) act sprint to goal working null gp true 861.5,62.0,451.5 legs 0/1 st 0 nu 0 ss 19.9 na 0.0 t 19.9 | running from world life
+    [trace]  1200 Elidor     (854.71,62.00,456.19) yaw -1.55 want NaN v 7.37,0.29 goal HIDE(hiding from world life (last seen 0s ago)) act sprint to goal working null gp true 864.5,62.0,455.5 legs 0/1 st 0 nu 0 ss 20.0 na 0.0 t 20.0 | running from world life
+    [trace]  1210 Elidor     (855.94,62.00,456.24) yaw -1.58 want NaN v 7.38,0.20 goal HIDE(hiding from world life (last seen 0s ago)) act sprint to goal working null gp true 865.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 20.2 na 0.0 t 20.2 | running from world life
+    [trace]  1220 Elidor     (857.16,62.00,456.27) yaw -1.58 want NaN v 6.91,0.19 goal HIDE(hiding from world life (last seen 0s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 20.3 na 0.0 t 20.4 | hiding from world life
+    [trace]  1230 Elidor     (858.13,62.00,456.30) yaw -1.58 want NaN v 4.58,0.12 goal HIDE(hiding from world life (last seen 0s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 20.5 na 0.0 t 20.5 | hiding from world life
+    [trace]  1240 Elidor     (858.71,62.00,456.31) yaw -1.58 want NaN v 2.25,0.05 goal HIDE(hiding from world life (last seen 0s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 20.7 na 0.0 t 20.7 | hiding from world life
+    [trace]  1250 Elidor     (858.96,62.00,456.32) yaw -1.58 want NaN v 1.35,0.02 goal HIDE(hiding from world life (last seen 0s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 20.8 na 0.0 t 20.9 | hiding from world life
+    [trace]  1260 Elidor     (859.19,62.00,456.32) yaw -1.58 want NaN v 1.35,0.02 goal HIDE(hiding from world life (last seen 0s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 21.0 na 0.0 t 21.0 | hiding from world life
+    [trace]  1270 Elidor     (859.41,62.00,456.33) yaw -1.58 want NaN v 1.35,0.02 goal HIDE(hiding from world life (last seen 1s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 21.0 na 0.0 t 21.2 | hiding from world life
+    [trace]  1280 Elidor     (859.64,62.00,456.33) yaw -1.58 want NaN v 1.35,0.02 goal HIDE(hiding from world life (last seen 1s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 21.2 na 0.0 t 21.4 | hiding from world life
+    [trace]  1290 Elidor     (859.85,62.00,456.32) yaw -1.53 want NaN v 0.88,-0.29 goal HIDE(hiding from world life (last seen 1s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 21.4 na 0.0 t 21.5 | hiding from world life
+    [trace]  1300 Elidor     (859.99,62.00,456.26) yaw -1.34 want NaN v 0.93,-0.41 goal HIDE(hiding from world life (last seen 1s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 21.6 na 0.0 t 21.7 | hiding from world life
+    [trace]  1310 Elidor     (860.14,62.00,456.16) yaw -1.23 want NaN v 1.14,-0.34 goal HIDE(hiding from world life (last seen 1s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 21.6 na 0.0 t 21.9 | hiding from world life
+    [trace]  1320 Elidor     (860.34,62.00,456.10) yaw -1.39 want NaN v 1.34,-0.04 goal HIDE(hiding from world life (last seen 2s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 21.9 na 0.0 t 22.0 | hiding from world life
+    [trace]  1330 Elidor     (860.57,62.00,456.11) yaw -1.54 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 2s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 22.1 na 0.0 t 22.2 | hiding from world life
+    [trace]  1340 Elidor     (860.79,62.00,456.11) yaw -1.58 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 2s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 22.3 na 0.0 t 22.4 | hiding from world life
+    [trace]  1350 Elidor     (861.01,62.00,456.12) yaw -1.58 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 2s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 22.5 na 0.0 t 22.5 | hiding from world life
+    [trace]  1360 Elidor     (861.24,62.00,456.13) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 2s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 22.5 na 0.0 t 22.7 | hiding from world life
+    [trace]  1370 Elidor     (861.46,62.00,456.14) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 2s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 22.7 na 0.0 t 22.9 | hiding from world life
+    [trace]  1380 Elidor     (861.69,62.00,456.15) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 2s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 22.9 na 0.0 t 23.0 | hiding from world life
+    [trace]  1390 Elidor     (861.91,62.00,456.16) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 2s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 23.1 na 0.0 t 23.2 | hiding from world life
+    [trace]  1400 Elidor     (862.14,62.00,456.17) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 2s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 23.3 na 0.0 t 23.4 | hiding from world life
+    [trace]  1410 Elidor     (862.36,62.00,456.18) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 3s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 23.5 na 0.0 t 23.5 | hiding from world life
+    [trace]  1420 Elidor     (862.59,62.00,456.19) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 3s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 23.5 na 0.0 t 23.7 | hiding from world life
+    [trace]  1430 Elidor     (862.81,62.00,456.20) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 3s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 23.7 na 0.0 t 23.9 | hiding from world life
+    [trace]  1440 Elidor     (863.04,62.00,456.21) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 3s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 23.9 na 0.0 t 24.0 | hiding from world life
+    [trace]  1450 Elidor     (863.26,62.00,456.21) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 4s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 24.1 na 0.0 t 24.2 | hiding from world life
+    [trace]  1460 Elidor     (863.49,62.00,456.22) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 4s ago)) act sprint to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 24.3 na 0.0 t 24.4 | hiding from world life
+    [trace]  1470 Elidor     (863.71,62.00,456.23) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 4s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 24.5 na 0.0 t 24.5 | hiding from world life
+    [trace]  1480 Elidor     (863.93,62.00,456.24) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 4s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 24.5 na 0.0 t 24.7 | hiding from world life
+    [trace]  1490 Elidor     (864.16,62.00,456.25) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 5s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 24.7 na 0.0 t 24.9 | hiding from world life
+    [trace]  1500 Elidor     (864.38,62.00,456.26) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 5s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 24.9 na 0.0 t 25.0 | hiding from world life
+    [trace]  1510 Elidor     (864.61,62.00,456.27) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 5s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 25.1 na 0.0 t 25.2 | hiding from world life
+    [trace]  1520 Elidor     (864.83,62.00,456.28) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 5s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 25.3 na 0.0 t 25.4 | hiding from world life
+    [trace]  1530 Elidor     (865.06,62.00,456.29) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 5s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 25.5 na 0.0 t 25.5 | hiding from world life
+    [trace]  1540 Elidor     (865.28,62.00,456.29) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 5s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 25.5 na 0.0 t 25.7 | hiding from world life
+    [trace]  1550 Elidor     (865.51,62.00,456.30) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 5s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 25.7 na 0.0 t 25.9 | hiding from world life
+    [trace]  1560 Elidor     (865.73,62.00,456.31) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 5s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 25.9 na 0.0 t 26.0 | hiding from world life
+    [trace]  1570 Elidor     (865.96,62.00,456.32) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 5s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 26.1 na 0.0 t 26.2 | hiding from world life
+    [trace]  1580 Elidor     (866.18,62.00,456.33) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 6s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 26.3 na 0.0 t 26.4 | hiding from world life
+    [trace]  1590 Elidor     (866.41,62.00,456.34) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 6s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 26.5 na 0.0 t 26.5 | hiding from world life
+    [trace]  1600 Elidor     (866.63,62.00,456.35) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 6s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 26.5 na 0.0 t 26.7 | hiding from world life
+    [trace]  1610 Elidor     (866.85,62.00,456.36) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 6s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 26.7 na 0.0 t 26.9 | hiding from world life
+    [trace]  1620 Elidor     (867.08,62.00,456.37) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 7s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 26.9 na 0.0 t 27.0 | hiding from world life
+    [trace]  1630 Elidor     (867.30,62.00,456.37) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 7s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 27.1 na 0.0 t 27.2 | hiding from world life
+    [trace]  1640 Elidor     (867.53,62.00,456.38) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 7s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 27.3 na 0.0 t 27.4 | hiding from world life
+    [trace]  1650 Elidor     (867.75,62.00,456.39) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 7s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 27.5 na 0.0 t 27.5 | hiding from world life
+    [trace]  1660 Elidor     (867.98,62.00,456.40) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 7s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 27.5 na 0.0 t 27.7 | hiding from world life
+    [trace]  1670 Elidor     (868.20,62.00,456.41) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 8s ago)) act run to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 27.7 na 0.0 t 27.9 | hiding from world life
+    [trace]  1680 Elidor     (868.43,62.00,456.42) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 8s ago)) act go to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 27.9 na 0.0 t 28.0 | hiding from world life
+    [trace]  1690 Elidor     (868.65,62.00,456.43) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 8s ago)) act go to goal working null gp true 870.5,62.0,456.5 legs 0/1 st 0 nu 0 ss 28.1 na 0.0 t 28.2 | hiding from world life
+    [trace]  1700 Elidor     (868.88,62.00,456.44) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 8s ago)) act go to goal working null gp true 870.5,62.0,456.5 legs 1/1 st 0 nu 0 ss 28.3 na 0.0 t 28.4 | hiding from world life
+    [trace]  1710 Elidor     (869.10,62.00,456.44) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 8s ago)) act go to goal working null gp true 870.5,62.0,456.5 legs 1/1 st 0 nu 0 ss 28.5 na 0.0 t 28.5 | hiding from world life
+    [trace]  1720 Elidor     (869.33,62.00,456.45) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 8s ago)) act go to goal working null gp true 870.5,62.0,456.5 legs 1/1 st 0 nu 0 ss 28.5 na 0.0 t 28.7 | hiding from world life
+    [trace]  1730 Elidor     (869.55,62.00,456.46) yaw -1.61 want NaN v 1.35,0.05 goal HIDE(hiding from world life (last seen 8s ago)) act go to goal working null gp true 870.5,62.0,456.5 legs 1/1 st 0 nu 0 ss 28.7 na 0.0 t 28.9 | hiding from world life
+    [trace]  1740 Elidor     (869.71,62.00,456.47) yaw -1.61 want NaN v 0.00,0.00 goal HIDE(hiding from world life (last seen 8s ago)) act hold/face working null gp false 870.5,62.0,456.5 legs - st 0 nu 0 ss 28.7 na 0.0 t 29.0 | hiding from world life
+    [trace]  1750 Elidor     (869.71,62.00,456.47) yaw -2.58 want 1.65 v 0.00,0.00 goal HIDE(hiding from world life (last seen 8s ago)) act hold/face working null gp false 870.5,62.0,456.5 legs - st 0 nu 0 ss 28.7 na 0.0 t 29.2 | hiding from world life
+    [trace]  1760 Elidor     (869.71,62.00,456.47) yaw 2.62 want 1.65 v 0.00,0.00 goal HIDE(hiding from world life (last seen 9s ago)) act hold/face working null gp false 870.5,62.0,456.5 legs - st 0 nu 0 ss 28.7 na 0.0 t 29.4 | hiding from world life
+    [trace]  1770 Elidor     (869.71,62.00,456.47) yaw 1.65 want 1.65 v 0.00,0.00 goal HIDE(hiding from world life (last seen 9s ago)) act hold/face working null gp false 870.5,62.0,456.5 legs - st 0 nu 0 ss 28.7 na 0.0 t 29.5 | hiding from world life
+    [trace]  1780 Elidor     (869.71,62.00,456.47) yaw 1.65 want 1.65 v 0.00,0.00 goal HIDE(hiding from world life (last seen 9s ago)) act hold/face working null gp false 870.5,62.0,456.5 legs - st 0 nu 0 ss 28.7 na 0.0 t 29.7 | hiding from world life
+    [trace]  1790 Elidor     (869.71,62.00,456.47) yaw 1.65 want 1.65 v 0.00,0.00 goal HIDE(hiding from world life (last seen 9s ago)) act hold/face working null gp false 870.5,62.0,456.5 legs - st 0 nu 0 ss 28.7 na 0.0 t 29.9 | hiding from world life
+    [life] stop 850,458 done (20 people seen so far)
+
+    [life] 1 stops of 1800 frames; 20 people seen
+      never in play: Ealdra MERCHANT home (309,974)
+      never in play: Torren LAWMAN home (287,1035)
+      never in play: Aldric GUARD home (278,1028)
+      never in play: Oswin WORKER home (352,949)
+      never in play: Tam CRAFTSMAN home (333,884)
+      never in play: Brannoc THIEF home (628,948)
+      never in play: Mara MERCHANT home (162,819)
+      never in play: Lucan LAWMAN home (143,749)
+      never in play: Ferrick CARTER home (240,1021)
+      never in play: Garvin QUEST_GIVER home (259,945)
+      never in play: Kettil CONTACT home (647,924)
+      never in play: Wynn FARMER home (252,1018)
+      never in play: Father Wulfric UNDERTAKER home (227,928)
+      never in play: Skarn FENCE home (628,1074)
+      never in play: Bram GUARD home (285,1026)
+      never in play: Bilal BEGGAR home (956,908)
+      never in play: Ysolde PRIEST home (231,1011)
+      never in play: Father Gregory PRIEST home (260,942)
+      never in play: Rafe HUNTER home (403,849)
+      never in play: Maelin SCHOLAR home (178,647)
+      never in play: Bryn FISHERMAN home (619,641)
+      never in play: Brokk MINER home (247,482)
+      never in play: Fred CRAFTSMAN home (289,965)
+      never in play: Sir Andrew KNIGHT home (269,944)
+      never in play: Hakon HUNTER home (144,624)
+      never in play: Hadwin CIVIC home (312,1004)
+      never in play: Danek CRAFTSMAN home (183,825)
+      never in play: Dawud MINER home (995,926)
+      never in play: Sir Hedric KNIGHT home (407,796)
+      never in play: Gudrik FISHERMAN home (650,1068)
+      never in play: Vesna FISHERMAN home (152,821)
+      never in play: King Leonidas CIVIC home (617,134)
+      never in play: Baron Photios LAWMAN home (644,155)
+      never in play: Leontios GUARD home (643,160)
+      never in play: Anwar GUARD home (926,928)
+      never in play: Brand GUARD home (430,429)
+      never in play: Roder GUARD home (196,668)
+      never in play: Zoe MERCHANT home (528,165)
+      never in play: Father Paul PRIEST home (925,101)
+      never in play: Father Eirik PRIEST home (399,436)
+      never in play: Aristides SCHOLAR home (659,199)
+      never in play: Polyxena MINER home (925,177)
+      never in play: Tolis BEGGAR home (534,109)
+      never in play: Yrsa CIVIC home (432,466)
+      never in play: King Fahad CIVIC home (954,943)
+      never in play: Wat FISHERMAN home (230,1010)
+      never in play: Tauron HUNTER home (908,557)
+      never in play: Bera CIVIC home (435,489)
+      never in play: Duke Torkell CIVIC home (434,426)
+      never in play: Viggo HUNTER home (471,456)
+      never in play: Torvik MINER home (242,487)
+      never in play: Dunstan CRAFTSMAN home (352,952)
+      never in play: Olek CRAFTSMAN home (146,791)
+      never in play: Sten CRAFTSMAN home (404,474)
+      never in play: Alexios CRAFTSMAN home (510,82)
+      never in play: Cenric WORKER home (351,944)
+      never in play: Radek WORKER home (136,817)
+      never in play: Dorran MINER home (224,584)
+      never in play: Merek MINER home (140,612)
+      never in play: Meriwyn MERCHANT home (647,919)
+      never in play: Damaris MERCHANT home (528,167)
+      never in play: Cuthmar FARMER home (297,946)
+      never in play: Baron Osric CIVIC home (292,902)
+      never in play: Kyra FARMER home (262,338)
+      never in play: Marinos FARMER home (264,331)
+      never in play: Berthild CIVIC home (320,992)
+      never in play: Maddoc MERCHANT home (324,994)
+      never in play: Karlon CRAFTSMAN home (327,993)
+      never in play: Melitta CIVIC home (585,239)
+      never in play: Basil MERCHANT home (593,239)
+      never in play: Lazaros CRAFTSMAN home (580,239)
+      never in play: Brennar CRAFTSMAN home (230,664)
+      never in play: Fenna MERCHANT home (248,699)
+      never in play: Aldred CIVIC home (361,964)
+      never in play: Layla CRAFTSMAN home (942,880)
+      never in play: Zainab CRAFTSMAN home (943,876)
+      never in play: Baron Jalal CIVIC home (893,924)
+      never in play: Ziad CRAFTSMAN home (940,877)
+      never in play: Murad CRAFTSMAN home (940,881)
+      never in play: Ilva FARMER home (203,806)
+      never in play: Ioanna CIVIC home (517,260)
+      never in play: Petros FISHERMAN home (513,84)
+      never in play: Sabine SCHOLAR home (260,1041)
+      never in play: Baron Hadrik CIVIC home (238,662)
+      never in play: Yannis FISHERMAN home (510,84)
+      never in play: Count Dracula CIVIC home (140,750)
+      never in play: Sir Garran KNIGHT home (200,672)
+      never in play: Sella CIVIC home (188,825)
+      never in play: Orven CARTER home (253,661)
+      never in play: Leofric CRAFTSMAN home (346,944)
+      never in play: Siv FARMER home (391,451)
+      never in play: Hurk BANDIT home (878,741)
+      never in play: Sigrun BANDIT home (875,742)
+      never in play: Garmund BRUTE home (876,740)
+      never in play: King Richard CIVIC home (274,1025)
+      never in play: Duke Donald CIVIC home (275,1031)
+      never in play: Count William CIVIC home (346,932)
+      never in play: Alaric PRIEST home (263,944)
+      never in play: Maeve CRAFTSMAN home (282,1029)
+      never in play: Hob GUARD home (407,790)
+      never in play: Eadmund CRAFTSMAN home (346,950)
+      never in play: Beric HUNTER home (404,844)
+      never in play: Duke Bashir CIVIC home (951,947)
+      never in play: Count Awhad CIVIC home (905,913)
+      never in play: Sir Faris-ul-Azhar KNIGHT home (954,931)
+      never in play: Hassan SCHOLAR home (954,936)
+      never in play: Idris SCHOLAR home (954,928)
+      never in play: Father Rafiq PRIEST home (962,907)
+      never in play: Yusuf PRIEST home (959,908)
+      never in play: Tariq CIVIC home (892,968)
+      never in play: Zafir CRAFTSMAN home (852,958)
+      never in play: Osama CRAFTSMAN home (985,899)
+      never in play: Marwan CRAFTSMAN home (1004,871)
+      never in play: Karim CRAFTSMAN home (878,885)
+      never in play: Mohamed MERCHANT home (864,911)
+      never in play: Rashid MERCHANT home (909,913)
+      never in play: Munir CARTER home (876,883)
+      never in play: Hakim CARTER home (951,925)
+      never in play: Hamid CRAFTSMAN home (985,946)
+      never in play: Nabil CRAFTSMAN home (989,944)
+      never in play: Salim CRAFTSMAN home (994,928)
+      never in play: Kamal CRAFTSMAN home (996,928)
+      never in play: Qasim WORKER home (987,928)
+      never in play: Fadi MINER home (921,834)
+      never in play: Jamila FARMER home (817,1033)
+      never in play: Samira FARMER home (814,1033)
+      never in play: Zaid GUARD home (939,949)
+      never in play: Sabir GUARD home (947,949)
+      never in play: Baron Nuri CIVIC home (945,923)
+      never in play: Duke Artemios CIVIC home (601,134)
+      never in play: Count Constantine CIVIC home (545,101)
+      never in play: Sir Nicholas KNIGHT home (640,155)
+      never in play: Sir Kosmas KNIGHT home (638,155)
+      never in play: Baroness Eudokia CIVIC home (653,198)
+      never in play: Father Khalid PRIEST home (532,160)
+      never in play: Ione PRIEST home (498,82)
+      never in play: Stavros CIVIC home (479,263)
+      never in play: Demetrios CRAFTSMAN home (495,244)
+      never in play: Irene SCHOLAR home (589,134)
+      never in play: Theodora CRAFTSMAN home (496,221)
+      never in play: Xenia CRAFTSMAN home (638,164)
+      never in play: Eleni CRAFTSMAN home (497,221)
+      never in play: Theron MERCHANT home (530,161)
+      never in play: Pavlos FENCE home (528,160)
+      never in play: Melina FISHERMAN home (516,84)
+      never in play: Spiros WORKER home (510,84)
+      never in play: Timon WORKER home (512,87)
+      never in play: Damon WORKER home (516,82)
+      never in play: Alkis CARTER home (529,166)
+      never in play: Andreas CRAFTSMAN home (472,200)
+      never in play: Nikos CRAFTSMAN home (470,200)
+      never in play: Kallias CRAFTSMAN home (472,205)
+      never in play: Isidoros CRAFTSMAN home (476,205)
+      never in play: Orestes WORKER home (228,179)
+      never in play: Myron GUARD home (638,162)
+      never in play: Perikles GUARD home (641,167)
+      never in play: Zenon GUARD home (639,167)
+      never in play: Argyros GUARD home (638,159)
+      never in play: Gorgias GUARD home (643,163)
+      never in play: Kleon GUARD home (643,158)
+      never in play: Kyros THIEF home (470,201)
+      never in play: Mimis BEGGAR home (531,109)
+      never in play: Argus THIEF home (474,200)
+      never in play: Phaedra CARTER home (642,155)
+      never in play: Leandros BEGGAR home (518,82)
+      never in play: Sabeen BEGGAR home (518,84)
+      never in play: King Phillip CIVIC home (207,669)
+      never in play: Duke Edran CIVIC home (204,672)
+      never in play: Sir Vaelor KNIGHT home (177,642)
+      never in play: Father Anselm PRIEST home (177,645)
+      never in play: Tovin CRAFTSMAN home (248,704)
+      never in play: Elric CIVIC home (230,682)
+      never in play: Halwen CRAFTSMAN home (263,701)
+      never in play: Hesta FARMER home (252,654)
+      never in play: Aldis CIVIC home (177,705)
+      never in play: Toben CRAFTSMAN home (177,708)
+      never in play: Soren SCHOLAR home (400,440)
+      never in play: Halvar CRAFTSMAN home (448,449)
+      never in play: Runa CARTER home (454,447)
+      never in play: Ulven CRAFTSMAN home (433,486)
+      never in play: Nessa MERCHANT home (439,480)
+      never in play: Einar WORKER home (404,484)
+      never in play: Varek SCHOLAR home (137,754)
+      never in play: Father Odran PRIEST home (198,772)
+      never in play: Mother Mirel PRIEST home (156,787)
+      never in play: Borin FARMER home (202,836)
+      never in play: Vark BANDIT home (879,740)
+      never in play: Dolgrin MINER home (249,482)
+      never in play: Pell WORKER home (913,626)
+      never in play: Ysmay WORKER home (1032,439)
+      never in play: Hask HUNTER home (768,529)
+      never in play: Orrin CRAFTSMAN home (417,702)
+      never in play: Corvane HUNTER home (633,937)
+      never in play: Bogdan GUARD home (148,837)
+      never in play: Milena CIVIC home (212,771)
+      never in play: Lothar GUARD home (211,654)
+      never in play: Hilde UNDERTAKER home (175,628)
+      never in play: Gunnar GUARD home (447,482)
+      never in play: Astrid UNDERTAKER home (409,423)
+      never in play: Nadim GUARD home (971,1019)
+      never in play: Samir UNDERTAKER home (878,843)
+      never in play: Rask BANDIT home (874,741)
+      never in play: Wenna BANDIT home (880,741)
+      never in play: Hullen BANDIT home (872,740)
+      never in play: Grisel BANDIT home (882,741)
+      never in play: Haskel MINER home (219,583)
+      never in play: Tamsin MINER home (147,611)
+      never in play: Osk MINER home (248,487)
+      never in play: Mabry WORKER home (226,179)
+      never in play: Edvin WORKER home (220,179)
+      never in play: Corra WORKER home (916,625)
+      never in play: Grimbold UNDERTAKER home (233,967)
+      never in play: Odo UNDERTAKER home (148,808)
+      never in play: Kyrillos UNDERTAKER home (478,187)
+      never in play: Nasira SCHOLAR home (916,845)
+      never in play: Hrodna CIVIC home (479,475)
+    [life] 0 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 63.883 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 8s
+9 actionable tasks: 1 executed, 8 up-to-date

@@ -1,0 +1,160 @@
+Starting a Gradle Daemon (subsequent builds will be faster)
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test
+  slow: rpg.monster.MonsterFightTest.aGroundedRangedMonsterClimbsToReachableHighGround() 86.073 s
+
+MonsterFightTest > aGroundedRangedMonsterClimbsToReachableHighGround() FAILED
+    org.opentest4j.AssertionFailedError: ranged monster stayed at 29.5,4.001472,26.5 (ENGAGE, climbing to a clear firing position) ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+        at app//rpg.monster.MonsterFightTest.aGroundedRangedMonsterClimbsToReachableHighGround(MonsterFightTest.java:70)
+
+MonsterFightTest > aMeleeMonsterClimbsTowardAnElevatedVisibleOpponent() FAILED
+    org.opentest4j.AssertionFailedError: melee monster stayed at 29.85236,4.001472,25.79527 (roaring up at Fights) ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+        at app//rpg.monster.MonsterFightTest.aMeleeMonsterClimbsTowardAnElevatedVisibleOpponent(MonsterFightTest.java:80)
+
+SimProfileProbe > profileTheSimulation() SKIPPED
+
+FlyerProbeTest > probe() SKIPPED
+  slow: rpg.ai.Gamefixes032Test.aFireSpellStillBurnsGrassAfterWalkingTheWholeMap() 22.513 s
+  slow: rpg.ai.Gamefixes032Test.theCropFarmerHarvestsAndResowsHisRows() 45.78 s
+  slow: rpg.ai.Gamefixes033Test.aPettyFineIsAskedForOnceAndNotAgainWhileItStandsUnchanged() 28.194 s
+  slow: rpg.ai.Gamefixes034Test.aleLendsFiveStrengthThatEbbsAndLeavesTheBottle() 81.875 s
+  slow: rpg.ai.Gamefixes036Test.theFenceTradesWithACustomerWhoseBladeIsOut() 21.341 s
+
+JumpProbeTest > probe() SKIPPED
+
+LifeProbeTest > probe() SKIPPED
+
+LifeProbeTest > trace() SKIPPED
+  slow: rpg.ai.NewResidentsTest.theFiveGetOnWithTheirTrades() 21.772 s
+
+ReportPauseProbeTest > probe() SKIPPED
+
+SoundProbeTest > probe() SKIPPED
+
+StallMapProbeTest > probe() SKIPPED
+
+TabernaProbeTest > probe() SKIPPED
+  slow: rpg.animal.WadingTest.ducksTakeToTheirPondOfTheirOwnAccord() 46.716 s
+  slow: rpg.combat.SummonStressTest.summoningOverAndOverNeverBreaksTheWorld(Path) 29.568 s
+  slow: rpg.encounter.EncounterTest.highwaymenAskTheirTollAndArePaid() 44.549 s
+  slow: rpg.encounter.EncounterTest.everyEncounterStartsWhereItFits() 21.415 s
+
+HaunterProbeTest > probe() SKIPPED
+
+Gamefixes041Test > theBankAndTheGardensAreWhereShadowVeilPutsThem() FAILED
+    org.opentest4j.AssertionFailedError: the bank counter is in Loxford Castle's keep ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+        at app//rpg.world.Gamefixes041Test.theBankAndTheGardensAreWhereShadowVeilPutsThem(Gamefixes041Test.java:91)
+
+Gamefixes044Test > everyEnterableBuildingIsFittedOutAndApproved() FAILED
+    org.opentest4j.AssertionFailedError: 537: [loxford_store scored 93 {architecture=20, furniture=20, lighting=15, function=15, navigation=15, technical=8} [the shopfloor (storey 0) has no light], loxford_store's shopfloor is unlit, harlette_store scored 92 {architecture=20, furniture=19, lighting=15, function=15, navigation=15, technical=8} [the shopfloor (storey 0) has no light], harlette_store's shopfloor is unlit, fennas_shop scored 92 {architecture=20, furniture=19, lighting=15, function=15, navigation=15, technical=8} [the shopfloor (storey 0) has no light], fennas_shop's shopfloor is unlit, tovins_workshop scored 88 {architecture=20, furniture=19, lighting=15, function=15, navigation=15, technical=4} [the shopfloor (storey 0) has no light, no room inside for its anvil, no room inside for its furnace], tovins_workshop's shopfloor is unlit, zafirs_swords scored 93 {architecture=20, furniture=20, lighting=15, function=15, navigation=15, technical=8} [the shopfloor (storey 0) has no light], zafirs_swords's shopfloor is unlit, mohameds_crafting scored 93 {architecture=20, furniture=20, lighting=15, function=15, navigation=15, technical=8} [the shopfloor (storey 0) has no light], mohameds_crafting's shopfloor is unlit, karims_kitchen scored 93 {architecture=20, furniture=20, lighting=15, function=15, navigation=15, technical=8} [the shopfloor (storey 0) has no light], karims_kitchen's shopfloor is unlit, azharad_store scored 93 {architecture=20, furniture=20, lighting=15, function=15, navigation=15, technical=8} [the shopfloor (storey 0) has no light], azharad_store's shopfloor is unlit, osamas_armour scored 93 {architecture=20, furniture=20, lighting=15, function=15, navigation=15, technical=8} [the shopfloor (storey 0) has no light], osamas_armour's shopfloor is unlit, marwans_armour scored 91 {architecture=20, furniture=20, lighting=15, function=15, navigation=15, technical=6} [the shopfloor (storey 0) has no light, no room inside for its furnace], marwans_armour's shopfloor is unlit] ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:42)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:191)
+        at app//rpg.world.Gamefixes044Test.everyEnterableBuildingIsFittedOutAndApproved(Gamefixes044Test.java:66)
+
+Gamefixes044Test > everyoneSleepsInARealBedIndoorsAndWorksAtARealPost() FAILED
+    org.opentest4j.AssertionFailedError: 1: [Hadwin has no bed of their own in loxford_bank] ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:42)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:191)
+        at app//rpg.world.Gamefixes044Test.everyoneSleepsInARealBedIndoorsAndWorksAtARealPost(Gamefixes044Test.java:84)
+
+Gamefixes044Test > everyoneWalksFromTheirDoorToTheirBedAndTheirPost() FAILED
+    org.opentest4j.AssertionFailedError: 2: [Eadmund: no way to the post at 351,40,945, Hrodna: no way to the post at 479,55,478] ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:42)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:191)
+        at app//rpg.world.Gamefixes044Test.everyoneWalksFromTheirDoorToTheirBedAndTheirPost(Gamefixes044Test.java:122)
+
+Gamefixes044Test > everyRoomOfEveryBuildingIsReachedFromItsDoor() FAILED
+    org.opentest4j.AssertionFailedError: 4: [millwood_lodge's kitchen (storey 0) is not reached from its door: 342,40,952 -> 347,40,944, chieftains_hall's kitchen (storey 0) is not reached from its door: 435,57,435 -> 430,57,428, loggers_rest's inn_kitchen (storey 0) is not reached from its door: 224,38,182 -> 218,38,176, waystation_bunks's inn_kitchen (storey 0) is not reached from its door: 654,34,923 -> 646,34,927] ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:42)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:191)
+        at app//rpg.world.Gamefixes044Test.everyRoomOfEveryBuildingIsReachedFromItsDoor(Gamefixes044Test.java:152)
+
+Gamefixes045Test > twoHundredTwentyFivePeople() FAILED
+    org.opentest4j.AssertionFailedError: expected: <225> but was: <236>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:531)
+        at app//rpg.world.Gamefixes045Test.twoHundredTwentyFivePeople(Gamefixes045Test.java:45)
+
+Gamefixes045Test > theOutfitsAreItemsWithTheirRequirements() FAILED
+    org.opentest4j.AssertionFailedError: Pigskin, Rogue, Prospector, three Desert, Farmer's, Lumberjack ==> expected: <8> but was: <9>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:563)
+        at app//rpg.world.Gamefixes045Test.theOutfitsAreItemsWithTheirRequirements(Gamefixes045Test.java:103)
+
+IvyProbeTest > probe() SKIPPED
+
+MapDumpProbeTest > dump() SKIPPED
+  slow: rpg.world.RepairsTest.theCarpenterPutsABrokenWindowBack() 21.893 s
+  slow: rpg.world.ShadowVeilTest.aWholeGameDayRunsWithoutAFault() 56.124 s
+
+TextureSheetProbeTest > sheet() SKIPPED
+
+554 tests completed, 9 failed, 13 skipped
+
+> Task :test FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 30m 56s
+9 actionable tasks: 1 executed, 8 up-to-date
+EXIT 1

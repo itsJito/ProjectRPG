@@ -64,7 +64,31 @@ public final class Voxels {
     public void afterCommands(){if(navigationPending){navigationRevision++;navigationPending=false;for(int i=pendingChunks.nextSetBit(0);i>=0;i=pendingChunks.nextSetBit(i+1))chunkVersions[i]++;pendingChunks.clear();}}
 
     private java.util.List<rpg.objects.Door> doors = java.util.List.of();
-    public void doors(java.util.List<rpg.objects.Door> doors) { this.doors = doors; navigation.doors(doors); }
+    public void doors(java.util.List<rpg.objects.Door> doors) { this.doors = doors; navigation.doors(doors); doorGridOf = -1; }
+
+    // (0.4.7, gamefixes: aggressive optimization) the doors by the sixteen-cell square they hang in: every ray and line of
+    // sight in the game tried every door in the world (over a thousand on ShadowVeil), thousands of times a frame in a fight
+    private final java.util.Map<Long, java.util.List<rpg.objects.Door>> doorGrid = new java.util.HashMap<>();
+    private int doorGridOf = -1;
+    private final java.util.ArrayList<rpg.objects.Door> nearDoors = new java.util.ArrayList<>();
+    private final Thread doorThread = Thread.currentThread();
+    private static final int DOOR_SQUARE = 16;
+    private static final float DOOR_PAD = 4;
+    /** The doors whose leaves could cross a segment (x, z to ex, ez): those hung within a few metres of its box. */
+    private java.util.List<rpg.objects.Door> doorsNear(float ox, float oz, float ex, float ez) {
+        if (Thread.currentThread() != doorThread || doors.size() < 32) return doors;
+        if (doorGridOf != doors.size()) {
+            doorGrid.clear(); doorGridOf = doors.size();
+            for (var d : doors) doorGrid.computeIfAbsent(squareKey((int) Math.floor(d.x / DOOR_SQUARE), (int) Math.floor(d.z / DOOR_SQUARE)), k -> new java.util.ArrayList<>(2)).add(d);
+        }
+        int x0 = (int) Math.floor((Math.min(ox, ex) - DOOR_PAD) / DOOR_SQUARE), x1 = (int) Math.floor((Math.max(ox, ex) + DOOR_PAD) / DOOR_SQUARE);
+        int z0 = (int) Math.floor((Math.min(oz, ez) - DOOR_PAD) / DOOR_SQUARE), z1 = (int) Math.floor((Math.max(oz, ez) + DOOR_PAD) / DOOR_SQUARE);
+        if ((long) (x1 - x0 + 1) * (z1 - z0 + 1) > 64) return doors;   // a very long ray: the whole list is as quick
+        nearDoors.clear();
+        for (int cx = x0; cx <= x1; cx++) for (int cz = z0; cz <= z1; cz++) { var l = doorGrid.get(squareKey(cx, cz)); if (l != null) nearDoors.addAll(l); }
+        return nearDoors;
+    }
+    private static long squareKey(int x, int z) { return ((long) x << 32) ^ (z & 0xFFFFFFFFL); }
     private static boolean door(int block) { return block == Blocks.DOOR || block == Blocks.LOCKED_DOOR; }
 
     public int block(int x, int y, int z) { return v.block(x, y, z); }
@@ -117,14 +141,14 @@ public final class Voxels {
             if (b != 0 && (!door(b) && solid[b] || stopAtWater && b == Blocks.WATER) && !(throughFurniture && furnitureCells != null && furnitureCells.test(cellKey(x, y, z)))) {
                 h.hit = true; h.dist = t; h.bx = x; h.by = y; h.bz = z; h.nx = nx; h.ny = ny; h.nz = nz; h.block = b;
                 h.x = ox + dx * t; h.y = oy + dy * t; h.z = oz + dz * t;
-                for (var panel : doors) if (leaves || !panel.open) panel.ray(h, ox, oy, oz, dx, dy, dz, t);
+                for (var panel : doorsNear(ox, oz, ox + dx * t, oz + dz * t)) if (leaves || !panel.open) panel.ray(h, ox, oy, oz, dx, dy, dz, t);
                 return h;
             }
             if (tmx < tmy && tmx < tmz) { t = tmx; tmx += tdx; x += sx; nx = -sx; ny = 0; nz = 0; }
             else if (tmy < tmz) { t = tmy; tmy += tdy; y += sy; nx = 0; ny = -sy; nz = 0; }
             else { t = tmz; tmz += tdz; z += sz; nx = 0; ny = 0; nz = -sz; }
         }
-        for (var panel : doors) if (leaves || !panel.open) panel.ray(h, ox, oy, oz, dx, dy, dz, max);
+        for (var panel : doorsNear(ox, oz, ox + dx * max, oz + dz * max)) if (leaves || !panel.open) panel.ray(h, ox, oy, oz, dx, dy, dz, max);
         return h;
     }
 
@@ -164,7 +188,7 @@ public final class Voxels {
     private boolean panelBlocks(float x,float y,float z,float dx,float dy,float dz,float length) {
         if (length < 1e-5f) return false;
         Hit hit = new Hit();
-        for (var panel : doors) panel.ray(hit, x,y,z,dx/length,dy/length,dz/length,length);
+        for (var panel : doorsNear(x, z, x + dx, z + dz)) panel.ray(hit, x,y,z,dx/length,dy/length,dz/length,length);
         return hit.hit && hit.dist < length - 0.02f;
     }
 

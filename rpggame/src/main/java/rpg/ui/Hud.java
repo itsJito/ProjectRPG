@@ -115,6 +115,10 @@ public final class Hud {
     // ------------------------------------------------------------------ registry and layout
     <T extends Fragment> T add(T f) { f.bind(this); fragments.put(f.id, f); return f; }
     public Fragment fragment(String id) { return fragments.get(id); }
+    /** (0.4.8, reviews and tests) the journal's chosen quest, its settings sheet, the world map's view. */
+    public void journalSelect(String id) { if (fragments.get("journal") instanceof Panels.Journal j) j.select(id); }
+    public void journalSettings(boolean open) { if (fragments.get("journal") instanceof Panels.Journal j) j.settingsOpen(open); }
+    public void mapView(float x, float z, float zoom) { if (fragments.get("worldmap") instanceof HudFragments.WorldMap m) m.view(x, z, zoom); }
 
     void group(String id, Object... fragmentsAndPlacements) {
         List<Slot> l = groups.computeIfAbsent(id, k -> new ArrayList<>());
@@ -124,7 +128,7 @@ public final class Hud {
     /** A placement inside the scene frame: (fx, fy) from the frame's top-left corner. */
     Placement inFrame(String fragment, float fx, float fy) {
         Fragment f = fragments.get(fragment);
-        return Placement.at(Anchor.CENTER, frameShift() - frameWidth() / 2 + fx + f.width() / 2, FRAME_Y - FH / 2 + fy + f.height() / 2);
+        return Placement.at(Anchor.CENTER, frameShift() - frameWidth() / 2 + fx + f.width() / 2, FRAME_Y - frameHeight() / 2 + fy + f.height() / 2);
     }
 
     private void layout() {
@@ -140,7 +144,7 @@ public final class Hud {
                 "container", Placement.at(Anchor.CENTER, apart, FRAME_Y), "shop", Placement.at(Anchor.CENTER, apart, FRAME_Y));
         group("character", "equipment", inFrame("equipment", 16, 52), "stats", inFrame("stats", 232, 52));
         group("skills", "skills", inFrame("skills", 16, 52), "guide", inFrame("guide", 452, 52));
-        group("journal", "journal", inFrame("journal", 16, 52), "legend", inFrame("legend", 552, 52));
+        group("journal", "journal", inFrame("journal", 16, 52));
         group("magic", "magic", inFrame("magic", 16, 52));
         group("faith", "faith", inFrame("faith", 16, 52));
         group("map", "worldmap", inFrame("worldmap", 16, 52));
@@ -216,7 +220,11 @@ public final class Hud {
     }
     /** A scene key: opens it, or closes it when it is already open. */
     public void toggle(Scene s) { go(scene == s ? Scene.WORLD : s); }
-    public float frameWidth() { return vaultOpen() ? VAULT_SIDE : inventoryOnly() ? 684 : FW; }
+    public float frameWidth() { return vaultOpen() ? VAULT_SIDE : inventoryOnly() ? 684 : scene == Scene.MAP ? mapFrameW() : FW; }
+    /** (0.4.8, gamefixes: the world map larger) the map's frame takes the screen, less a margin; every other scene's is the standard frame. */
+    public float frameHeight() { return scene == Scene.MAP ? mapFrameH() : FH; }
+    float mapFrameW() { return Math.max(FW, Math.min(w - 64, 1600)); }
+    float mapFrameH() { return Math.max(FH, Math.min(h - 150, 900)); }
     public boolean inventoryOnly() { return win == Win.CONTAINER && container != null; }
     /**
      * At the bank (gamefixes: the bank's window should be easier, the vault taking centre stage): the vault is the big
@@ -342,6 +350,7 @@ public final class Hud {
         }
         stackTop(on, at);
         if (scene == Scene.INVENTORY) at.put("radial", Placement.at(Anchor.CENTER, frameWidth() / 2 + 16 + radial.width() / 2, FRAME_Y + 48));
+        if (scene == Scene.MAP) at.put("worldmap", inFrame("worldmap", 16, 52));
         if (settings.open) on.clear();
         // dead, the interface steps aside for the death itself (the rest fades out where it was)
         if (!g.player.alive) on.retainAll(java.util.Set.of("death", "console"));

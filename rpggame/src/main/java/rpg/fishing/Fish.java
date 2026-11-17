@@ -67,7 +67,8 @@ public final class Fish implements Interactable {
     public float maxHp() { return Math.max(1, kind.health); }
     /** The combat level its kind's skills give it. */
     public int combatLevel() { return kind.combatLevel(); }
-    @Override public String label() { return kind.title + " (level " + combatLevel() + ")"; }
+    @Override public String label() { return kind.title; }
+    @Override public int levelTag() { return alive ? combatLevel() : -1; }
 
     // ------------------------------------------------------------------ as something in the world (Interactable)
     @Override public long id() { return id; }

@@ -1,0 +1,220 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldInspectProbeTest > inspect() STANDARD_OUT
+    [Load] ShadowVeil grown in 19.55s ({regions=911, overlays=483, variants=631, scarp=50, coast=431, erosion=335, peaks=76, lakes=56, isles=1, rivers=745, wadis=13, ground=24, roads=592, causeways=4, architecture=1302, pitsFilled=1396, pits=419, banks=67, clamp=13, cliffs=54, columns=790, falls=15, raise=10822, trees=296, outcrops=0, ways=501, lava=0, dungeons=94, postsSunk=28, floatingRemoved=59, floating=780}), made and lit in 2.19s
+    [water] flow field grown in 1743 ms: 39016 columns moving
+    [gathering] 757 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+
+    ================ 627, 33, 947  law WILDS  stand Y 33.0
+    structure here: -
+      near waystation_bunks           Waystation                               hall           32 m lot 645,917-652,930 floor 33
+      near wagon_stop                 Wagon stop                               yard           27 m lot 649,941-658,952 floor 32
+      near waystation_stakes          Torchlit stakes                          gibbets        36 m lot 605,907-618,920 floor 33
+      near culvert_cave               Culvert cave                             mouth          6 m lot 616,945-625,949 floor 32
+      object Container              Old chest                      (628.5, 15.4, 950.5)
+      object Trap                   Spike plate                    (624.5, 4.0, 949.5)
+      npc Brannoc      THIEF          (626.5, 33.0, 947.5) goal IDLE
+      npc Corvane      HUNTER         (632.5, 34.0, 936.5) goal IDLE
+      layer Y31 (x 622..632 across, z down; * the point)
+       aaaaa~~~~~~
+       bbbbba~~~~~
+       bbbbbb~~~~~
+       aaaabc...~~
+       ..aabba~.~~
+       ..aab*aa~~~
+       ..aaddaa~~~
+       aaaaddda~~~
+       ddddddda~~~
+       ddddddda~~~
+       aaaadda~~~~
+      layer Y32 (x 622..632 across, z down; * the point)
+       aaaaa~~~~~~
+       ddddba~~~~~
+       ddddab~~~~~
+       aaaac....~~
+       ..aaaba~~~~
+       ..aaa*aa~~~
+       ..aabeaa~~~
+       aaaaaeda~~~
+       ddddaeda~~~
+       ddddedda~~~
+       aaaadda~~~~
+      layer Y33 (x 622..632 across, z down; * the point)
+       aaaaa....ff
+       dddd.a....f
+       ddd.......f
+       aaa.......f
+       .....aaa...
+       .....*aa...
+       .....aaa...
+       aaaa..da...
+       dddd..da...
+       dddd.dda...
+       aaaadda....
+      layer Y34 (x 622..632 across, z down; * the point)
+       aaaaa....g.
+       dddd.a....g
+       ddd.......g
+       aaa.......g
+       .....aaa...
+       .....*aa...
+       .....aaa...
+       aaaa..ea...
+       dddd..ea...
+       dddd.eea...
+       aaaaeea....
+      layer Y35 (x 622..632 across, z down; * the point)
+       aada.......
+       dddh.a.....
+       ddd........
+       aaa...a....
+       aa...aaa...
+       aa...*aa...
+       aa...aaa...
+       aaaa.......
+       dddd.......
+       eedd.......
+       aada.......
+      layer Y36 (x 622..632 across, z down; * the point)
+       aah........
+       hhd........
+       hhd........
+       aaa........
+       ba...aaa...
+       ba...*aa...
+       ba...aaa...
+       aaaa.......
+       ehdh.......
+       ..ee.......
+       aah........
+      layer Y37 (x 622..632 across, z down; * the point)
+       ...........
+       ..h........
+       ..h........
+       aadh.......
+       badh.......
+       badh.*.....
+       badh.......
+       aade.......
+       ..h........
+       ...........
+       ...........
+      legend: a=stone b=gravel c=stairs d=dirt e=dry_grass f=planks g=fence h=grass
+
+    ================ 202, 58, 590  law WILDS  stand Y 58.0
+    structure here: sunkissed_mine Sunkissed Mine (mouth) lot 198,577 - 202,590 floor 57
+      near sunkissed_bunkhouse        Sunkissed Mine bunkhouse                 hall           22 m lot 217,579-228,586 floor 61
+      object Trap                   Spike plate                    (203.5, 4.0, 587.5)
+      npc Dorran       MINER          (202.5, 58.0, 592.5) goal IDLE
+      npc Haskel       MINER          (200.5, 58.0, 589.5) goal IDLE
+      layer Y56 (x 197..207 across, z down; * the point)
+       ab...baabbb
+       ab...baabbb
+       ac...caabbb
+       ab...d...bb
+       abbbbbaa.bb
+       abbbb*aabbb
+       aaaaaaaabbb
+       aaaaaaabbbb
+       bbbbbbbbbbb
+       bbbbbbbbbba
+       aabbabbabaa
+      layer Y57 (x 197..207 across, z down; * the point)
+       eb...beefbb
+       eb...beefbb
+       ec.bbceefbb
+       fb.bd....bb
+       fbbbbbfefbb
+       fcbbb*fefbb
+       fffbbffabba
+       eeeaeeefbaa
+       affffaaaaaa
+       aaaaaaaaaaa
+       aaaaaaaaaaa
+      layer Y58 (x 197..207 across, z down; * the point)
+       .b...b..fbb
+       .b...b..fbb
+       .c......fba
+       .b......fba
+       .b...bbbfba
+       .c...*bbfaa
+       .....bbeaaa
+       .......faaa
+       affffaaaaaa
+       aaaaaaaaaae
+       eeaaeaaeaee
+      layer Y59 (x 197..207 across, z down; * the point)
+       .bbbbb..faa
+       .bbbbb..faa
+       .cg.....faa
+       .b......faa
+       .b...bbbfaa
+       .c...*bbfaa
+       .....bbbaae
+       .......faee
+       effffeeeeee
+       eeeeeeeeee.
+       ..ee.ee.e..
+      layer Y60 (x 197..207 across, z down; * the point)
+       .fbbbf..faa
+       .fbbbf..faa
+       .cc.....fae
+       .bb.....fae
+       .b...bbbfae
+       .c...*bbfee
+       .....bbbee.
+       .......fe..
+       .ffff......
+       ...........
+       ...........
+      layer Y61 (x 197..207 across, z down; * the point)
+       .faaaf..fee
+       .faaaf..fee
+       .fa.....fe.
+       .ff.....fe.
+       .b...bbbfe.
+       .c...*bbf..
+       .....bbb...
+       ...........
+       ...........
+       ...........
+       ...........
+      layer Y62 (x 197..207 across, z down; * the point)
+       .faaaf..f..
+       .faaaf..f..
+       .faaaf.....
+       .fffff.....
+       ...........
+       .....*.....
+       ...........
+       ...........
+       ...........
+       ...........
+       ...........
+      legend: a=gravel b=stone c=spruce_log d=stairs e=grass f=granite g=planks
+  slow: rpg.probe.WorldInspectProbeTest.inspect() 34.738 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 39s
+9 actionable tasks: 1 executed, 8 up-to-date

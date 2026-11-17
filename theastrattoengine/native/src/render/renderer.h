@@ -124,7 +124,7 @@ private:
     struct Env {
         float sun[3] = {0.3f, 0.8f, 0.4f}, daylight = 1, time = 0, rain = 0, wet = -1, snow = 0, overcast = -1, lightning = 0;
         float fog[3] = {0.6f, 0.62f, 0.64f}, fogDensity = 1.0f / 200, wallStart = 1e9f, wallEnd = 2e9f, skyHorizon = 0, skyZenith = 0;
-        float tint[3] = {1, 1, 1}, ambientFloor = 0.0035f, fogOrigin[3] = {std::numeric_limits<float>::quiet_NaN(), 0, 0}, bloom = 0.05f;
+        float tint[3] = {1, 1, 1}, ambientFloor = 0.0035f, fogOrigin[3] = {std::numeric_limits<float>::quiet_NaN(), 0, 0}, bloom = 0.05f, edge[4] = {0, 0, 0, 0}, edgeBand = 0;
     };
     struct Camera {
         Mat4 view, proj, vmProj;

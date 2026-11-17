@@ -1,0 +1,92 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :gallery
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 15 2026 20:47:17 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 37.01s ({regions=832, overlays=590, variants=377, scarp=60, coast=369, erosion=416, peaks=99, lakes=77, isles=1, rivers=826, wadis=15, ground=31, roads=830, causeways=5, architecture=1767, pitsFilled=1396, pits=607, banks=132, clamp=17, cliffs=104, columns=1460, falls=26, raise=25514, trees=439, outcrops=0, ways=1053, lava=0, dungeons=229, postsSunk=4, floatingRemoved=59, floating=1089}), made and lit in 4.60s
+[Load] ShadowVeil 41.69s
+[Load] renderer and UI 5.41s
+[water] flow field grown in 1596 ms: 39016 columns moving
+[gathering] 757 wild herb patches, flax and berry bushes
+[monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 49 chunks made, 39 meshes, 1.25s
+[Load] 243 furniture models made in 0.09s
+[Load] first rendered frame 6.50s
+[Load] the world about the spawn made ready in 15.99s
+[Load] game frame 1: scene 10 ms, interface 1051 ms, render 64 ms
+[Load] game frame 2: scene 10 ms, interface 3 ms, render 10 ms
+[Load] game frame 3: scene 9 ms, interface 3 ms, render 10 ms
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-sunny-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-sunny-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-high_pressure-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-high_pressure-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-clouds-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-clouds-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-overcast-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-overcast-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-dark_overcast-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-dark_overcast-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-mist-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-mist-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-dense_fog-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-dense_fog-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-drizzle-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-drizzle-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-rain-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-rain-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-showers-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-showers-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-thunder-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-thunder-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-thunderstorm-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-thunderstorm-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-hurricane-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-hurricane-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-hail-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-hail-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-sleet-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-sleet-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-light_snow-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-light_snow-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-snow-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-snow-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-blizzard-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-blizzard-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-ground_blizzard-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-ground_blizzard-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-whiteout-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-whiteout-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-sandstorm-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-sandstorm-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-snow_clearing-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-snow_clearing-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-rain_clearing-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\wx1\weather-rain_clearing-high.png
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 3m 46s
+8 actionable tasks: 1 executed, 7 up-to-date
+EXIT 0

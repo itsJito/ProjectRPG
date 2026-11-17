@@ -1,0 +1,60 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources
+> Task :compileJava UP-TO-DATE
+> Task :classes
+
+> Task :gallery
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 14 2026 17:37:31 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 20.88s ({regions=965, overlays=671, variants=443, scarp=62, coast=540, erosion=427, peaks=64, lakes=74, isles=4, rivers=613, wadis=14, ground=26, roads=595, causeways=4, architecture=1201, pitsFilled=1302, pits=484, banks=98, clamp=14, cliffs=72, columns=1255, falls=23, raise=11627, trees=298, outcrops=0, ways=631, postsSunk=32, floatingRemoved=59, floating=634}), made and lit in 2.27s
+[Load] ShadowVeil 23.22s
+[Load] renderer and UI 2.28s
+[water] flow field grown in 826 ms: 39016 columns moving
+[gathering] 757 wild herb patches, flax and berry bushes
+[monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 49 chunks made, 39 meshes, 1.21s
+[Load] 245 furniture models made in 0.09s
+[Load] first rendered frame 6.05s
+[Load] the world about the spawn made ready in 13.21s
+[Load] growth about the spawn: 14 chunks made, 51 meshes, 0.28s
+[Load] game frame 1: scene 11 ms, interface 932 ms, render 28 ms
+[Load] game frame 2: scene 9 ms, interface 3 ms, render 9 ms
+[Load] game frame 3: scene 11 ms, interface 4 ms, render 9 ms
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\who1\who-arthur-front.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\who1\who-arthur-quarter.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\who1\who-arthur-side.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\who1\who-arthur-back.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\who1\who-arthur-face.png
+[Load] growth about the spawn: 0 chunks made, 54 meshes, 0.00s
+[Load] 0 furniture models made in 0.00s
+[Load] the world about the spawn made ready in 0.11s
+[Load] growth about the spawn: 7 chunks made, 58 meshes, 0.07s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\who1\who-guinevere-front.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\who1\who-guinevere-quarter.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\who1\who-guinevere-side.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\who1\who-guinevere-back.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\who1\who-guinevere-face.png
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 51s
+8 actionable tasks: 2 executed, 6 up-to-date

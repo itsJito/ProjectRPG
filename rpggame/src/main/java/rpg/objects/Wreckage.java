@@ -158,8 +158,11 @@ public final class Wreckage {
     public Object[] ray(float ox, float oy, float oz, float dx, float dy, float dz, float limit) {
         Object[] best = null;
         float bestT = limit;
-        for (Furniture f : g.objects.furniture) {
-            if (!f.exists() || !breakable(f.kind)) continue;
+        // (0.4.7, gamefixes: aggressive optimization) only the furniture about the line: every swing of every fighter tried
+        // every piece in the world (thousands on ShadowVeil) every frame of the swing
+        float len = (float) Math.sqrt(dx * dx + dy * dy + dz * dz), reach = len < 1e-6f ? 0 : limit / len;
+        for (rpg.interact.WorldObject near : g.objects.near(ox + dx * reach * 0.5f, oz + dz * reach * 0.5f, limit * 0.5f + 3)) {
+            if (!(near instanceof Furniture f) || !f.exists() || !breakable(f.kind)) continue;
             float half = Math.max(f.width(), f.depth()) * 0.75f + f.h;
             float cx = f.x - ox, cy = f.floor + f.h * 0.5f - oy, cz = f.z - oz;
             float along = cx * dx + cy * dy + cz * dz;

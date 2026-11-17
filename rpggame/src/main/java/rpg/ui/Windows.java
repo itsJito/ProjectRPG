@@ -274,10 +274,10 @@ final class Windows {
                 boolean on = g.quests.courier.name().equals(states[i]);
                 Style.tab(ui, states[i].toLowerCase().replace('_', ' '), x + 12 + i * 119, yy, 113, 28, on);
             }
-            ui.text("Active to completed: deliver the letter to Kit. Any state to failed: Kit dies.", x + 12, yy + 36, 11, Style.DIM);
-            yy += 58;
             Npc kit = (Npc) g.actor(Ids.CONTACT);
-            ui.text("Dependency NPC: Kit (#" + Ids.CONTACT + ") - " + (kit.alive ? "alive" : "DEAD (permanent)"), x + 12, yy, 13, kit.alive ? Style.GOOD : Style.BAD);
+            ui.text("Active to completed: deliver the letter to " + kit.name + ". Any state to failed: " + kit.name + " dies.", x + 12, yy + 36, 11, Style.DIM);
+            yy += 58;
+            ui.text("Dependency NPC: " + kit.name + " (#" + Ids.CONTACT + ") - " + (kit.alive ? "alive" : "DEAD (permanent)"), x + 12, yy, 13, kit.alive ? Style.GOOD : Style.BAD);
             yy += 20;
             if (g.quests.failReason != null) { ui.text("Failure reason: " + g.quests.failReason, x + 12, yy, 12, Style.BAD); yy += 18; }
             ui.text("Journal", x + 12, yy, 13, Style.ACCENT);
@@ -286,11 +286,11 @@ final class Windows {
             for (String j : g.quests.journal) lines.addAll(HudFragments.wrap(ui, j, 11, ww - 30));
             for (int i = Math.max(0, lines.size() - 7); i < lines.size(); i++) { ui.text(lines.get(i), x + 18, yy, 11, Style.TEXT); yy += 14; }
             float by = y + wh - 36;
-            if (Style.button(ui, "Remove Kit (kill)", x + 12, by, 150, 26, live && kit.alive)) {
+            if (Style.button(ui, "Remove " + kit.name + " (kill)", x + 12, by, 150, 26, live && kit.alive)) {
                 kit.hp = 0;
                 var ev = g.state.commit("DebugRemoveNpc", g.player.id, kit.id, DevMap.BETA, 0, "kiosk: remove dependency NPC");
                 kit.alive = false;
-                g.state.commit("ActorKilled", 0, kit.id, DevMap.BETA, ev.id(), "Kit removed at the kiosk");
+                g.state.commit("ActorKilled", 0, kit.id, DevMap.BETA, ev.id(), kit.name + " removed at the kiosk");
                 g.ai.onKilled(kit, g.player);
             }
             if (Style.button(ui, "Reset fixture (debug)", x + 170, by, 170, 26, live)) { g.quests.reset(); if (!kit.alive) g.ai.revive(kit, true); }

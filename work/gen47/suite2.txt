@@ -1,0 +1,44 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test
+
+SimProfileProbe > profileTheSimulation() SKIPPED
+
+FlyerProbeTest > probe() SKIPPED
+  slow: rpg.ai.Gamefixes032Test.aFireSpellStillBurnsGrassAfterWalkingTheWholeMap() 23.167 s
+  slow: rpg.ai.Gamefixes032Test.theCropFarmerHarvestsAndResowsHisRows() 46.914 s
+  slow: rpg.ai.Gamefixes033Test.aPettyFineIsAskedForOnceAndNotAgainWhileItStandsUnchanged() 29.268 s
+  slow: rpg.ai.Gamefixes034Test.aleLendsFiveStrengthThatEbbsAndLeavesTheBottle() 85.616 s
+  slow: rpg.ai.Gamefixes036Test.theFenceTradesWithACustomerWhoseBladeIsOut() 20.597 s
+
+JumpProbeTest > probe() SKIPPED
+
+LifeProbeTest > probe() SKIPPED
+
+LifeProbeTest > trace() SKIPPED
+  slow: rpg.ai.NewResidentsTest.theFiveGetOnWithTheirTrades() 20.649 s
+
+ReportPauseProbeTest > probe() SKIPPED
+
+SoundProbeTest > probe() SKIPPED
+
+StallMapProbeTest > probe() SKIPPED
+
+TabernaProbeTest > probe() SKIPPED
+  slow: rpg.animal.WadingTest.ducksTakeToTheirPondOfTheirOwnAccord() 46.532 s
+  slow: rpg.combat.SummonStressTest.summoningOverAndOverNeverBreaksTheWorld(Path) 29.454 s
+  slow: rpg.encounter.EncounterTest.highwaymenAskTheirTollAndArePaid() 53.654 s
+  slow: rpg.encounter.EncounterTest.everyEncounterStartsWhereItFits() 22.487 s
+  slow: rpg.law.LieToGuardTest.aSuccessfulLieCallsOffTheWholeWatch() 20.997 s
+
+HaunterProbeTest > probe() SKIPPED

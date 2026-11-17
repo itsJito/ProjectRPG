@@ -1,0 +1,50 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+> Task :probe
+
+DungeonsProbeTest > dungeons() STANDARD_OUT
+    [Load] ShadowVeil grown in 34.08s ({regions=863, overlays=511, variants=510, scarp=73, coast=1020, erosion=600, peaks=143, lakes=160, isles=1, rivers=1076, wadis=31, ground=93, roads=1073, causeways=5, architecture=2455, pitsFilled=1396, pits=753, banks=117, clamp=23, cliffs=66, columns=1617, falls=17, raise=20751, trees=335, outcrops=0, ways=849, lava=0, dungeons=186, postsSunk=28, floatingRemoved=59, floating=700}), made and lit in 2.65s
+    [water] flow field grown in 1281 ms: 39016 columns moving
+    [gathering] 757 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+    [dungeons] Goblin Hollow, level 1             MACRO  WARREN floor Y26 at 382,806 rooms 7 residents 18 entry open route 25 legs
+    [dungeons] Goblin Hollow, level 2             ELITE  WARREN floor Y15 at 389,811 rooms 5 residents 9 entry open route (stair)
+    [dungeons] Murk caves, level 1                MACRO  CAVE   floor Y30 at 522,832 rooms 8 residents 19 entry open route 27 legs
+    [dungeons] Murk caves, level 2                ELITE  CAVE   floor Y19 at 529,837 rooms 5 residents 9 entry open route (stair)
+    [dungeons] Spider Nest, level 1               MACRO  CAVE   floor Y46 at 831,539 rooms 8 residents 18 entry open route 31 legs
+    [dungeons] Spider Nest, level 2               ELITE  CAVE   floor Y35 at 838,544 rooms 4 residents 8 entry open route (stair)
+    [dungeons] Ashmaw Throat, level 1             MACRO  CAVE   floor Y52 at 985,507 rooms 7 residents 17 entry open route 55 legs
+    [dungeons] Ashmaw Throat, level 2             MACRO  CAVE   floor Y41 at 985,507 rooms 7 residents 17 entry open route (stair)
+    [dungeons] Ashmaw Throat, level 3             ELITE  CAVE   floor Y30 at 992,512 rooms 5 residents 9 entry open route (stair)
+    [dungeons] Culvert cave                       MICRO  CAVE   floor Y15 at 608,930 rooms 3 residents 5 entry open route NONE
+    [dungeons] Sunkissed Mine, level 1            MACRO  HALL   floor Y39 at 170,561 rooms 8 residents 20 entry open route NONE
+    [dungeons] Sunkissed Mine, level 2            ELITE  HALL   floor Y28 at 177,566 rooms 5 residents 12 entry open route (stair)
+    [dungeons] Marble Mine, level 1               MACRO  HALL   floor Y18 at 90,555 rooms 6 residents 14 entry open route 41 legs
+    [dungeons] Marble Mine, level 2               ELITE  HALL   floor Y7 at 97,560 rooms 6 residents 11 entry open route (stair)
+    [dungeons] Highland adit                      MICRO  HALL   floor Y57 at 211,455 rooms 4 residents 8 entry open route 37 legs
+    [dungeons] Hollow Crags mine                  MICRO  HALL   floor Y45 at 192,533 rooms 3 residents 2 entry open route 31 legs
+    [dungeons] Hollow Crags mine                  MICRO  HALL   floor Y48 at 113,487 rooms 4 residents 0 entry open route 33 legs
+    [dungeons] Loxford Graveyard                  MICRO  CRYPT  floor Y25 at 189,939 rooms 3 residents 5 entry open route 24 legs
+    [dungeons] 16 of 18 levels open and reached
+  slow: rpg.probe.DungeonsProbeTest.dungeons() 62.399 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 14s
+9 actionable tasks: 2 executed, 7 up-to-date

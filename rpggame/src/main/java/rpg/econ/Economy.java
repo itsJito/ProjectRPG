@@ -29,7 +29,8 @@ public final class Economy {
 
     public static final class Shop {
         public final long merchant;
-        public final String name;
+        /** (0.4.7) Not final: on ShadowVeil a shop takes the name of the building its keeper trades in. */
+        public String name;
         /** (0.4.0) Where the shop trades: its town and counter (moved with its keeper to ShadowVeil). */
         public String jurisdiction;
         public final Inventory stock = new Inventory(20, 20);   // the shop's storeroom
@@ -76,7 +77,7 @@ public final class Economy {
     public void init() {
         shopA = new Shop(Ids.MERCHANT_A, "Store A", DevMap.ALPHA, DevMap.SHOP_A_COUNTER[0], DevMap.SHOP_A_COUNTER[1] + 2.2f);
         shopB = new Shop(Ids.MERCHANT_B, "Store B", DevMap.BETA, DevMap.SHOP_B_COUNTER[0] + 2.2f, DevMap.SHOP_B_COUNTER[1]);
-        fence = new Shop(Ids.FENCE, "Silas's crates", DevMap.BETA, DevMap.FENCE_POST[0], DevMap.FENCE_POST[1] - 1.2f);
+        fence = new Shop(Ids.FENCE, g.possessive(Ids.FENCE, "Silas") + " crates", DevMap.BETA, DevMap.FENCE_POST[0], DevMap.FENCE_POST[1] - 1.2f);
         macellum = new Shop(Ids.MACELLUM, "The Macellum", DevMap.PALACE, rpg.world.Expanse.MERCHANT_POST[0] - 1.6f, rpg.world.Expanse.MERCHANT_POST[1]);
         stock(macellum, Items.BREAD, 6, 10); stock(macellum, Items.RELIGIOUS_WINE, 4, 6); stock(macellum, Items.TROUT, 4, 8); stock(macellum, Items.BERRIES, 3, 8);
         stock(macellum, Items.get("iron_sword"), 1, 1); stock(macellum, Items.get("iron_shield"), 1, 1); stock(macellum, Items.FISHING_ROD, 1, 2); stock(macellum, Items.get("gold_ring"), 1, 1);
@@ -94,6 +95,8 @@ public final class Economy {
             // (0.4.4) a keeper behind a counter indoors: the customers' place before it
             float[] cust = rpg.world.shadowveil.Census.customerSpot(keeper.id);
             if (cust != null) { s.counterX = cust[0]; s.counterZ = cust[1]; }
+            // (0.4.7, gamefixes: NPCs still called the shops 'Store A') the shop is named for the building it trades in
+            s.name = shadowveilName(keeper, s.name);
         }
         stock(shopA, Items.BREAD, 8, 10); stock(shopA, Items.SHRIMP, 5, 8); stock(shopA, Items.LOGS, 3, 6); stock(shopA, Items.BERRIES, 2, 8);
         stock(shopA, Items.TINDERBOX, 2, 2); stock(shopA, Items.TORCH, 4, 4); stock(shopA, Items.SADDLE, 2, 2); stock(shopA, Items.KNIFE, 2, 2); stock(shopA, Items.HAMMER, 2, 2); stock(shopA, Items.FISHING_ROD, 2, 2);
@@ -117,6 +120,20 @@ public final class Economy {
         stock(shopB, Items.OAK_BOW, 1, 1);
         // what the fence has on hand at the start: odds and ends of uncertain origin
         stock(fence, Items.LOCKPICK, 2, 2); stock(fence, Items.get("dodgy_necklace"), 1, 1); stock(fence, Items.TOBACCO, 3, 3); stock(fence, Items.ALE, 4, 4); stock(shopB, Items.LOCKPICK, 3, 3); stock(shopB, Items.HOLY_SYMBOL, 1, 1); stock(shopB, Items.STAFF, 1, 1);
+    }
+
+    /**
+     * (0.4.7) What a ShadowVeil shop is called: the building its keeper's post stands in ("Loxford General Store"), else
+     * the keeper's own ("Mara's shop"); the devmap's labels ("Store A") never leave the devmap.
+     */
+    static String shadowveilName(Npc keeper, String fallback) {
+        var t = rpg.world.shadowveil.ShadowVeil.terrain();
+        if (t != null && t.arch != null) {
+            var s = t.arch.at((int) Math.floor(keeper.postX), (int) Math.floor(keeper.postZ));
+            if (s != null && s.name != null && !s.name.isBlank() && !s.name.matches("(?i).*\b(house|home|homes|cottage)\b.*")) return s.name;
+        }
+        String first = keeper.name == null || keeper.name.isBlank() ? null : keeper.name.split(" ")[0];
+        return first == null ? fallback : first + "'s shop";
     }
 
     /** Startup goods transfer from the trader's real inventory, including during an old-save migration. */
@@ -144,7 +161,10 @@ public final class Economy {
         if (n > 0 && s.stock.add(new ItemStack(d, n, s.merchant, false, s.merchant))) g.state.mint(d, n);
     }
 
+    /** (0.4.7) A shop made outside the economy's own (an encounter's pedlar's pack). */
+    public Shop newShop(long merchant, String name, String jurisdiction, float x, float z) { return new Shop(merchant, name, jurisdiction, x, z); }
     public Shop shopOf(Npc merchant) {
+        if (g.encounters != null) { Shop own = g.encounters.shopOf(merchant); if (own != null) return own; }
         // (0.3.2) an inn's bartender keeps its bar
         if (g.inns != null) for (var inn : g.inns.all) if (inn.layout.bartender() == merchant.id) return inn.bar;
         if (g.guilds != null) { Shop row = g.guilds.storeOf(merchant); if (row != null) return row; }

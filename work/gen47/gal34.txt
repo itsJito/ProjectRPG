@@ -1,0 +1,99 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :gallery
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 14 2026 17:37:31 (MSVC)
+[Load] native services 0.04s
+[Load] Devmap (legacy test map) 8.56s
+[Load] renderer and UI 2.21s
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] first rendered frame 0.07s
+[Load] game frame 1: scene 553 ms, interface 284 ms, render 75 ms
+[Load] game frame 2: scene 35 ms, interface 4 ms, render 29 ms
+[Load] game frame 3: scene 40 ms, interface 8 ms, render 31 ms
+[handwork] pick at [64.5, 6.2041664, 60.2] shoulder [6.0401897, 21.580353, 1.3384688] spot [4.499152, 29.696249, -1.4847078] rest [6.9460983, 13.359026, -2.007535] hk 1.00
+[handwork] pick at [64.5, 6.201111, 60.2] shoulder [6.041328, 21.570026, 1.3245039] spot [4.48991, 29.676308, -1.5205336] rest [6.944155, 13.344001, -2.010765] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0424504, 21.562096, 1.3116755] spot [4.4801908, 29.658098, -1.5565989] rest [6.9422336, 13.332004, -2.0143738] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0435615, 21.55619, 1.3000035] spot [4.470039, 29.64127, -1.5928226] rest [6.940334, 13.322671, -2.0183654] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0446644, 21.551876, 1.2895045] spot [4.459508, 29.625404, -1.6291082] rest [6.9384556, 13.315568, -2.0227432] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.045762, 21.548756, 1.2801925] spot [4.44865, 29.610134, -1.6653634] rest [6.936599, 13.310302, -2.0275116] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0468583, 21.546501, 1.2720789] spot [4.4375167, 29.59515, -1.7015022] rest [6.9347634, 13.306544, -2.0326693] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.047955, 21.544836, 1.2651725] spot [4.426157, 29.580194, -1.7374415] rest [6.9329486, 13.304021, -2.0382168] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0490556, 21.54356, 1.2594798] spot [4.4146175, 29.56509, -1.7731059] rest [6.9311543, 13.302532, -2.0441518] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0501623, 21.54252, 1.2550039] spot [4.402943, 29.549704, -1.8084238] rest [6.9293814, 13.301924, -2.0504708] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0512786, 21.5416, 1.2517459] spot [4.391179, 29.53394, -1.8433251] rest [6.92763, 13.302078, -2.0571694] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.052405, 21.540716, 1.2497039] spot [4.379367, 29.517742, -1.8777425] rest [6.9258995, 13.302912, -2.0642395] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0535436, 21.53981, 1.248873] spot [4.367551, 29.501072, -1.9116073] rest [6.924191, 13.304365, -2.0716743] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.054697, 21.538841, 1.2492464] spot [4.355775, 29.483923, -1.9448502] rest [6.922505, 13.306392, -2.079464] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0558653, 21.53778, 1.250814] spot [4.3440814, 29.466293, -1.9774024] rest [6.920842, 13.308963, -2.0875974] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.05705, 21.536606, 1.2535636] spot [4.3325157, 29.4482, -2.0091898] rest [6.9192033, 13.312049, -2.0960622] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0582523, 21.535301, 1.2574799] spot [4.321122, 29.429665, -2.0401382] rest [6.917589, 13.315634, -2.1048455] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.059472, 21.533863, 1.2625462] spot [4.3099446, 29.410732, -2.0701714] rest [6.916002, 13.319705, -2.1139307] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.060709, 21.532276, 1.2687417] spot [4.299029, 29.391432, -2.099207] rest [6.914441, 13.324244, -2.1233034] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.061963, 21.530546, 1.2760448] spot [4.288418, 29.371822, -2.1271641] rest [6.912908, 13.3292465, -2.1329448] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.063235, 21.528664, 1.2844306] spot [4.2781577, 29.351955, -2.153957] rest [6.911407, 13.3347, -2.1428368] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.064522, 21.526634, 1.2938722] spot [4.26829, 29.3319, -2.1795] rest [6.9099364, 13.340594, -2.1529598] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.065823, 21.52445, 1.3043406] spot [4.2588587, 29.31171, -2.2037034] rest [6.908499, 13.346918, -2.1632924] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.067138, 21.522116, 1.3158046] spot [4.249905, 29.291466, -2.2264776] rest [6.907098, 13.353661, -2.1738136] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0684643, 21.519634, 1.3282306] spot [4.2414675, 29.271244, -2.247735] rest [6.905732, 13.360816, -2.1845007] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0697994, 21.517004, 1.3415844] spot [4.2335844, 29.251122, -2.267383] rest [6.904406, 13.368366, -2.1953301] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.071142, 21.514229, 1.3558283] spot [4.226292, 29.231182, -2.2853353] rest [6.903123, 13.376303, -2.2062786] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0724883, 21.511312, 1.3709233] spot [4.219622, 29.211512, -2.3015041] rest [6.901882, 13.384614, -2.2173207] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0738363, 21.508257, 1.3868299] spot [4.2136054, 29.192198, -2.315804] rest [6.9006877, 13.393281, -2.2284312] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0751824, 21.505066, 1.4035056] spot [4.208269, 29.173328, -2.3281548] rest [6.899541, 13.402291, -2.2395847] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.076523, 21.501747, 1.420907] spot [4.2036357, 29.154995, -2.3384807] rest [6.8984456, 13.411633, -2.2507558] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.077855, 21.498299, 1.43899] spot [4.199727, 29.13728, -2.3467078] rest [6.8974032, 13.421278, -2.2619176] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0791736, 21.494732, 1.4577088] spot [4.1965575, 29.120275, -2.3527722] rest [6.8964167, 13.43122, -2.2730436] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.080476, 21.49105, 1.4770159] spot [4.1941414, 29.104061, -2.3566136] rest [6.8954873, 13.441433, -2.2841082] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0817575, 21.487257, 1.4968638] spot [4.1924872, 29.088718, -2.3581789] rest [6.89462, 13.451898, -2.2950845] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.083014, 21.483364, 1.5172042] spot [4.1915994, 29.074326, -2.3574257] rest [6.8938155, 13.462595, -2.3059464] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.084241, 21.479376, 1.5379874] spot [4.1914787, 29.060955, -2.3543172] rest [6.8930764, 13.4735, -2.3166676] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0854335, 21.4753, 1.5591633] spot [4.1921234, 29.048668, -2.3488264] rest [6.892405, 13.4845915, -2.3272219] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.086588, 21.471146, 1.5806818] spot [4.1935263, 29.037529, -2.3409367] rest [6.891804, 13.495844, -2.337585] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0876985, 21.466923, 1.602492] spot [4.195677, 29.027586, -2.3306398] rest [6.891276, 13.507235, -2.3477306] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.088762, 21.462639, 1.6245435] spot [4.198562, 29.018887, -2.3179383] rest [6.890822, 13.518737, -2.3576357] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.089772, 21.458302, 1.6467843] spot [4.2021646, 29.011465, -2.302843] rest [6.890445, 13.53032, -2.3672752] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0907264, 21.453926, 1.6691649] spot [4.206465, 29.005354, -2.285378] rest [6.890147, 13.5419655, -2.3766265] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.091619, 21.449518, 1.6916332] spot [4.2114396, 29.000566, -2.2655752] rest [6.88993, 13.553637, -2.3856673] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0924454, 21.445093, 1.7141395] spot [4.2170634, 28.997122, -2.243477] rest [6.8897953, 13.565312, -2.3943758] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0932016, 21.440659, 1.7366333] spot [4.2233086, 28.995016, -2.2191355] rest [6.8897443, 13.576957, -2.402731] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0938835, 21.43623, 1.759066] spot [4.2301445, 28.994247, -2.1926122] rest [6.8897786, 13.588548, -2.4107132] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.094487, 21.431814, 1.781388] spot [4.2375402, 28.994799, -2.1639771] rest [6.889901, 13.60005, -2.4183035] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0950084, 21.427427, 1.8035512] spot [4.245462, 28.996655, -2.1333122] rest [6.8901105, 13.611437, -2.4254837] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0954437, 21.42308, 1.8255091] spot [4.2538743, 28.99978, -2.1007047] rest [6.890409, 13.62268, -2.4322367] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.09579, 21.418785, 1.8472148] spot [4.262742, 29.004143, -2.0662484] rest [6.8907976, 13.633746, -2.4385462] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.096043, 21.414555, 1.8686236] spot [4.272027, 29.009699, -2.0300508] rest [6.8912764, 13.644608, -2.4443984] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0962, 21.4104, 1.8896916] spot [4.2816935, 29.016401, -1.9922175] rest [6.891845, 13.655236, -2.4497776] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0962586, 21.406336, 1.9103765] spot [4.2917013, 29.024199, -1.9528675] rest [6.8925047, 13.665603, -2.4546723] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.096217, 21.402374, 1.9306368] spot [4.3020134, 29.033031, -1.9121226] rest [6.8932567, 13.675678, -2.4590697] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0960712, 21.398525, 1.9504329] spot [4.312591, 29.042843, -1.870108] rest [6.8940983, 13.685436, -2.4629595] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0958214, 21.394802, 1.9697263] spot [4.3233957, 29.053562, -1.8269572] rest [6.895032, 13.69485, -2.466332] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0954647, 21.391214, 1.9884812] spot [4.3343906, 29.065128, -1.7828015] rest [6.896055, 13.70389, -2.469178] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0950007, 21.387775, 2.0066624] spot [4.345536, 29.07747, -1.737782] rest [6.897168, 13.712536, -2.4714894] hk 1.00
+[handwork] pick at [64.5, 6.2014723, 60.2] shoulder [6.0944276, 21.384497, 2.0242367] spot [4.3567967, 29.090525, -1.6920369] rest [6.8983693, 13.720761, -2.4732609] hk 1.00
+[sheet] hand-pick (20 frames)
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 22s
+8 actionable tasks: 1 executed, 7 up-to-date

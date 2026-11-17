@@ -1,0 +1,223 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 20.91s ({regions=810, overlays=508, variants=639, scarp=51, coast=656, erosion=355, peaks=78, lakes=61, isles=1, rivers=1170, wadis=13, ground=24, roads=660, causeways=3, architecture=1238, pitsFilled=1396, pits=408, banks=66, clamp=13, cliffs=51, columns=1232, falls=16, raise=10625, trees=237, outcrops=0, ways=475, lava=0, dungeons=177, cellars=626, postsSunk=4, floatingRemoved=41, floating=641}), made and lit in 2.26s
+    [water] flow field grown in 1155 ms: 39016 columns moving
+    [gathering] 760 wild herb patches, flax and berry bushes
+    [monsters] 8 wilderness territories (passed over: 8 wet or road, 29 in a realm, 79 near the settled, 16 by a road, 29 by their biome's chances; 1151 settled points)
+    [life] start: 236 people, 0 stand with 3+ others within 2 m
+
+    [life] stops: 166,798; 293,977; 480,216; 430,458;
+    [life] stop 166,798 done (19 people seen so far)
+    [spin] Dunstan:9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 HOME/idle getting up and dressed] [-1.17 351.9,950.8 SOCIALIZE/go to goal ] [-0.95 351.7,950.8 SOCIALIZE/go to goal ] [-0.30 351.5,950.7 SOCIALIZE/go to goal ] [0.35 351.3,950.6 SOCIALIZE/go to goal ] [1.00 351.1,950.6 SOCIALIZE/go to goal ] [1.28 350.8,950.5 SOCIALIZE/go to goal ] [1.25 350.6,950.4 SOCIALIZE/go to goal ] [1.25 350.4,950.3 SOCIALIZE/go to goal ] [1.25 350.1,950.2 SOCIALIZE/go to goal ] [1.22 349.9,950.1 SOCIALIZE/go to goal ] [1.22 349.7,950.1 SOCIALIZE/go to goal ] [1.22 349.4,950.0 SOCIALIZE/go to goal ] [1.22 349.2,949.9 SOCIALIZE/go to goal ] [1.22 349.0,949.8 SOCIALIZE/go to goal ] [1.22 348.8,949.7 SOCIALIZE/go to goal ] [1.22 348.5,949.6 SOCIALIZE/go to goal ] [1.22 348.3,949.5 SOCIALIZE/go to goal ] [1.22 348.1,949.5 SOCIALIZE/go to goal ] [1.22 347.8,949.4 SOCIALIZE/go to goal ] [1.22 347.6,949.3 SOCIALIZE/go to goal ] [1.22 347.4,949.2 SOCIALIZE/go to goal ] [1.22 347.1,949.1 SOCIALIZE/go to goal ] [1.22 346.9,949.0 SOCIALIZE/hold/face ] [1.22 346.8,949.0 SOCIALIZE/go to goal ] [1.22 346.6,948.9 SOCIALIZE/go to goal ] [1.22 346.4,948.8 SOCIALIZE/go to goal ] [1.07 346.3,948.8 SOCIALIZE/go to goal ] [0.74 346.3,948.7 SOCIALIZE/go to goal ] [0.96 346.2,948.6 SOCIALIZE/go to goal ] [1.23 346.0,948.6 SOCIALIZE/go to goal ] [1.18 345.8,948.5 SOCIALIZE/go to goal ] [0.75 345.7,948.3 SOCIALIZE/go to goal ] [0.32 345.7,948.1 SOCIALIZE/go to goal ] [0.17 345.7,947.8 SOCIALIZE/go to goal ] [0.13 345.6,947.6 SOCIALIZE/go to goal ] [0.10 345.6,947.4 SOCIALIZE/go to goal ] [0.10 345.6,947.1 SOCIALIZE/go to goal ] [0.10 345.6,946.9 SOCIALIZE/go to goal ] [-0.02 345.6,946.8 SOCIALIZE/go to goal ] [-0.28 345.6,946.8 SOCIALIZE/go to goal ] [-0.66 345.7,946.8 SOCIALIZE/go to goal ] [-0.54 345.7,946.7 SOCIALIZE/go to goal ] [0.11 345.7,946.7 SOCIALIZE/go to goal ] [0.75 345.7,946.6 SOCIALIZE/go to goal ] [0.75 345.7,946.6 SOCIALIZE/go to goal ] [0.42 345.7,946.4 SOCIALIZE/go to goal ] [0.13 345.6,946.2 SOCIALIZE/go to goal ] [0.17 345.6,945.9 SOCIALIZE/go to goal ] [0.10 345.6,945.7 SOCIALIZE/go to goal ] [-0.25 345.7,945.6 SOCIALIZE/go to goal ] [-0.65 345.7,945.7 SOCIALIZE/go to goal ] [-0.75 345.7,945.7 SOCIALIZE/go to goal ] [-0.75 345.7,945.7 SOCIALIZE/go to goal ] [-0.75 345.7,945.7 SOCIALIZE/go to goal ] [-1.30 345.7,945.9 SOCIALIZE/go to goal ] [-1.95 345.7,946.1 SOCIALIZE/go to goal ] [-2.60 345.6,946.4 SOCIALIZE/go to goal ] [3.07 345.6,946.6 SOCIALIZE/go to goal ] [3.07 345.6,946.9 SOCIALIZE/go to goal ] [3.07 345.6,947.1 SOCIALIZE/go to goal ] [3.07 345.6,947.4 SOCIALIZE/go to goal ] [3.07 345.6,947.6 SOCIALIZE/go to goal ] [3.10 345.6,947.7 SOCIALIZE/go to goal ] [3.14 345.6,947.9 SOCIALIZE/go to goal ] [3.14 345.6,948.0 SOCIALIZE/go to goal ] [-3.05 345.6,948.1 SOCIALIZE/go to goal ] [-2.57 345.7,948.2 SOCIALIZE/go to goal ] [-2.61 345.7,948.2 SOCIALIZE/go to goal ] [-2.64 345.7,948.3 SOCIALIZE/go to goal ] [-2.64 345.7,948.3 SOCIALIZE/go to goal ] [-2.64 345.7,948.3 SOCIALIZE/go to goal ] [-2.64 345.7,948.3 SOCIALIZE/go to goal ] [-2.64 345.8,948.3 SOCIALIZE/go to goal ] [-1.99 346.0,948.4 SOCIALIZE/go to goal ] [-1.85 346.2,948.4 SOCIALIZE/hold/face ] [-1.85 346.2,948.4 SOCIALIZE/hold/face ] [-2.29 346.2,948.4 SOCIALIZE/hold/face ] [-2.94 346.2,948.4 SOCIALIZE/hold/face ] [2.70 346.2,948.4 SOCIALIZE/hold/face ] [2.05 346.2,948.4 SOCIALIZE/hold/face ] [1.87 346.2,948.4 SOCIALIZE/hold/face ] [1.87 346.2,948.4 SOCIALIZE/hold/face talked with Leofric] [1.87 346.2,948.4 HOME/go to goal getting up and dressed] [1.87 346.3,948.5 HOME/go to goal getting up and dressed] [2.52 346.6,948.6 HOME/go to goal getting up and dressed]
+    [life] stop 293,977 done (51 people seen so far)
+    [life] stop 480,216 done (70 people seen so far)
+    [life] stop 430,458 done (87 people seen so far)
+
+    [life] 4 stops of 3600 frames; 87 people seen
+      Mara             MERCHANT     seen   580 spins   0 blocked    48 still     0
+          last (210.4,43.0,777.7) HOME: paused to reconsider a blocked route
+      Wynn             FARMER       seen   580 spins   0 blocked     0 still   387
+          last (240.7,39.0,1018.9) WORK: on the way
+      Father Wulfric   UNDERTAKER   seen   580 spins   0 blocked   396 still     0
+          last (204.5,25.0,959.4) WORK: paused to reconsider a blocked route
+      Father Gregory   PRIEST       seen   580 spins   0 blocked    52 still     1
+          last (265.2,39.0,946.6) HOME: paused to reconsider a blocked route
+      Vesna            FISHERMAN    seen   580 spins   0 blocked   125 still     0
+          last (139.5,39.0,809.5) HOME: paused to reconsider a blocked route
+      Dunstan          CRAFTSMAN    seen   580 spins   1 blocked     0 still     0
+          spun at (346.6,40.0,948.6) HOME: getting up and dressed
+      Olek             CRAFTSMAN    seen   580 spins   0 blocked   139 still     0
+          last (149.5,42.0,784.5) HOME: paused to reconsider a blocked route
+      Radek            WORKER       seen   580 spins   0 blocked   243 still     0
+          last (147.5,40.0,794.5) HOME: paused to reconsider a blocked route
+      Berthild         CIVIC        seen   580 spins   0 blocked     0 still   521
+          last (320.2,40.0,996.5) SLEEP: on the way
+      Maddoc           MERCHANT     seen   580 spins   0 blocked     0 still   496
+          last (326.2,40.0,994.5) SLEEP: on the way
+      Karlon           CRAFTSMAN    seen   580 spins   0 blocked     0 still   459
+          last (324.3,44.0,1000.4) SLEEP: on the way
+      Mother Mirel     PRIEST       seen   580 spins   0 blocked   299 still     0
+          last (147.7,43.0,784.5) WORK: paused to reconsider a blocked route
+      Borin            FARMER       seen   580 spins   0 blocked   120 still   137
+          last (211.5,40.0,831.1) WORK: paused to reconsider a blocked route
+      Astrid           UNDERTAKER   seen   580 spins   0 blocked   296 still    29
+          last (388.5,65.0,414.5) WORK: paused to reconsider a blocked route
+      Odo              UNDERTAKER   seen   580 spins   0 blocked   127 still    10
+          last (192.5,43.0,776.1) HOME: paused to reconsider a blocked route
+      never in play: Tam CRAFTSMAN home (333,884)
+      never in play: Brannoc THIEF home (628,948)
+      never in play: Kettil CONTACT home (647,924)
+      never in play: Skarn FENCE home (628,1074)
+      never in play: Bilal BEGGAR home (956,908)
+      never in play: Rafe HUNTER home (403,849)
+      never in play: Maelin SCHOLAR home (178,647)
+      never in play: Bryn FISHERMAN home (619,641)
+      never in play: Brokk MINER home (247,482)
+      never in play: Hakon HUNTER home (144,624)
+      never in play: Dawud MINER home (995,926)
+      never in play: Sir Hedric KNIGHT home (407,796)
+      never in play: Gudrik FISHERMAN home (650,1068)
+      never in play: King Leonidas CIVIC home (617,134)
+      never in play: Baron Photios LAWMAN home (644,155)
+      never in play: Leontios GUARD home (643,160)
+      never in play: Anwar GUARD home (926,928)
+      never in play: Roder GUARD home (196,668)
+      never in play: Baroness Guinevere CIVIC home (865,415)
+      never in play: Father Paul PRIEST home (925,101)
+      never in play: Aristides SCHOLAR home (659,199)
+      never in play: Polyxena MINER home (925,177)
+      never in play: Tolis BEGGAR home (534,109)
+      never in play: King Fahad CIVIC home (954,943)
+      never in play: Cerys CRAFTSMAN home (862,468)
+      never in play: Tauron HUNTER home (908,557)
+      never in play: King Arthur CIVIC home (865,419)
+      never in play: Sir Lancelot KNIGHT home (857,420)
+      never in play: Sir Gawain KNIGHT home (890,392)
+      never in play: Torvik MINER home (242,487)
+      never in play: Merlin SCHOLAR home (827,423)
+      never in play: Alexios CRAFTSMAN home (510,82)
+      never in play: Dorran MINER home (224,584)
+      never in play: Merek MINER home (140,612)
+      never in play: Meriwyn MERCHANT home (647,919)
+      never in play: Kyra FARMER home (262,338)
+      never in play: Marinos FARMER home (264,331)
+      never in play: Melitta CIVIC home (585,239)
+      never in play: Basil MERCHANT home (593,239)
+      never in play: Lazaros CRAFTSMAN home (580,239)
+      never in play: Brennar CRAFTSMAN home (230,664)
+      never in play: Fenna MERCHANT home (248,699)
+      never in play: Layla CRAFTSMAN home (942,880)
+      never in play: Zainab CRAFTSMAN home (943,876)
+      never in play: Baron Jalal CIVIC home (893,924)
+      never in play: Ziad CRAFTSMAN home (940,877)
+      never in play: Murad CRAFTSMAN home (940,881)
+      never in play: Petros FISHERMAN home (513,84)
+      never in play: Baron Hadrik CIVIC home (238,662)
+      never in play: Yannis FISHERMAN home (510,84)
+      never in play: Sir Garran KNIGHT home (200,672)
+      never in play: Orven CARTER home (253,661)
+      never in play: Hurk BANDIT home (878,741)
+      never in play: Sigrun BANDIT home (875,742)
+      never in play: Garmund BRUTE home (876,740)
+      never in play: Hob GUARD home (407,790)
+      never in play: Beric HUNTER home (404,844)
+      never in play: Duke Bashir CIVIC home (951,947)
+      never in play: Count Awhad CIVIC home (905,913)
+      never in play: Sir Faris-ul-Azhar KNIGHT home (954,931)
+      never in play: Hassan SCHOLAR home (954,936)
+      never in play: Idris SCHOLAR home (954,928)
+      never in play: Father Rafiq PRIEST home (962,907)
+      never in play: Yusuf PRIEST home (959,908)
+      never in play: Tariq CIVIC home (892,968)
+      never in play: Zafir CRAFTSMAN home (852,958)
+      never in play: Osama CRAFTSMAN home (985,899)
+      never in play: Marwan CRAFTSMAN home (1004,871)
+      never in play: Karim CRAFTSMAN home (878,885)
+      never in play: Mohamed MERCHANT home (864,911)
+      never in play: Rashid MERCHANT home (909,913)
+      never in play: Munir CARTER home (876,883)
+      never in play: Hakim CARTER home (951,925)
+      never in play: Hamid CRAFTSMAN home (985,946)
+      never in play: Nabil CRAFTSMAN home (989,944)
+      never in play: Salim CRAFTSMAN home (994,928)
+      never in play: Kamal CRAFTSMAN home (996,928)
+      never in play: Qasim WORKER home (987,928)
+      never in play: Fadi MINER home (921,834)
+      never in play: Jamila FARMER home (817,1033)
+      never in play: Samira FARMER home (814,1033)
+      never in play: Zaid GUARD home (939,949)
+      never in play: Sabir GUARD home (947,949)
+      never in play: Baron Nuri CIVIC home (945,923)
+      never in play: Duke Artemios CIVIC home (601,134)
+      never in play: Count Constantine CIVIC home (545,101)
+      never in play: Sir Nicholas KNIGHT home (640,155)
+      never in play: Sir Kosmas KNIGHT home (638,155)
+      never in play: Baroness Eudokia CIVIC home (653,198)
+      never in play: Ione PRIEST home (498,82)
+      never in play: Irene SCHOLAR home (589,134)
+      never in play: Xenia CRAFTSMAN home (638,164)
+      never in play: Melina FISHERMAN home (516,84)
+      never in play: Spiros WORKER home (510,84)
+      never in play: Timon WORKER home (512,87)
+      never in play: Damon WORKER home (516,82)
+      never in play: Orestes WORKER home (228,179)
+      never in play: Myron GUARD home (638,162)
+      never in play: Perikles GUARD home (641,167)
+      never in play: Zenon GUARD home (639,167)
+      never in play: Argyros GUARD home (638,159)
+      never in play: Kleon GUARD home (643,158)
+      never in play: Mimis BEGGAR home (531,109)
+      never in play: Phaedra CARTER home (642,155)
+      never in play: Leandros BEGGAR home (518,82)
+      never in play: Sabeen BEGGAR home (518,84)
+      never in play: King Phillip CIVIC home (207,669)
+      never in play: Duke Edran CIVIC home (204,672)
+      never in play: Sir Vaelor KNIGHT home (177,642)
+      never in play: Father Anselm PRIEST home (177,645)
+      never in play: Tovin CRAFTSMAN home (248,704)
+      never in play: Elric CIVIC home (230,682)
+      never in play: Halwen CRAFTSMAN home (263,701)
+      never in play: Sir Bedivere KNIGHT home (910,435)
+      never in play: Father Cadren PRIEST home (831,422)
+      never in play: Elian PRIEST home (889,395)
+      never in play: Baron Aldren CIVIC home (845,432)
+      never in play: Wystan CRAFTSMAN home (863,464)
+      never in play: Perrin CRAFTSMAN home (862,465)
+      never in play: Rowena MERCHANT home (877,471)
+      never in play: Huw FARMER home (918,433)
+      never in play: Edric GUARD home (918,436)
+      never in play: Vark BANDIT home (879,740)
+      never in play: Dolgrin MINER home (249,482)
+      never in play: Pell WORKER home (913,626)
+      never in play: Ysmay WORKER home (1032,439)
+      never in play: Hask HUNTER home (768,529)
+      never in play: Orrin CRAFTSMAN home (417,702)
+      never in play: Corvane HUNTER home (633,937)
+      never in play: Lothar GUARD home (211,654)
+      never in play: Hilde UNDERTAKER home (175,628)
+      never in play: Nadim GUARD home (971,1019)
+      never in play: Samir UNDERTAKER home (878,843)
+      never in play: Emrys GUARD home (892,435)
+      never in play: Rhiannon CIVIC home (868,437)
+      never in play: Rask BANDIT home (874,741)
+      never in play: Wenna BANDIT home (880,741)
+      never in play: Hullen BANDIT home (872,740)
+      never in play: Grisel BANDIT home (882,741)
+      never in play: Haskel MINER home (219,583)
+      never in play: Tamsin MINER home (147,611)
+      never in play: Osk MINER home (248,487)
+      never in play: Mabry WORKER home (226,179)
+      never in play: Edvin WORKER home (220,179)
+      never in play: Corra WORKER home (916,625)
+      never in play: Elidor UNDERTAKER home (853,442)
+      never in play: Gwenna UNDERTAKER home (839,461)
+      never in play: Nasira SCHOLAR home (916,845)
+      never in play: Merrin SCHOLAR home (892,466)
+    [life] 15 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 166.382 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 2m 51s
+9 actionable tasks: 1 executed, 8 up-to-date

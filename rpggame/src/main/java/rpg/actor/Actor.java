@@ -85,6 +85,8 @@ public class Actor {
     /** (0.3.9) Where a person in the saddle is riding to (NaN: nowhere - the mount stands). */
     public float rideToX = Float.NaN, rideToZ = Float.NaN;
     public double torchLightingAt = -99;
+    /** (0.4.8) When a burning torch next touches the growth it is carried through. */
+    public double torchBrushAt;
     public static final float TORCH_LIGHTING = 1.2f;
     /** Whether this body holds a torch in hand now (drawn), and whether it is being lit this moment. */
     public boolean torchInHand() { ItemDef m = main(); return m != null && m.family == ItemDef.Family.TORCH && !sheathed; }
@@ -279,6 +281,18 @@ public class Actor {
     public float ragdollScale() { return 1; }
     public int sydneyProfile() { return astratto.bridge.AstrattoNative.SYDNEY_HUMAN; }
     /** Sizes the hitbox to the body plan; call after the look is set and before the engine body is made. */
+    /**
+     * (0.4.7, gamefixes: NPCs wearing gear must have the stats to wear and use it) raises each skill to what every piece
+     * worn or held asks of its wearer - never lowers one. People are made able for their kit; they do not train into it
+     * (only the player gains levels).
+     */
+    public void meetGear() {
+        for (rpg.item.ItemDef.Slot s : rpg.item.ItemDef.Slot.values()) {
+            rpg.item.ItemDef d = eq.def(s);
+            if (d == null) continue;
+            for (var r : d.requirements().entrySet()) if (skills.level(r.getKey()) < r.getValue()) skills.setLevel(r.getKey(), r.getValue());
+        }
+    }
     public void fitBody() { Body b = plan(); radius = b.radius; height = b.height; }
 
     /** HP is the Health level itself (gamefixes): 10 HP at Health 10, 100 at 100. */
@@ -346,6 +360,12 @@ public class Actor {
         public double hitAt = -99;
         /** Frozen in place (Fogish ice): seconds left in which the feet cannot move - the hands still can. */
         public float frozenT;
+        /**
+         * (0.4.8, gamefixes: scorpions' own attacks) held fast in something's grip (a scorpion's pincer): no step taken
+         * until it lets go; poisoned (a sting): so much health lost a second while the venom lasts, and who gave it.
+         */
+        public float heldT, poisonT, poisonDps, poisonAcc;
+        public long poisonBy;
         /** (The old cast-once blessings' timers are gone: prayers are toggled; see combat.Prayers.) */
         /** A crossbow being loaded again (seconds left). */
         public float reload;

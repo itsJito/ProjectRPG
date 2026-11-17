@@ -43,6 +43,8 @@ public interface Interactable {
     Result perform(Rpg g, Actor actor, String actionId, long requestId);
     /** A line or two for the developer inspector. */
     default String inspect(Rpg g) { return ""; }
+    /** (0.4.8) The combat level shown in its tag beside the name, coloured against the player's (-1: none shown). */
+    default int levelTag() { return -1; }
     /** Owner entity id (0: nobody's). */
     default long owner() { return 0; }
 }

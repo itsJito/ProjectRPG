@@ -1,0 +1,64 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+BirdsProbeTest > birds() STANDARD_OUT
+    [Load] ShadowVeil grown in 20.03s ({regions=828, overlays=500, variants=513, scarp=47, coast=413, erosion=326, peaks=73, lakes=53, isles=1, rivers=1178, wadis=13, ground=22, roads=615, causeways=3, architecture=1279, pitsFilled=1396, pits=406, banks=62, clamp=13, cliffs=56, columns=1156, falls=15, raise=10760, trees=310, outcrops=0, ways=664, lava=0, postsSunk=32, floatingRemoved=59, floating=668}), made and lit in 2.23s
+    [water] flow field grown in 1573 ms: 39016 columns moving
+    [gathering] 757 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+    [birds] CROW 4 (254,1062 the wild (meadow)) (255,1062 the wild (meadow)) (256,1062 the wild (meadow)) (254,1064 the wild (meadow))
+    [birds] PIGEON 6 (280,985 the birds of Castle Square) (281,985 the birds of Castle Square) (282,985 the birds of Castle Square) (280,987 the birds of Castle Square)
+    [birds] VULTURE 0
+    [birds] t=0s flying 6 (picked PIGEON at 286.2,42.2,990.5 flying=true mode=2 flying across its range)
+          [stuck] Sir Andrew WORK at (265.50, 41.29, 963.50) -> (265.5, 964.5), go to goal, v (0.00, 0.00) ground false route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    [birds] t=5s flying 6 (picked PIGEON at 278.2,42.8,988.6 flying=true mode=1 took fright at birds)
+    [birds] t=10s flying 4 (picked PIGEON at 233.5,49.0,989.3 flying=true mode=2 took fright at birds)
+          [stuck] Eadmund WANDER at (352.27, 40.00, 944.55) -> (309.5, 976.5), wander, v (0.00, 0.00) ground true route 0 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    [birds] t=15s flying 4 (picked PIGEON at 216.5,40.0,989.5 flying=false mode=0 took fright at birds)
+    [birds] t=20s flying 3 (picked PIGEON at 216.5,40.0,989.5 flying=false mode=0 took fright at birds)
+    [birds] t=25s flying 2 (picked PIGEON at 217.3,40.0,987.0 flying=false mode=0 took fright at birds)
+          [stuck] Eadmund WANDER at (352.27, 40.00, 946.45) -> (309.5, 976.5), wander, v (0.00, 0.00) ground true route 0 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    [birds] t=30s flying 3 (picked PIGEON at 218.1,40.0,983.6 flying=false mode=0 took fright at birds)
+          [stuck] Eadmund WANDER at (350.55, 40.00, 943.74) -> (309.5, 976.5), wander, v (0.00, 0.00) ground true route 0 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    [birds] t=35s flying 3 (picked PIGEON at 218.4,40.0,980.2 flying=false mode=0 took fright at birds)
+          [stuck] Eadmund WANDER at (352.18, 40.00, 946.43) -> (309.5, 976.5), wander, v (1.29, 0.27) ground true route 1 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    [birds] most aloft at once 6, highest 25.10836 m, down again near 3
+    [birds] vulture 284.2,39.6,988.8 flying true mode 1 h 1
+          [stuck] Eadmund WANDER at (349.81, 40.00, 943.56) -> (309.5, 976.5), wander, v (-1.27, -0.26) ground true route 1 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    [birds] vulture 258.8,75.8,1036.1 flying true mode 3 h 36
+          [stuck] Eadmund WANDER at (352.27, 40.00, 946.45) -> (309.5, 976.5), wander, v (0.00, 0.00) ground true route 0 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    [birds] vulture 258.0,76.0,1035.6 flying true mode 3 h 36
+          [stuck] Eadmund WANDER at (347.52, 40.00, 946.14) -> (309.5, 976.5), wander, v (0.00, 0.00) ground true route 0 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    [birds] vulture 258.0,76.0,1035.6 flying true mode 3 h 36
+          [stuck] Eadmund WANDER at (352.27, 40.00, 946.45) -> (309.5, 976.5), wander, v (0.00, 0.00) ground true route 0 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Eadmund WANDER at (349.81, 40.00, 943.56) -> (309.5, 976.5), wander, v (-1.27, -0.26) ground true route 1 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    [birds] vulture 258.0,76.0,1035.6 flying true mode 3 h 36
+          [stuck] Eadmund WANDER at (352.18, 40.00, 946.43) -> (309.5, 976.5), wander, v (1.29, 0.27) ground true route 1 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Eadmund WANDER at (352.26, 40.00, 946.45) -> (309.5, 976.5), wander, v (0.00, 0.00) ground true route 0 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Eadmund WANDER at (352.26, 40.00, 946.45) -> (309.5, 976.5), wander, v (0.00, 0.00) ground true route 0 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    [birds] vulture 258.0,76.0,1035.6 flying true mode 3 h 36
+    [birds] vulture aloft 100% of a minute, highest 36 m, soaring on the warm air
+  slow: rpg.probe.BirdsProbeTest.birds() 95.234 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 39s
+9 actionable tasks: 1 executed, 8 up-to-date

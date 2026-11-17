@@ -364,7 +364,10 @@ void AudioService::place(Engine&, VoiceRec& v, Mixer::Change& c, float hear) {
         send = std::max(send, 0.25f + 0.5f * listenerIndoor_);
     } else {
         const float p = clampf(v.pan, -1, 1);
-        gl = v.gain * std::sqrt(0.5f * (1 - p)); gr = v.gain * std::sqrt(0.5f * (1 + p));
+        float g = v.gain;
+        // (2.16) the open air heard from indoors: dulled (a one-pole low-pass toward a muffled thud) and lowered
+        if (v.flags & ASTRATTO_VOICE_OUTDOOR) { lp = 0.9f * muffle_; g *= 1 - 0.35f * muffle_; send = 0.3f * muffle_; }
+        gl = g * std::sqrt(0.5f * (1 - p)); gr = g * std::sqrt(0.5f * (1 + p));
     }
     c.v.tgl = gl; c.v.tgr = gr; c.v.tlp = lp; c.v.tsend = send;
 }
@@ -484,11 +487,13 @@ void AudioService::step(Engine& e, float dt) {
     const VoxelWorld* w = e.active();
     // what stands between each positional sound and the ear, worked out across the workers, then glided toward
     order_.clear();
-    voices_.each([&](astratto_handle h, const VoiceRec& v) { if (v.playing && (v.flags & ASTRATTO_VOICE_POSITIONAL)) order_.push_back(h); });
+    voices_.each([&](astratto_handle h, const VoiceRec& v) { if (v.playing && (v.flags & (ASTRATTO_VOICE_POSITIONAL | ASTRATTO_VOICE_OUTDOOR))) order_.push_back(h); });
+    // (2.16) how muffled the open air is: the listener's enclosure, eased over about a second
+    muffle_ += (clampf((listenerIndoor_ - 0.25f) / 0.5f, 0, 1) - muffle_) * std::min(1.0f, dt * 1.5f);
     hear_.assign(order_.size(), 1.0f);
     if (w != nullptr) e.pool().parallelFor(order_.size(), [&](size_t i, unsigned) {
         const VoiceRec& v = *voices_.get(order_[i]);
-        if (v.flags & ASTRATTO_VOICE_OCCLUDE) hear_[i] = 0.15f + 0.85f * openness(*w, v.x, v.y, v.z);
+        if ((v.flags & ASTRATTO_VOICE_OCCLUDE) && (v.flags & ASTRATTO_VOICE_POSITIONAL)) hear_[i] = 0.15f + 0.85f * openness(*w, v.x, v.y, v.z);
     });
     const float k = std::min(1.0f, dt * 6);
     for (size_t i = 0; i < order_.size(); i++) {

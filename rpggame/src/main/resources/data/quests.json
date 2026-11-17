@@ -1,0 +1,24 @@
+{
+ "_about": "(0.4.8, gamefixes: the journal redone) How the journal files every quest the world offers (rpg.quest.QuestLog). Each authored quest's entry: its title, whether it is a 'main' or a 'side' quest, who gives it, what it asks of the player before it can be taken ('requires': a combat level, a skill's level), a line saying what it is, and where its giver and its goal are (resolved from the world by the entity ids in rpg.Ids). Warrants taken from a watch board ('warrants') are side quests made by the world: their title is the fugitive's name, their goal the last place the watch saw them. 'colors' are the list's: red for a quest not begun, yellow for one under way, green for one done (grey for one failed).",
+ "quests": {
+  "courier": {
+   "title": "Courier",
+   "category": "side",
+   "giver": "QUEST_GIVER",
+   "target": "CONTACT",
+   "requires": {"combat": 1},
+   "summary": "A sealed letter to be carried, unopened, from one hand to another."
+  }
+ },
+ "warrants": {
+  "category": "side",
+  "title": "Warrant: %s",
+  "summary": "A signed warrant from the watch of %s for %s, %d gold on their head. The mark on the map is where the watch last saw them; they may have moved."
+ },
+ "colors": {
+  "unstarted": "D8584A",
+  "active": "E8C84A",
+  "completed": "6AC46A",
+  "failed": "8A8278"
+ }
+}

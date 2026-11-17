@@ -96,7 +96,7 @@ class Gamefixes036Test {
         Fish whale = oneOf(FishKind.WHALE);
         assertTrue(g.interact.all().contains(whale), "fish can be looked at");
         assertEquals(FishKind.WHALE.health, whale.maxHp(), 1e-6f);
-        assertTrue(whale.label().contains("level " + FishKind.WHALE.combatLevel()));
+        assertEquals(FishKind.WHALE.combatLevel(), whale.levelTag());
         // a line along the whale's flank, near its tail, meets the body (not only its middle)
         float ax = (float) -Math.sin(whale.yaw), az = (float) -Math.cos(whale.yaw), tail = whale.length() * 0.4f;
         float ox = whale.x - ax * tail - az * 4, oz = whale.z - az * tail + ax * 4;

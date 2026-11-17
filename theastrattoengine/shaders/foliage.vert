@@ -12,6 +12,7 @@ uniform vec2 uFade;
 uniform vec4 uPush[8];                 // x, z, radius, y of whatever is wading through
 uniform int uPushN;
 uniform float uSnow;
+uniform vec2 uRainFall;                // 0.4.7: the rain falling now (0..1), how wet the leaves are (0..1)
 out vec3 vCol;
 out vec3 vN;
 out vec2 vLight;
@@ -65,9 +66,23 @@ void main() {
     }
     p.xz += off;
     p.y -= min(p.y * 0.7, dot(off, off) / max(p.y * 1.4, 0.10));
+    // 0.4.7 (gamefixes: foliage did not react to rain) wet leaves hang heavier - the tips droop and spread a little -
+    // and the falling drops strike them: a quick, small, uneven bob, each leaf on its own beat, stronger the harder it falls
+    if (pliant > 0.0 && (uRainFall.x > 0.01 || uRainFall.y > 0.01)) {
+        float tip = clamp(p.y / max(0.25, 0.9 * iPosScale.w), 0.0, 1.0);
+        float droop = 0.10 * uRainFall.y * tip * tip * iPosScale.w * mix(0.4, 1.0, clamp(iRot.w, 0.0, 1.0));
+        p.y -= droop;
+        p.xz *= 1.0 + 0.6 * droop / max(0.2, iPosScale.w);
+        float seed = fract(sin(dot(root.xz + p.xz * 3.0, vec2(12.9898, 78.233))) * 43758.5453);
+        float beat = uWind.z * (9.0 + 7.0 * seed) + seed * 40.0;
+        float hit = pow(max(0.0, sin(beat)), 12.0) * (0.5 + 0.5 * sin(beat * 0.37 + seed * 9.0));
+        p.y -= hit * 0.035 * uRainFall.x * tip * iPosScale.w;
+    }
     vCol = aColSway.rgb * mix(vec3(0.82, 0.86, 0.80), vec3(1.14, 1.08, 0.86), iRot.y);
     float snowOn = uSnow * iLight.z * smoothstep(0.1, 0.9, n.y * 0.6 + 0.4);
     vCol = mix(vCol, vec3(0.84, 0.86, 0.90), snowOn);
+    // wet leaves are darker and deeper in colour
+    vCol *= mix(vec3(1.0), vec3(0.78, 0.84, 0.80), clamp(uRainFall.y, 0.0, 1.0) * (1.0 - snowOn));
     // lit as a soft mass, not as a heap of little cubes: the normal leans toward the sky
     vN = normalize(mix(n, vec3(0.0, 1.0, 0.0), 0.5));
     vLight = iLight.xy;

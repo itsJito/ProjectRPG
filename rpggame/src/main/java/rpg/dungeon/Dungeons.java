@@ -156,8 +156,36 @@ public final class Dungeons {
      * refilled past what it was built with. (Each resident had a lair of its own, which could grow to two and, once
      * cleared, be taken back by three.)
      */
+    /**
+     * (0.4.7, gamefixes: the dungeon system on ShadowVeil) its dungeons' levels under the map, as Underground carved them:
+     * each level's chests (the hoard deeper and richer the further down) and traps in fixed ids, then its residents.
+     */
+    public void initShadowveil() {
+        long id = rpg.Ids.SV_DUNGEONS;
+        for (DungeonLayout l : DungeonLayout.underground()) {
+            java.util.Random r = new java.util.Random(l.seed ^ 0x7EA5);
+            for (Spot s : l.spots) {
+                float x = l.worldX(s.x()) + 0.5f, z = l.worldZ(s.z()) + 0.5f;
+                switch (s.what()) {
+                    case "trap" -> { Trap t = g.objects.add(new Trap(id++, s.arg(), l.type.threat, level(l, 2), x, z)); t.y = l.floorY; traps.add(t); }
+                    case "chest" -> {
+                        Container chest = g.objects.add(new Container(id++, "chest", "Old chest", "chest", x, l.floorY + 0.4f, z, 20, 0));
+                        for (ItemStack st : hoard(l, s.arg() + l.depth - 1, r)) if (chest.contents.add(st)) g.state.mint(st.def, st.amount);
+                    }
+                    default -> { }
+                }
+            }
+        }
+        populate();
+    }
+    /** The dungeons in play: the devmap's own, or ShadowVeil's levels under the map. */
+    private static List<DungeonLayout> levels() { return rpg.world.WorldMap.shadowveil() ? DungeonLayout.underground() : DungeonLayout.all(); }
+
     public void populate() {
-        for (DungeonLayout l : DungeonLayout.all()) {
+        for (DungeonLayout l : levels()) {
+            // (0.4.7) a working mine's first level is the miners': nothing lives there; its old workings below hold vermin
+            DungeonSites.Site siteOf = l.site.isEmpty() ? null : DungeonSites.byId(l.site);
+            if (siteOf != null && siteOf.kind().equals("mine") && l.depth == 1) continue;
             String lairName = l.name;
             boolean have = false;
             for (var lair : g.monsters.lairs) if (lair.name.startsWith(lairName)) have = true;
@@ -176,7 +204,7 @@ public final class Dungeons {
                 Map<MonsterKind, Monsters.Lair> lairs = new HashMap<>();
                 for (Spot s : band) {
                     boolean master = s.what().equals("master");
-                    MonsterKind kind = resident(l, s, master);
+                    MonsterKind kind = siteResident(l, s, master);
                     int lv = level(l, s.arg()) + (master ? (int) (12 * l.type.threat) : 0);
                     if (l.type == DungeonLayout.Type.BOSS) lv = kind.maxLevel;
                     float x = l.worldX(s.x()) + 0.5f, z = l.worldZ(s.z()) + 0.5f;
@@ -185,14 +213,40 @@ public final class Dungeons {
                     float cx = e.getKey() == null ? x : l.ox + e.getKey().cx(), cz = e.getKey() == null ? z : l.oz + e.getKey().cz();
                     final int top = lv, size = members;
                     Monsters.Lair lair = lairs.get(kind);
-                    if (lair == null) { lair = g.monsters.addLair(kind, lairName + " " + (++room), cx, cz, Math.max(kind.minLevel, top - 6), Math.min(kind.maxLevel, top), size); lairs.put(kind, lair); }
-                    var m = g.monsters.spawn(kind, lv, x, z, lair);
+                    if (lair == null) {
+                        int lTop = top;
+                        if (rpg.world.WorldMap.shadowveil() && siteOf != null) { int[] b = rpg.world.shadowveil.Danger.band(siteOf.mouthX(), siteOf.mouthZ()); lTop = b[1]; }
+                        lair = g.monsters.addLair(kind, lairName + " " + (++room), cx, cz, Math.max(kind.minLevel, Math.min(kind.maxLevel, lTop - 8)), Math.max(kind.minLevel, Math.min(kind.maxLevel, lTop)), size);
+                        lairs.put(kind, lair);
+                    }
+                    // (0.4.7) under ShadowVeil each level down is harder, and its residents are made on its own floor;
+                    // (0.4.8, gamefixes: dungeons more dangerous further from Loxford) their levels are the band of the
+                    // ground over the mouth, climbing through it room by room and level by level, the master at its top
+                    if (rpg.world.WorldMap.shadowveil()) {
+                        int levelsDown = siteOf == null ? 1 : Math.max(1, siteOf.levels());
+                        double share = ((l.depth - 1) + Math.min(1, s.arg() / (double) (deepest + 1))) / levelsDown;
+                        float mx = siteOf == null ? l.worldX(l.entryX) : siteOf.mouthX(), mz = siteOf == null ? l.worldZ(l.entryZ) : siteOf.mouthZ();
+                        lv = rpg.world.shadowveil.Danger.level(mx, mz, master ? 1.1 : share);
+                        lv = Math.max(kind.minLevel, Math.min(kind.maxLevel, lv));
+                    }
+                    var m = rpg.world.WorldMap.shadowveil() ? g.monsters.spawnAt(kind, lv, x, l.floorY, z, lair) : g.monsters.spawn(kind, lv, x, z, lair);
                     if (master || !led && s.arg() == deepest) { m.leader = true; led = true; lair.led = true; }
                 }
             }
         }
     }
 
+    /** (0.4.7) How many levels harder each level down a ShadowVeil dungeon's residents are. */
+    static final int DEPTH_LEVELS = rpg.Tuning.i("dungeons.levelsPerDepth", 6);
+    /** (0.4.7) A ShadowVeil site's own creatures where its data names them (its lair's kind, the master the strongest), else the theme's. */
+    private static MonsterKind siteResident(DungeonLayout l, Spot s, boolean master) {
+        DungeonSites.Site site = l.site.isEmpty() ? null : DungeonSites.byId(l.site);
+        if (site != null && site.creatures().isEmpty() && site.kind().equals("mine")) return Math.floorMod(s.x() * 31 + s.z() * 17, 3) == 0 ? MonsterKind.BAT : MonsterKind.GIANT_SPIDER;
+        if (site == null || site.creatures().isEmpty()) return resident(l, s, master);
+        List<String> c = site.creatures();
+        String pick = master ? c.get(c.size() - 1) : c.get(Math.floorMod(s.x() * 31 + s.z() * 17, c.size()));
+        try { return MonsterKind.valueOf(pick); } catch (IllegalArgumentException e) { return resident(l, s, master); }
+    }
     /** Who lives where: by the dungeon's theme, the deeper rooms holding the stronger kinds. */
     private static MonsterKind resident(DungeonLayout l, Spot s, boolean master) {
         int depth = s.arg(), roll = Math.floorMod(s.x() * 31 + s.z() * 17, 6);
@@ -348,6 +402,7 @@ public final class Dungeons {
     public Trap snare(rpg.ai.Npc hunter, float x, float z) {
         Trap t = g.objects.add(new Trap(g.state.newEntityId(), 2, 1, Math.max(1, hunter.skills.level(Skill.THIEVING)), x, z));
         t.owner = hunter.id;
+        t.y = hunter.y;   // (0.4.7) laid on the ground the hunter stands on, not the devmap's floor
         traps.add(t);
         g.state.commit("SnareSet", hunter.id, t.id, DevMap.jurisdiction(x, z), 0, String.format("at (%.1f, %.1f)", x, z));
         return t;
@@ -357,6 +412,12 @@ public final class Dungeons {
         // a hunter's snares go with the hunt: lifted when the one who set them is gone or has given up
         for (Trap t : traps) if (t.kind == 2 && !t.removed && !(g.actor(t.owner) instanceof rpg.ai.Npc h && h.alive && h.hunt != null)) t.removed = true;
         traps.removeIf(t -> t.kind == 2 && t.removed);
+        // (0.4.7, gamefixes: aggressive optimization) the traps by the cell they lie in, for each body to look up the few
+        // under its feet: every armed trap was tried against every body in the world every frame
+        if (trapCells.isEmpty() != traps.isEmpty() || trapCellsOf != traps.size()) {
+            trapCells.clear(); trapCellsOf = traps.size();
+            for (Trap t : traps) trapCells.computeIfAbsent(cellKey((int) Math.floor(t.x), (int) Math.floor(t.z)), k -> new ArrayList<>(1)).add(t);
+        }
         for (Trap t : traps) {
             if (t.removed || t.disarmed) continue;
             if (!t.armed && g.time >= t.readyAt) t.armed = true;
@@ -365,15 +426,29 @@ public final class Dungeons {
                 t.found = true;
                 g.chat.add("You notice a " + (t.kind == 0 ? "plate set in the floor ahead. A trap." : "loose stone under a cracked roof. A trap."), Chat.Kind.WARN);
             }
-            if (!t.armed) continue;
-            for (Actor a : g.actors()) {
-                if (!a.alive || a.dummy || a instanceof rpg.monster.Monster || !a.grounded && !(a instanceof rpg.animal.Animal)) continue;
-                // a snare spares its hunters - the one who set it, the posse, and (0.2.2) anyone hunting the same quarry
-                // (the lawman leading the hunt walked into his own party's snare before the quarry came near)
-                if (t.owner != 0 && a.id != quarry(t) && (a.id == t.owner || a instanceof rpg.ai.Npc n && (n.posse || n.watch() || n.hunt != null && n.hunt.target == quarry(t)))) continue;
-                if (Math.abs(a.x - t.x) < 0.45f && Math.abs(a.z - t.z) < 0.45f && a.y < DevMap.FLOOR + 0.3f) { spring(t, a); break; }
+        }
+        if (trapCells.isEmpty()) return;
+        bodies:
+        for (Actor a : g.actors()) {
+            if (!a.alive || a.dummy || a instanceof rpg.monster.Monster || !a.grounded && !(a instanceof rpg.animal.Animal)) continue;
+            int x0 = (int) Math.floor(a.x - 0.45f), x1 = (int) Math.floor(a.x + 0.45f), z0 = (int) Math.floor(a.z - 0.45f), z1 = (int) Math.floor(a.z + 0.45f);
+            for (int cx = x0; cx <= x1; cx++) for (int cz = z0; cz <= z1; cz++) {
+                List<Trap> here = trapCells.get(cellKey(cx, cz));
+                if (here != null) for (Trap t : here) if (tread(t, a)) { spring(t, a); continue bodies; }
             }
         }
+    }
+    private final java.util.Map<Long, List<Trap>> trapCells = new java.util.HashMap<>();
+    private int trapCellsOf = -1;
+    private static long cellKey(int x, int z) { return ((long) x << 32) ^ (z & 0xFFFFFFFFL); }
+
+    /** Whether a body treads on an armed trap: on it, on its own floor (a dungeon's level, the ground a snare lies on). */
+    private boolean tread(Trap t, Actor a) {
+        if (t.removed || t.disarmed || !t.armed) return false;
+        // a snare spares its hunters - the one who set it, the posse, and (0.2.2) anyone hunting the same quarry
+        // (the lawman leading the hunt walked into his own party's snare before the quarry came near)
+        if (t.owner != 0 && a.id != quarry(t) && (a.id == t.owner || a instanceof rpg.ai.Npc n && (n.posse || n.watch() || n.hunt != null && n.hunt.target == quarry(t)))) return false;
+        return Math.abs(a.x - t.x) < 0.45f && Math.abs(a.z - t.z) < 0.45f && Math.abs(a.y - t.y) < 0.6f;
     }
 
     /** Whom a hunter's snare is set for: its setter's quarry (0 when it has none). */

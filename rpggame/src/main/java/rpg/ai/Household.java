@@ -96,14 +96,21 @@ final class Household {
         float dm = (float) Math.min(600, now - lastMinutes);
         lastMinutes = now;
         if (dm <= 0) return;
-        for (Furniture f : g.objects.furniture) if (f.kind == Furniture.Kind.FIREPLACE && f.fuel > 0) f.burn(dm);
+        // (0.4.7, gamefixes: aggressive optimization) the hearths alone, found once: every piece of furniture in the world
+        // (some thousands on ShadowVeil) was walked every frame for the few that burn
+        if (hearthsOf != g.objects.furniture.size()) {
+            hearthsOf = g.objects.furniture.size(); hearths.clear();
+            for (Furniture f : g.objects.furniture) if (f.kind == Furniture.Kind.FIREPLACE) hearths.add(f);
+        }
+        for (Furniture f : hearths) if (f.fuel > 0) f.burn(dm);
     }
+    private final java.util.List<Furniture> hearths = new java.util.ArrayList<>();
+    private int hearthsOf = -1;
 
     // ------------------------------------------------------------------ helpers
     /** The floor under a height (where to stand to reach something at that height). */
     private static float fy(float y) { return Mansion.LEVELS[Mansion.level(y)]; }
 
-    private boolean at(Npc n, float x, int level, float z, float within) { return brain.goTo(n, x, Mansion.LEVELS[level], z, false, within); }
 
     /** The pantry's stores: the crates and barrels on the ground floor's pantry (or the kitchen) that are still whole. */
     private Breakable store(ItemDef d, boolean withSome) {

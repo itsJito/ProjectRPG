@@ -303,11 +303,15 @@ void AiService::plan(Engine& e, Agent& a, const VoxelWorld* w) {
             if (a.waiting && a.pause > 0) break;
             a.waiting = false;
             const float range = act.range > 0 ? act.range : 8;
-            for (int tries = 0; tries < 8; tries++) {
+            // (0.4.8) the first tries only take a spot it can walk to straight from where it stands (a stroll round a
+            // cramped home kept picking a cell behind a wall and stalling on it); the last fall back to any standing cell
+            const bool doors = (a.flags & ASTRATTO_AGENT_DOORS) != 0;
+            for (int tries = 0; tries < 12; tries++) {
                 const float ang = rand01(a) * 2 * PI, dist = range * (0.3f + 0.7f * rand01(a));
                 const float tx = a.homeX + std::cos(ang) * dist, tz = a.homeZ + std::sin(ang) * dist;
-                const int ty = Pathfinder::stepY(*w, fl(tx), fl(tz), fl(a.homeY + 0.5f), (a.flags & ASTRATTO_AGENT_DOORS) != 0);
+                const int ty = Pathfinder::stepY(*w, fl(tx), fl(tz), fl(a.homeY + 0.5f), doors);
                 if (ty < 0) continue;
+                if (tries < 9 && (std::abs(static_cast<float>(ty) - a.y) > 1.2f || !Pathfinder::clearBody(*w, a.x, a.y, a.z, static_cast<float>(fl(tx)) + 0.5f, static_cast<float>(fl(tz)) + 0.5f, doors, 0.3f))) continue;
                 a.arrived = false; a.stuck = false; a.moving = false;
                 setDest(static_cast<float>(fl(tx)) + 0.5f, static_cast<float>(ty), static_cast<float>(fl(tz)) + 0.5f);
                 a.wantPath = true;
@@ -351,7 +355,13 @@ void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, Physi
         float dx = cx - a.x, dz = cz - a.z;
         const float d = std::sqrt(dx * dx + dz * dz);
         const bool last = (a.routeAt + 1) * 3 >= a.route.size();
-        if (d < (last ? 0.3f : 0.45f) && std::fabs(cy - a.y) < (Pathfinder::climb(*w,fl(a.x),fl(a.y),fl(a.z)) ? .35f : 1.2f)) {
+        // (2.14) a rung waypoint is reached as near across as the climb itself takes hold of the ladder (0.6 m): a
+        // climber a little off the ladder's middle (the rungs slow any step across) chased the rung's height up and down
+        // for ever, never near enough across to have reached it
+        const bool rungs = Pathfinder::climb(*w,fl(a.x),fl(a.y),fl(a.z))
+                && (Pathfinder::climb(*w,fl(cx),fl(cy),fl(cz)) || Pathfinder::climb(*w,fl(cx),fl(cy)-1,fl(cz)));
+        const bool onRungs = Pathfinder::climb(*w,fl(a.x),fl(a.y),fl(a.z));
+        if (d < (rungs ? 0.6f : last ? 0.3f : 0.45f) && std::fabs(cy - a.y) < (onRungs ? .35f : 1.2f)) {
             a.routeAt++;
             a.progressBest = 1e9f; a.progressTimer = 0;
             if (a.routeAt * 3 >= a.route.size()) {
@@ -408,7 +418,9 @@ void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, Physi
             if (m && cy > a.y + 0.6f && d < 1.4f && m->onGround && (!(a.flags & ASTRATTO_AGENT_EXTERNAL_TRAVERSAL) || cy - a.y <= 1.05f) && (sideStep || !(w->def(fl(cx), fl(cy) - 1, fl(cz)).flags & ASTRATTO_BLOCK_STEP)) && (sideStep || !(cy - a.y <= 1.05f && (w->def(fl(cx), fl(cy) - 1, fl(cz)).flags & ASTRATTO_BLOCK_GROUND)))) jump = std::sqrt(2 * 22.0f * (cy - a.y + 0.35f));
             // progress: if it has not got nearer for a second and a half it is stuck - search again; three times and it gives up
             a.progressTimer += dt;
-            if (d < a.progressBest - 0.1f) { a.progressBest = d; a.progressTimer = 0; a.fails = 0; }
+            // (2.14) on a ladder the rungs are the way: height gained or lost is headway as much as ground covered
+            const float prog = d + (m && m->climb ? std::fabs(cy - a.y) : 0.0f);
+            if (prog < a.progressBest - 0.1f) { a.progressBest = prog; a.progressTimer = 0; a.fails = 0; }
             if (a.progressTimer > 1.5f) {
                 rememberBlock(fl(cx),fl(cy),fl(cz));
                 a.progressTimer = 0; a.progressBest = 1e9f;
@@ -424,6 +436,9 @@ void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, Physi
     const Policy* p = policies_.get(a.policy);
     if (a.sees && p && a.current >= 0 && p->actions[static_cast<size_t>(a.current)].kind != ASTRATTO_ACT_FLEE && (!a.moving || p->actions[static_cast<size_t>(a.current)].kind == ASTRATTO_ACT_HOLD))
         a.yaw = std::atan2(-(a.targetX - a.x), -(a.targetZ - a.z));
+    // (2.14) an agent on a ladder with nowhere to go this frame (its rung reached, the next not yet asked) holds on there
+    // rather than sliding back down the rungs it has climbed
+    if (m && !m->climb && !m->onGround && w != nullptr && wantX == 0 && wantZ == 0 && (Pathfinder::climb(*w, fl(a.x), fl(a.y), fl(a.z)) || Pathfinder::climb(*w, fl(a.x), fl(a.y) - 1, fl(a.z)))) { m->climb = true; m->wishY = 0; }
     if (m) {
         if (m->crouch) {
             const float speed = std::sqrt(wantX * wantX + wantZ * wantZ);

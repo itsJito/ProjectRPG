@@ -36,6 +36,9 @@ public final class Soundscape {
         data = m;
     }
 
+    /** (0.4.7) A section of the audio data (the weather beds'). */
+    public Map<String, Object> section(String key) { return map(data, key); }
+
     /** What the place sounds like: the kinds of ground the ambience knows. */
     public enum Place { TOWN, FARMLAND, WOOD, OPEN, BARREN, COAST, INDOORS, UNDERGROUND }
 

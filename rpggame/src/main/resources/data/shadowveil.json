@@ -57,7 +57,8 @@
  },
  "regions": [
   {
-   "id": "loxford_lowlands", "name": "Loxford Lowlands",
+   "id": "loxford_lowlands",
+   "name": "Loxford Lowlands",
    "rect": [
     1,
     26,
@@ -75,7 +76,8 @@
    "realm": "WILDS"
   },
   {
-   "id": "southern_marches", "name": "Southern Marches",
+   "id": "southern_marches",
+   "name": "Southern Marches",
    "rect": [
     27,
     44,
@@ -93,7 +95,8 @@
    "realm": "WILDS"
   },
   {
-   "id": "azharad_basin", "name": "Azharad Basin",
+   "id": "azharad_basin",
+   "name": "Azharad Basin",
    "rect": [
     45,
     67,
@@ -111,7 +114,8 @@
    "realm": "WILDS"
   },
   {
-   "id": "valgard_highlands", "name": "Valgard Highlands",
+   "id": "valgard_highlands",
+   "name": "Valgard Highlands",
    "rect": [
     1,
     18,
@@ -129,7 +133,8 @@
    "realm": "WILDS"
   },
   {
-   "id": "western_crags", "name": "Western Crags",
+   "id": "western_crags",
+   "name": "Western Crags",
    "rect": [
     1,
     18,
@@ -147,7 +152,8 @@
    "realm": "WILDS"
   },
   {
-   "id": "gallows_heath", "name": "Gallows Heath",
+   "id": "gallows_heath",
+   "name": "Gallows Heath",
    "rect": [
     19,
     27,
@@ -165,7 +171,8 @@
    "realm": "WILDS"
   },
   {
-   "id": "gorrick_shoulder", "name": "Gorrick Shoulder",
+   "id": "gorrick_shoulder",
+   "name": "Gorrick Shoulder",
    "rect": [
     19,
     27,
@@ -183,7 +190,8 @@
    "realm": "WILDS"
   },
   {
-   "id": "dimwater_basin", "name": "Dimwater Basin",
+   "id": "dimwater_basin",
+   "name": "Dimwater Basin",
    "rect": [
     28,
     44,
@@ -201,7 +209,8 @@
    "realm": "WILDS"
   },
   {
-   "id": "dead_wood", "name": "Dead Wood",
+   "id": "dead_wood",
+   "name": "Dead Wood",
    "rect": [
     45,
     56,
@@ -219,7 +228,8 @@
    "realm": "WILDS"
   },
   {
-   "id": "camelot_shoulder", "name": "Camelot Shoulder",
+   "id": "camelot_shoulder",
+   "name": "Camelot Shoulder",
    "rect": [
     45,
     56,
@@ -237,7 +247,8 @@
    "realm": "WILDS"
   },
   {
-   "id": "ashmaw_coast", "name": "Ashmaw Coast",
+   "id": "ashmaw_coast",
+   "name": "Ashmaw Coast",
    "rect": [
     57,
     67,
@@ -255,7 +266,8 @@
    "realm": "WILDS"
   },
   {
-   "id": "severian_north", "name": "Severian North",
+   "id": "severian_north",
+   "name": "Severian North",
    "rect": [
     1,
     67,
@@ -677,12 +689,34 @@
     36
    ],
    "y": 92,
-   "radius": 92,
-   "crater": 14,
-   "craterDepth": 7,
-   "power": 1.35,
+   "radius": 100,
+   "crater": 16,
+   "craterDepth": 11,
+   "power": 1.5,
    "biome": "volcanic",
-   "rough": 0.12
+   "rough": 0.2,
+   "gullies": 13,
+   "gullyDepth": 4,
+   "lava": 0.62,
+   "plume": {
+    "height": 70,
+    "puffs": 9,
+    "radius": [
+     7,
+     26
+    ],
+    "density": [
+     0.55,
+     0.14
+    ],
+    "colour": [
+     0.1,
+     0.09,
+     0.09
+    ],
+    "glow": 0.55,
+    "reach": 900
+   }
   },
   {
    "id": "gallows_tor",
@@ -4377,7 +4411,44 @@
      1.0,
      1.08
     ]
-   }
+   },
+   "_fogDensity": "(0.4.7, gamefixes: fog did not change by region) how thick each biome's air is: the mist's density and how near the bank comes, x1 = the default",
+   "fogDensity": {
+    "meadow": 1.0,
+    "willowmeadow": 1.15,
+    "clearing": 1.0,
+    "copse": 1.1,
+    "chalk": 0.95,
+    "stony": 1.0,
+    "scrub": 0.9,
+    "scrubwood": 1.0,
+    "marches": 1.2,
+    "oakwood": 1.35,
+    "pinewood": 1.4,
+    "marsh": 2.3,
+    "lakeshore": 1.7,
+    "desert": 0.45,
+    "desert_town": 0.5,
+    "dunes": 0.45,
+    "sandstone": 0.55,
+    "claypits": 0.8,
+    "oasis": 0.9,
+    "volcanic": 1.6,
+    "cinders": 1.8,
+    "scorched": 1.5,
+    "deadwood": 2.1,
+    "highland": 1.25,
+    "crags": 1.4,
+    "upland": 1.15,
+    "heath": 1.3,
+    "mediterranean": 0.75,
+    "vineyard": 0.8,
+    "cypress": 0.85,
+    "olivegrove": 0.8,
+    "beach": 1.3,
+    "seabed": 1.5
+   },
+   "fogTintBoost": 1.8
   },
   "blend": 48,
   "list": [
@@ -4414,7 +4485,8 @@
      0.92,
      0.97,
      1.06
-    ]
+    ],
+    "fogDensity": 1.15
    },
    {
     "name": "Harlette",
@@ -4449,7 +4521,8 @@
      0.86,
      0.95,
      0.9
-    ]
+    ],
+    "fogDensity": 1.5
    },
    {
     "name": "Valgard",
@@ -4478,7 +4551,8 @@
      0.9,
      0.95,
      1.08
-    ]
+    ],
+    "fogDensity": 1.1
    },
    {
     "name": "Gorrick",
@@ -4507,7 +4581,8 @@
      0.9,
      0.96,
      1.1
-    ]
+    ],
+    "fogDensity": 1.2
    },
    {
     "name": "Azharad",
@@ -4536,7 +4611,8 @@
      1.12,
      1.0,
      0.8
-    ]
+    ],
+    "fogDensity": 0.5
    },
    {
     "name": "Camelot",
@@ -4565,7 +4641,8 @@
      1.05,
      1.02,
      0.95
-    ]
+    ],
+    "fogDensity": 1.0
    },
    {
     "name": "Severia",
@@ -4600,7 +4677,8 @@
      1.06,
      1.02,
      0.94
-    ]
+    ],
+    "fogDensity": 0.85
    }
   ],
   "_fog": "(0.4.4, gamefixes: fog tinted by the region you are in) each realm's fog colour (a multiplier on the hour's fog), blended in over its bounds as its tint is; the wilds' by the biome under the eye (wilds.fogBiomes), a neutral one where none is named"
@@ -5109,7 +5187,7 @@
    },
    {
     "id": "TELLER",
-    "to": "loxford_castle"
+    "to": "loxford_bank"
    },
    {
     "id": "BANDIT_1",
@@ -5213,11 +5291,11 @@
    },
    {
     "id": "GUILD_FORESTERS",
-    "to": "millwood_lodge"
+    "to": "foresters_guild"
    },
    {
     "id": "GUILD_ARTISANS",
-    "to": "azharad_workshop"
+    "to": "artisans_guild"
    },
    {
     "id": "CARDER",
@@ -5237,19 +5315,19 @@
    },
    {
     "id": "GUILD_FARMERS",
-    "to": "tenant_fields"
+    "to": "farmers_guild"
    },
    {
     "id": "GUILD_PROVISIONERS",
-    "to": "karim_kitchen"
+    "to": "provisioners_guild"
    },
    {
     "id": "GUILD_MARINERS",
-    "to": "harbor"
+    "to": "mariners_guild"
    },
    {
     "id": "GUILD_ARCANISTS",
-    "to": "hojimo_monastery"
+    "to": "arcanists_guild"
    },
    {
     "id": "BARON",
@@ -5485,6 +5563,13 @@
       1,
       0,
       15
+     ],
+     [
+      "CROW",
+      2,
+      2,
+      0,
+      30
      ]
     ],
     "willowmeadow": [
@@ -5538,6 +5623,13 @@
       0,
       0,
       4
+     ],
+     [
+      "CROW",
+      2,
+      1,
+      0,
+      20
      ]
     ],
     "copse": [
@@ -5559,6 +5651,13 @@
       "FOX",
       1,
       1,
+      0,
+      30
+     ],
+     [
+      "CROW",
+      2,
+      2,
       0,
       30
      ]
@@ -5621,6 +5720,13 @@
       0,
       1,
       15
+     ],
+     [
+      "CROW",
+      2,
+      2,
+      0,
+      25
      ]
     ],
     "pinewood": [
@@ -5734,6 +5840,20 @@
       0,
       0,
       3
+     ],
+     [
+      "VULTURE",
+      1,
+      0,
+      0,
+      20
+     ],
+     [
+      "CROW",
+      1,
+      1,
+      0,
+      20
      ]
     ],
     "crags": [
@@ -5757,6 +5877,13 @@
       1,
       0,
       30
+     ],
+     [
+      "VULTURE",
+      1,
+      1,
+      0,
+      25
      ]
     ],
     "stony": [
@@ -5803,6 +5930,20 @@
       1,
       0,
       15
+     ],
+     [
+      "VULTURE",
+      1,
+      0,
+      0,
+      15
+     ],
+     [
+      "CROW",
+      2,
+      1,
+      0,
+      25
      ]
     ],
     "deadwood": [
@@ -5833,6 +5974,13 @@
       1,
       0,
       35
+     ],
+     [
+      "CROW",
+      3,
+      2,
+      0,
+      50
      ]
     ],
     "marsh": [
@@ -5895,6 +6043,20 @@
       1,
       0,
       25
+     ],
+     [
+      "CROW",
+      2,
+      2,
+      0,
+      30
+     ],
+     [
+      "VULTURE",
+      1,
+      1,
+      0,
+      10
      ]
     ],
     "mediterranean": [
@@ -5918,6 +6080,13 @@
       1,
       0,
       20
+     ],
+     [
+      "CROW",
+      1,
+      1,
+      0,
+      15
      ]
     ],
     "olivegrove": [
@@ -5968,6 +6137,13 @@
       1,
       1,
       35
+     ],
+     [
+      "VULTURE",
+      1,
+      1,
+      0,
+      35
      ]
     ],
     "dunes": [
@@ -5977,6 +6153,13 @@
       1,
       0,
       20
+     ],
+     [
+      "VULTURE",
+      1,
+      1,
+      0,
+      25
      ]
     ],
     "scrub": [
@@ -6000,6 +6183,13 @@
       0,
       0,
       20
+     ],
+     [
+      "CROW",
+      2,
+      1,
+      0,
+      20
      ]
     ],
     "sandstone": [
@@ -6016,6 +6206,13 @@
       1,
       0,
       30
+     ],
+     [
+      "VULTURE",
+      1,
+      1,
+      0,
+      25
      ]
     ],
     "claypits": [
@@ -6034,6 +6231,13 @@
       0,
       0,
       15
+     ],
+     [
+      "VULTURE",
+      1,
+      1,
+      0,
+      40
      ]
     ],
     "cinders": [
@@ -6043,6 +6247,13 @@
       0,
       0,
       15
+     ],
+     [
+      "VULTURE",
+      1,
+      1,
+      0,
+      30
      ]
     ],
     "scorched": [
@@ -6052,9 +6263,87 @@
       0,
       0,
       15
+     ],
+     [
+      "VULTURE",
+      1,
+      1,
+      0,
+      30
+     ],
+     [
+      "CROW",
+      2,
+      1,
+      0,
+      20
      ]
     ]
-   }
+   },
+   "_perches": "(0.4.7) the settled places' birds: each kind of structure's groups [species, females, males, young, percent chance], in a habitat 'size' across about it",
+   "perches": [
+    {
+     "templates": [
+      "plaza"
+     ],
+     "size": 30,
+     "groups": [
+      [
+       "PIGEON",
+       3,
+       3,
+       0,
+       85
+      ],
+      [
+       "CROW",
+       1,
+       1,
+       0,
+       15
+      ]
+     ]
+    },
+    {
+     "templates": [
+      "field",
+      "garden",
+      "orchard"
+     ],
+     "size": 34,
+     "groups": [
+      [
+       "CROW",
+       2,
+       2,
+       0,
+       35
+      ],
+      [
+       "PIGEON",
+       2,
+       1,
+       0,
+       15
+      ]
+     ]
+    },
+    {
+     "templates": [
+      "graveyard"
+     ],
+     "size": 26,
+     "groups": [
+      [
+       "CROW",
+       2,
+       2,
+       0,
+       60
+      ]
+     ]
+    }
+   ]
   }
  },
  "extraPlaces": {
@@ -6063,14 +6352,19 @@
    58
   ]
  },
+ "danger": {"_about": "(0.4.8, gamefixes: enemy levels by distance from Loxford) How dangerous the land is (rpg.world.shadowveil.Danger): nothing within 'safe' cells of the 'origin' realm's middle, rising along 'curve' to its full at 'far' cells; each region may add to or take from it. Enemies' levels at a place lie between 'low' and 'high', each taken at its danger ([at none, at full]): the monsters' territories, the dungeons' residents, the hostile people and beasts of encounters.",
+  "origin": "Loxford", "safe": 90, "far": 1000, "curve": 1.15,
+  "low": [1, 55], "high": [10, 110],
+  "regions": {"loxford_lowlands": -0.08, "southern_marches": 0.0, "dead_wood": 0.1, "ashmaw_coast": 0.15, "western_crags": 0.06, "gallows_heath": 0.04}},
  "monsters": {
   "_about": "(0.4.4, gamefixes: monsters with natural spawn locations and territories in the wilderness - orcs, goblins, the overworld's kinds, not the caves' zombies, skeletons or dragons) A territory grows on the open wilds on a grid (jittered), where its biome holds the kind by its chance, far from every kingdom and homestead ('clearance', cells) and off the roads: its lair (a camp, a nest, a haunt) and the ground its members roam, hunt and return to. Per biome: [kind, lowest level, highest level, how many it holds, chance in a hundred]. Its population is the monster system's own - it breeds when fed and safe, and is not respawned on a timer.",
   "grid": 88,
-  "most": 40,
+  "most": 56,
   "clearance": {
    "town": 110,
    "homestead": 55,
-   "road": 10
+   "road": 22,
+   "people": 60
   },
   "names": {
    "GOBLIN": "Goblin camp",
@@ -6079,7 +6373,13 @@
    "IMP": "Imp nest",
    "WEREWOLF": "Werewolf's range",
    "GIANT_SPIDER": "Giant spider's web",
-   "GHOST": "Restless ground"
+   "GHOST": "Restless ground",
+   "ICE_TROLL": "Ice troll's haunt",
+   "RIVER_TROLL": "River troll's haunt",
+   "SMALL_SCORPION": "Scorpion burrows",
+   "LARGE_SCORPION": "Giant scorpion's burrow",
+   "LESSER_DEMON": "Demon pit",
+   "GREATER_DEMON": "Greater demon's pit"
   },
   "biomes": {
    "oakwood": [
@@ -6164,6 +6464,13 @@
    ],
    "highland": [
     [
+     "ICE_TROLL",
+     55,
+     70,
+     1,
+     10
+    ],
+    [
      "ORC",
      20,
      32,
@@ -6179,6 +6486,13 @@
     ]
    ],
    "crags": [
+    [
+     "ICE_TROLL",
+     58,
+     72,
+     1,
+     8
+    ],
     [
      "ORC",
      20,
@@ -6214,6 +6528,13 @@
    ],
    "marsh": [
     [
+     "RIVER_TROLL",
+     35,
+     50,
+     1,
+     15
+    ],
+    [
      "GIANT_SPIDER",
      4,
      12,
@@ -6229,6 +6550,13 @@
     ]
    ],
    "marches": [
+    [
+     "RIVER_TROLL",
+     35,
+     48,
+     1,
+     6
+    ],
     [
      "GOBLIN",
      2,
@@ -6264,6 +6592,20 @@
    ],
    "volcanic": [
     [
+     "GREATER_DEMON",
+     70,
+     90,
+     1,
+     8
+    ],
+    [
+     "LESSER_DEMON",
+     30,
+     45,
+     2,
+     30
+    ],
+    [
      "IMP",
      4,
      12,
@@ -6272,6 +6614,13 @@
     ]
    ],
    "cinders": [
+    [
+     "LESSER_DEMON",
+     30,
+     45,
+     2,
+     22
+    ],
     [
      "IMP",
      4,
@@ -6282,6 +6631,20 @@
    ],
    "scorched": [
     [
+     "GREATER_DEMON",
+     70,
+     85,
+     1,
+     6
+    ],
+    [
+     "LESSER_DEMON",
+     30,
+     45,
+     2,
+     18
+    ],
+    [
      "IMP",
      4,
      12,
@@ -6291,6 +6654,20 @@
    ],
    "desert": [
     [
+     "LARGE_SCORPION",
+     26,
+     40,
+     1,
+     15
+    ],
+    [
+     "SMALL_SCORPION",
+     3,
+     15,
+     3,
+     45
+    ],
+    [
      "GIANT_SPIDER",
      4,
      12,
@@ -6299,6 +6676,20 @@
     ]
    ],
    "dunes": [
+    [
+     "LARGE_SCORPION",
+     26,
+     42,
+     1,
+     12
+    ],
+    [
+     "SMALL_SCORPION",
+     3,
+     15,
+     3,
+     40
+    ],
     [
      "GIANT_SPIDER",
      4,
@@ -6323,6 +6714,33 @@
      6,
      4,
      8
+    ]
+   ],
+   "lakeshore": [
+    [
+     "RIVER_TROLL",
+     35,
+     50,
+     1,
+     14
+    ]
+   ],
+   "willowmeadow": [
+    [
+     "RIVER_TROLL",
+     35,
+     48,
+     1,
+     8
+    ]
+   ],
+   "sandstone": [
+    [
+     "SMALL_SCORPION",
+     3,
+     14,
+     3,
+     30
     ]
    ]
   },
@@ -6401,6 +6819,91 @@
    "_about": "Kept this far (cells) from a lot and from a road: the gatherer's ground is the wild's.",
    "built": 3,
    "road": 1
+  }
+ },
+ "townTalk": {
+  "_about": "(0.4.7) What townsfolk say of their own kingdom, from projectrpg.txt's LORE. Keyed by realm; 'default' for anyone, or by role (GUARD, MERCHANT, PRIEST, CIVIC...). Read by Dialogue in place of hardcoded lines.",
+  "Loxford": {
+   "default": [
+    "The harvest dues come before anything else here. Ask anyone who missed them.",
+    "Keep to the Sun rites and folk will leave you be. Mostly.",
+    "King Richard keeps the old peace, so they say. The roads tell a different story.",
+    "Strangers are watched in Loxford. Don't take it to heart."
+   ],
+   "GUARD": [
+    "The king's peace holds inside these walls. Outside, mind yourself.",
+    "Watchtower's the last of the crown's eyes on the King's Road."
+   ],
+   "PRIEST": [
+    "The rites keep the dread off. Come to the church before you need it."
+   ]
+  },
+  "Azharad": {
+   "default": [
+    "A guest is owed bread and a roof. A thief is owed the Sultan's court.",
+    "Argue well here and they'll remember your name longer than your coin.",
+    "Valgard's ore comes in raw and leaves as craft. That's Azharad's trade.",
+    "The scholars will debate anything. Even the price of bread."
+   ],
+   "MERCHANT": [
+    "Severian ships carry our finished goods. Their fees are a scandal."
+   ]
+  },
+  "Severia": {
+   "default": [
+    "Everything worth having passes through the Great Market sooner or later.",
+    "Leonidas rules by charters and favours. Know whose favour you hold.",
+    "The harbour and the archives - that's what keeps the Empire needed.",
+    "Sun church on the hill, Moon shrine by the market. We get along, mostly."
+   ],
+   "GUARD": [
+    "Imperial patrol fees keep the roads safe. Mostly."
+   ],
+   "CIVIC": [
+    "Records matter here. A thing not written down didn't happen."
+   ]
+  },
+  "Valgard": {
+   "default": [
+    "A knight's oath and a miner's wage are written in the same book here.",
+    "The guild families hold the skills. The crown holds the guild families.",
+    "King Phillip expects discipline. So does the mine.",
+    "Our iron arms half the kingdoms. Nobody thanks us for it."
+   ],
+   "GUARD": [
+    "Keep to the law and the law keeps you. That's Valgard."
+   ]
+  },
+  "Gorrick": {
+   "default": [
+    "Chieftain Torkell is judged by the winter stores. So far, he's held.",
+    "Work earns you a place here. A name doesn't.",
+    "A witnessed promise is worth more than ink in Gorrick.",
+    "Valgard wants to inspect every northern shipment. Let them try."
+   ]
+  },
+  "Harlette": {
+   "default": [
+    "Bolt your door at dusk. That's not advice, it's custom.",
+    "The count's protection is real. So is the price of it.",
+    "We mark births, debts and departures carefully here.",
+    "Speak freely by your own hearth. Nowhere else."
+   ]
+  },
+  "Camelot": {
+   "default": [
+    "At the Round Table every voice gets a hearing. Not every voice gets heeded.",
+    "Arthur shelters those who flee. Not every king likes that.",
+    "Our escorts guard the roads for less than the imperial patrols ask.",
+    "An oath sworn here is sworn in public. Breaking it is public too."
+   ]
+  },
+  "Wilds": {
+   "default": [
+    "Out here a kept promise is worth more than any title.",
+    "Every camp keeps its own rules. Learn them quick.",
+    "Hospitality ends at the next ridge, they say. Don't test it."
+   ]
   }
  }
 }

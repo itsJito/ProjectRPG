@@ -1,0 +1,439 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 23.88s ({regions=820, overlays=525, variants=710, scarp=54, coast=481, erosion=474, peaks=82, lakes=61, isles=1, rivers=1405, wadis=98, ground=84, roads=1900, causeways=8, architecture=1763, pitsFilled=1396, pits=575, banks=102, clamp=17, cliffs=75, columns=1233, falls=17, raise=11606, trees=271, outcrops=0, ways=586, lava=0, dungeons=101, postsSunk=28, floatingRemoved=59, floating=785}), made and lit in 2.16s
+    [water] flow field grown in 1751 ms: 39016 columns moving
+    [gathering] 757 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+    [life] start: 236 people, 0 stand with 3+ others within 2 m
+
+    [trace]    30 Soren      (396.50,57.04,430.50) yaw 0.00 want NaN v 0.00,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 0.5 na 0.0 t 0.5 | on the way to prayers
+    [trace]    40 Soren      (396.66,57.00,430.50) yaw -0.43 want NaN v 2.15,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 0.5 na 0.0 t 0.7 | on the way to prayers
+    [trace]    50 Soren      (397.06,57.00,430.50) yaw -1.52 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 0.8 na 0.0 t 0.9 | on the way to prayers
+    [trace]    60 Soren      (397.47,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 1.0 na 0.0 t 1.0 | on the way to prayers
+    [trace]    70 Soren      (397.88,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 1.1 na 0.0 t 1.2 | on the way to prayers
+    [trace]    80 Soren      (398.28,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 1.2 na 0.0 t 1.4 | on the way to prayers
+    [trace]    90 Soren      (398.69,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 1.5 na 0.0 t 1.5 | on the way to prayers
+    [trace]   100 Soren      (399.10,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 1.6 na 0.0 t 1.7 | on the way to prayers
+    [trace]   110 Soren      (399.51,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 1.8 na 0.0 t 1.9 | on the way to prayers
+    [trace]   120 Soren      (399.92,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 1.9 na 0.0 t 2.0 | on the way to prayers
+    [trace]   130 Soren      (400.33,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 2.2 na 0.0 t 2.2 | on the way to prayers
+    [trace]   140 Soren      (400.73,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 2.3 na 0.0 t 2.4 | on the way to prayers
+    [trace]   150 Soren      (401.14,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 2.5 na 0.0 t 2.5 | on the way to prayers
+    [trace]   160 Soren      (401.55,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 2.6 na 0.0 t 2.7 | on the way to prayers
+    [trace]   170 Soren      (401.96,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 2.8 na 0.0 t 2.9 | on the way to prayers
+    [trace]   180 Soren      (402.37,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 3.0 na 0.0 t 3.0 | on the way to prayers
+    [trace]   190 Soren      (402.78,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 3.0 na 0.0 t 3.2 | on the way to prayers
+    [trace]   200 Soren      (403.18,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 3.2 na 0.0 t 3.4 | on the way to prayers
+    [trace]   210 Soren      (403.59,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 3.5 na 0.0 t 3.5 | on the way to prayers
+    [trace]   220 Soren      (404.00,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 3.5 na 0.0 t 3.7 | on the way to prayers
+    [trace]   230 Soren      (404.41,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 3.5 na 0.0 t 3.9 | on the way to prayers
+    [trace]   240 Soren      (404.82,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 4.0 na 0.0 t 4.0 | on the way to prayers
+    [trace]   250 Soren      (405.23,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 4.0 na 0.0 t 4.2 | on the way to prayers
+    [trace]   260 Soren      (405.63,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 4.0 na 0.0 t 4.4 | on the way to prayers
+    [trace]   270 Soren      (406.04,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 4.0 na 0.0 t 4.5 | on the way to prayers
+    [trace]   280 Soren      (406.45,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 4.5 na 0.0 t 4.7 | on the way to prayers
+    [trace]   290 Soren      (406.86,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 4.5 na 0.0 t 4.9 | on the way to prayers
+    [trace]   300 Soren      (407.27,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 4.5 na 0.0 t 5.0 | on the way to prayers
+    [trace]   310 Soren      (407.68,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 5.1 na 0.0 t 5.2 | on the way to prayers
+    [trace]   320 Soren      (408.08,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 5.1 na 0.0 t 5.4 | on the way to prayers
+    [trace]   330 Soren      (408.49,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 5.1 na 0.0 t 5.5 | on the way to prayers
+    [trace]   340 Soren      (408.90,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 5.6 na 0.0 t 5.7 | on the way to prayers
+    [trace]   350 Soren      (409.31,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 5.6 na 0.0 t 5.9 | on the way to prayers
+    [trace]   360 Soren      (409.72,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 5.6 na 0.0 t 6.0 | on the way to prayers
+    [trace]   370 Soren      (410.13,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 6.1 na 0.0 t 6.2 | on the way to prayers
+    [trace]   380 Soren      (410.53,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 6.1 na 0.0 t 6.4 | on the way to prayers
+    [trace]   390 Soren      (410.94,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 6.1 na 0.0 t 6.5 | on the way to prayers
+    [trace]   400 Soren      (411.35,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 6.6 na 0.0 t 6.7 | on the way to prayers
+    [trace]   410 Soren      (411.76,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 6.6 na 0.0 t 6.9 | on the way to prayers
+    [trace]   420 Soren      (412.17,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 6.6 na 0.0 t 7.0 | on the way to prayers
+    [trace]   430 Soren      (412.58,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 7.1 na 0.0 t 7.2 | on the way to prayers
+    [trace]   440 Soren      (412.98,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 7.1 na 0.0 t 7.4 | on the way to prayers
+    [trace]   450 Soren      (413.39,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 7.1 na 0.0 t 7.5 | on the way to prayers
+    [trace]   460 Soren      (413.80,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 7.6 na 0.0 t 7.7 | on the way to prayers
+    [trace]   470 Soren      (414.21,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 7.6 na 0.0 t 7.9 | on the way to prayers
+    [trace]   480 Soren      (414.62,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 7.6 na 0.0 t 8.0 | on the way to prayers
+    [trace]   490 Soren      (415.03,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 8.2 na 0.0 t 8.2 | on the way to prayers
+    [trace]   500 Soren      (415.43,57.00,430.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 8.2 na 0.0 t 8.4 | on the way to prayers
+    [trace]   510 Soren      (415.81,57.00,430.63) yaw -1.84 want NaN v 2.18,1.12 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 8.2 na 0.0 t 8.5 | on the way to prayers
+    [trace]   520 Soren      (416.14,57.00,430.70) yaw -1.73 want NaN v 1.79,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 8.2 na 0.0 t 8.7 | on the way to prayers
+    [trace]   530 Soren      (416.43,57.00,430.74) yaw -1.76 want NaN v 1.75,1.16 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 8.7 na 0.0 t 8.9 | on the way to prayers
+    [trace]   540 Soren      (416.73,57.00,431.01) yaw -2.17 want NaN v 1.82,1.64 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 8.7 na 0.0 t 9.0 | on the way to prayers
+    [trace]   550 Soren      (417.03,57.00,431.28) yaw -2.27 want NaN v 1.82,1.64 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 8.7 na 0.0 t 9.2 | on the way to prayers
+    [trace]   560 Soren      (417.33,57.00,431.55) yaw -2.27 want NaN v 1.82,1.64 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 9.3 na 0.0 t 9.4 | on the way to prayers
+    [trace]   570 Soren      (417.64,57.00,431.82) yaw -2.27 want NaN v 1.82,1.64 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 9.3 na 0.0 t 9.5 | on the way to prayers
+    [trace]   580 Soren      (417.94,57.00,432.10) yaw -2.30 want NaN v 1.82,1.64 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 9.3 na 0.0 t 9.7 | on the way to prayers
+    [trace]   590 Soren      (418.19,57.00,432.42) yaw -2.46 want NaN v 1.30,2.07 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 9.8 na 0.0 t 9.9 | on the way to prayers
+    [trace]   600 Soren      (418.41,57.00,432.76) yaw -2.54 want NaN v 1.30,2.07 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 9.8 na 0.0 t 10.0 | on the way to prayers
+    [trace]   610 Soren      (418.63,57.00,433.11) yaw -2.57 want NaN v 1.30,2.07 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 9.8 na 0.0 t 10.2 | on the way to prayers
+    [trace]   620 Soren      (418.84,57.00,433.45) yaw -2.57 want NaN v 1.30,2.07 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 10.3 na 0.0 t 10.4 | on the way to prayers
+    [trace]   630 Soren      (419.06,57.00,433.70) yaw -2.40 want NaN v 1.19,0.12 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 10.3 na 0.0 t 10.5 | on the way to prayers
+    [trace]   640 Soren      (419.22,57.00,433.70) yaw -1.90 want NaN v 0.77,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 10.3 na 0.0 t 10.7 | on the way to prayers
+    [trace]   650 Soren      (419.31,57.00,433.71) yaw -1.80 want NaN v 0.35,0.58 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 10.3 na 0.0 t 10.9 | on the way to prayers
+    [trace]   660 Soren      (419.35,57.00,433.98) yaw -2.87 want NaN v 0.14,2.45 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 10.3 na 0.0 t 11.0 | on the way to prayers
+    [trace]   670 Soren      (419.38,57.00,434.39) yaw -3.03 want NaN v 0.14,2.45 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 10.3 na 0.0 t 11.2 | on the way to prayers
+    [trace]   680 Soren      (419.40,57.00,434.80) yaw -3.06 want NaN v 0.14,2.45 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.2 na 0.0 t 11.4 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-0.29028168] hinge [[418.0, 436.94]]]
+    [trace]   690 Soren      (419.42,57.00,435.21) yaw -3.06 want NaN v 0.14,2.45 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.2 na 0.0 t 11.5 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-0.8086891] hinge [[418.0, 436.94]]]
+    [trace]   700 Soren      (419.45,57.00,435.62) yaw -3.06 want NaN v 0.14,2.45 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.2 na 0.0 t 11.7 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4485435] hinge [[418.0, 436.94]]]
+    [trace]   710 Soren      (419.47,57.00,436.02) yaw -3.06 want NaN v -0.02,2.28 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 11.9 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500009] hinge [[418.0, 436.94]]]
+    [trace]   720 Soren      (419.33,57.00,436.22) yaw 2.67 want NaN v -1.90,-0.15 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 12.0 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   730 Soren      (419.30,57.00,436.18) yaw 2.15 want NaN v -0.00,-0.26 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 12.2 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   740 Soren      (419.30,57.00,436.14) yaw 2.15 want NaN v 0.00,-0.11 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 12.4 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   750 Soren      (419.30,57.00,436.13) yaw 2.15 want NaN v 0.00,0.03 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 12.5 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   760 Soren      (419.30,57.00,436.14) yaw 2.15 want NaN v 0.00,0.09 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 12.7 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   770 Soren      (419.30,57.00,436.15) yaw 2.15 want NaN v 0.00,0.10 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 12.9 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   780 Soren      (419.30,57.00,436.16) yaw 2.15 want NaN v 0.00,0.10 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 13.0 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   790 Soren      (419.30,57.00,436.17) yaw 2.15 want NaN v 0.00,0.09 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 13.2 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   800 Soren      (419.30,57.00,436.18) yaw 2.15 want NaN v 0.00,0.08 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 13.4 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   810 Soren      (419.30,57.00,436.18) yaw 2.15 want NaN v 0.00,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 13.5 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   820 Soren      (419.30,57.00,436.20) yaw 2.15 want NaN v -0.00,0.16 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 13.7 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   830 Soren      (419.30,57.00,436.23) yaw 2.15 want NaN v -0.00,0.17 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 13.9 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   840 Soren      (419.30,57.00,436.24) yaw 2.15 want NaN v -0.00,0.01 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 14.0 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   850 Soren      (419.30,57.00,436.24) yaw 2.15 want NaN v -0.00,-0.07 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 14.2 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   860 Soren      (419.30,57.00,436.22) yaw 2.15 want NaN v -0.00,-0.08 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 14.4 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   870 Soren      (419.30,57.00,436.21) yaw 2.15 want NaN v -0.00,-0.06 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 14.5 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   880 Soren      (419.30,57.00,436.20) yaw 2.15 want NaN v -0.00,-0.04 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 14.7 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   890 Soren      (419.30,57.00,436.20) yaw 2.15 want NaN v -0.00,-0.02 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 14.9 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   900 Soren      (419.30,57.00,436.20) yaw 2.37 want 3.08 v -0.00,-0.01 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 15.0 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   910 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 15.2 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500014] hinge [[418.0, 436.94]]]
+    [trace]   920 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 15.4 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   930 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 15.5 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   940 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 15.7 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   950 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 15.9 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   960 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 16.0 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   970 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 16.2 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   980 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 16.4 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]   990 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 16.5 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1000 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 16.7 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1010 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 16.9 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1020 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 17.0 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1030 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 17.2 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1040 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 17.4 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1050 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 17.5 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1060 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 0 nu 0 ss 11.8 na 0.0 t 17.7 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1070 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 17.9 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1080 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 18.0 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1090 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 18.2 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1100 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 18.4 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1110 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 18.5 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1120 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 18.7 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1130 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 18.9 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1140 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 19.0 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1150 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 19.2 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1160 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 19.4 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1170 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 19.5 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1180 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 19.7 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1190 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 19.9 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1200 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 20.0 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1210 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 20.2 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4499989] hinge [[418.0, 436.94]]]
+    [trace]  1220 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 20.4 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1230 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 20.5 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1240 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 20.7 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1250 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 20.9 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1260 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 21.0 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1270 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 21.2 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1280 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 21.4 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1290 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 21.5 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1300 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 21.7 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1310 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 21.9 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1320 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 22.0 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1330 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 22.2 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500014] hinge [[418.0, 436.94]]]
+    [trace]  1340 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 22.4 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1350 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 22.5 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1360 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 22.7 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1370 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 22.9 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4499989] hinge [[418.0, 436.94]]]
+    [trace]  1380 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 23.0 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1390 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 23.2 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1400 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 23.4 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1410 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 23.5 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1420 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 404.5,57.0,434.5 legs 0/1 st 1 nu 0 ss 17.8 na 0.0 t 23.7 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1430 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 23.9 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1440 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 24.0 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1450 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 24.2 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1460 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 24.4 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1470 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 24.5 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1480 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 24.7 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1490 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 24.9 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1500 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 25.0 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1510 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 25.2 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1520 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 25.4 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1530 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 25.5 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500009] hinge [[418.0, 436.94]]]
+    [trace]  1540 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 25.7 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1550 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 25.9 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1560 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 26.0 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1570 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 26.2 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1580 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 26.4 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500005] hinge [[418.0, 436.94]]]
+    [trace]  1590 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 26.5 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1600 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 26.7 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1610 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 26.9 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1620 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 27.0 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1630 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 27.2 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1640 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 27.4 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1650 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 27.5 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1660 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 27.7 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1670 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 27.9 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1680 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 28.0 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1690 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 28.2 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1700 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 28.4 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1710 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 28.5 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1720 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 28.7 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1730 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 28.9 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1740 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 29.0 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1750 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 29.2 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1760 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 29.4 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4499989] hinge [[418.0, 436.94]]]
+    [trace]  1770 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 29.5 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1780 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 2 nu 0 ss 23.8 na 0.0 t 29.7 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [trace]  1790 Soren      (419.30,57.00,436.20) yaw 3.08 want 3.08 v -0.00,-0.00 goal PRAY(Solday: worship) act go to goal working null gp true 416.5,57.0,436.5 legs 0/8 st 3 nu 0 ss 29.8 na 0.0 t 29.9 | on the way to prayers [door Hojimo Monastery door (open) open true locked false blocked false angle [-1.4500004] hinge [[418.0, 436.94]]]
+    [life] stop 419,440 done (17 people seen so far)
+
+    [life] 1 stops of 1800 frames; 17 people seen
+      Yrsa             CIVIC        seen   280 spins   0 blocked    81 still     0
+          last (442.8,56.0,479.9) WORK: paused to reconsider a blocked route
+      Soren            SCHOLAR      seen   280 spins   0 blocked     0 still   176
+          last (419.3,57.0,436.1) PRAY: on the way to prayers
+      never in play: Ealdra MERCHANT home (309,974)
+      never in play: Torren LAWMAN home (287,1035)
+      never in play: Aldric GUARD home (278,1028)
+      never in play: Oswin WORKER home (352,949)
+      never in play: Tam CRAFTSMAN home (333,884)
+      never in play: Brannoc THIEF home (628,948)
+      never in play: Mara MERCHANT home (162,819)
+      never in play: Lucan LAWMAN home (143,749)
+      never in play: Ferrick CARTER home (240,1021)
+      never in play: Garvin QUEST_GIVER home (259,945)
+      never in play: Kettil CONTACT home (647,924)
+      never in play: Wynn FARMER home (252,1018)
+      never in play: Father Wulfric UNDERTAKER home (227,928)
+      never in play: Skarn FENCE home (628,1074)
+      never in play: Bram GUARD home (285,1026)
+      never in play: Bilal BEGGAR home (956,908)
+      never in play: Ysolde PRIEST home (231,1011)
+      never in play: Father Gregory PRIEST home (260,942)
+      never in play: Rafe HUNTER home (403,849)
+      never in play: Maelin SCHOLAR home (178,647)
+      never in play: Bryn FISHERMAN home (619,641)
+      never in play: Brokk MINER home (247,482)
+      never in play: Fred CRAFTSMAN home (289,965)
+      never in play: Sir Andrew KNIGHT home (269,944)
+      never in play: Hakon HUNTER home (144,624)
+      never in play: Hadwin CIVIC home (312,1004)
+      never in play: Danek CRAFTSMAN home (183,825)
+      never in play: Dawud MINER home (995,926)
+      never in play: Sir Hedric KNIGHT home (407,796)
+      never in play: Gudrik FISHERMAN home (650,1068)
+      never in play: Vesna FISHERMAN home (152,821)
+      never in play: King Leonidas CIVIC home (617,134)
+      never in play: Baron Photios LAWMAN home (644,155)
+      never in play: Leontios GUARD home (643,160)
+      never in play: Anwar GUARD home (926,928)
+      never in play: Roder GUARD home (196,668)
+      never in play: Baroness Guinevere CIVIC home (865,415)
+      never in play: Zoe MERCHANT home (528,165)
+      never in play: Father Paul PRIEST home (925,101)
+      never in play: Aristides SCHOLAR home (659,199)
+      never in play: Polyxena MINER home (925,177)
+      never in play: Tolis BEGGAR home (534,109)
+      never in play: King Fahad CIVIC home (954,943)
+      never in play: Cerys CRAFTSMAN home (862,468)
+      never in play: Wat FISHERMAN home (230,1010)
+      never in play: Tauron HUNTER home (908,557)
+      never in play: King Arthur CIVIC home (865,419)
+      never in play: Sir Lancelot KNIGHT home (857,420)
+      never in play: Sir Gawain KNIGHT home (890,392)
+      never in play: Torvik MINER home (242,487)
+      never in play: Merlin SCHOLAR home (827,423)
+      never in play: Dunstan CRAFTSMAN home (352,952)
+      never in play: Olek CRAFTSMAN home (146,791)
+      never in play: Alexios CRAFTSMAN home (510,82)
+      never in play: Cenric WORKER home (351,944)
+      never in play: Radek WORKER home (136,817)
+      never in play: Dorran MINER home (224,584)
+      never in play: Merek MINER home (140,612)
+      never in play: Meriwyn MERCHANT home (647,919)
+      never in play: Damaris MERCHANT home (528,167)
+      never in play: Cuthmar FARMER home (297,946)
+      never in play: Baron Osric CIVIC home (292,902)
+      never in play: Kyra FARMER home (262,338)
+      never in play: Marinos FARMER home (264,331)
+      never in play: Berthild CIVIC home (320,992)
+      never in play: Maddoc MERCHANT home (324,994)
+      never in play: Karlon CRAFTSMAN home (327,993)
+      never in play: Melitta CIVIC home (585,239)
+      never in play: Basil MERCHANT home (593,239)
+      never in play: Lazaros CRAFTSMAN home (580,239)
+      never in play: Brennar CRAFTSMAN home (230,664)
+      never in play: Fenna MERCHANT home (248,699)
+      never in play: Aldred CIVIC home (361,964)
+      never in play: Layla CRAFTSMAN home (942,880)
+      never in play: Zainab CRAFTSMAN home (943,876)
+      never in play: Baron Jalal CIVIC home (893,924)
+      never in play: Ziad CRAFTSMAN home (940,877)
+      never in play: Murad CRAFTSMAN home (940,881)
+      never in play: Ilva FARMER home (203,806)
+      never in play: Ioanna CIVIC home (517,260)
+      never in play: Petros FISHERMAN home (513,84)
+      never in play: Sabine SCHOLAR home (260,1041)
+      never in play: Baron Hadrik CIVIC home (238,662)
+      never in play: Yannis FISHERMAN home (510,84)
+      never in play: Count Dracula CIVIC home (140,750)
+      never in play: Sir Garran KNIGHT home (200,672)
+      never in play: Sella CIVIC home (188,825)
+      never in play: Orven CARTER home (253,661)
+      never in play: Leofric CRAFTSMAN home (346,944)
+      never in play: Hurk BANDIT home (878,741)
+      never in play: Sigrun BANDIT home (875,742)
+      never in play: Garmund BRUTE home (876,740)
+      never in play: King Richard CIVIC home (274,1025)
+      never in play: Duke Donald CIVIC home (275,1031)
+      never in play: Count William CIVIC home (346,932)
+      never in play: Alaric PRIEST home (263,944)
+      never in play: Maeve CRAFTSMAN home (282,1029)
+      never in play: Hob GUARD home (407,790)
+      never in play: Eadmund CRAFTSMAN home (346,950)
+      never in play: Beric HUNTER home (404,844)
+      never in play: Duke Bashir CIVIC home (951,947)
+      never in play: Count Awhad CIVIC home (905,913)
+      never in play: Sir Faris-ul-Azhar KNIGHT home (954,931)
+      never in play: Hassan SCHOLAR home (954,936)
+      never in play: Idris SCHOLAR home (954,928)
+      never in play: Father Rafiq PRIEST home (962,907)
+      never in play: Yusuf PRIEST home (959,908)
+      never in play: Tariq CIVIC home (892,968)
+      never in play: Zafir CRAFTSMAN home (852,958)
+      never in play: Osama CRAFTSMAN home (985,899)
+      never in play: Marwan CRAFTSMAN home (1004,871)
+      never in play: Karim CRAFTSMAN home (878,885)
+      never in play: Mohamed MERCHANT home (864,911)
+      never in play: Rashid MERCHANT home (909,913)
+      never in play: Munir CARTER home (876,883)
+      never in play: Hakim CARTER home (951,925)
+      never in play: Hamid CRAFTSMAN home (985,946)
+      never in play: Nabil CRAFTSMAN home (989,944)
+      never in play: Salim CRAFTSMAN home (994,928)
+      never in play: Kamal CRAFTSMAN home (996,928)
+      never in play: Qasim WORKER home (987,928)
+      never in play: Fadi MINER home (921,834)
+      never in play: Jamila FARMER home (817,1033)
+      never in play: Samira FARMER home (814,1033)
+      never in play: Zaid GUARD home (939,949)
+      never in play: Sabir GUARD home (947,949)
+      never in play: Baron Nuri CIVIC home (945,923)
+      never in play: Duke Artemios CIVIC home (601,134)
+      never in play: Count Constantine CIVIC home (545,101)
+      never in play: Sir Nicholas KNIGHT home (640,155)
+      never in play: Sir Kosmas KNIGHT home (638,155)
+      never in play: Baroness Eudokia CIVIC home (653,198)
+      never in play: Father Khalid PRIEST home (532,160)
+      never in play: Ione PRIEST home (498,82)
+      never in play: Stavros CIVIC home (479,263)
+      never in play: Demetrios CRAFTSMAN home (495,244)
+      never in play: Irene SCHOLAR home (589,134)
+      never in play: Theodora CRAFTSMAN home (496,221)
+      never in play: Xenia CRAFTSMAN home (638,164)
+      never in play: Eleni CRAFTSMAN home (497,221)
+      never in play: Theron MERCHANT home (530,161)
+      never in play: Pavlos FENCE home (528,160)
+      never in play: Melina FISHERMAN home (516,84)
+      never in play: Spiros WORKER home (510,84)
+      never in play: Timon WORKER home (512,87)
+      never in play: Damon WORKER home (516,82)
+      never in play: Alkis CARTER home (529,166)
+      never in play: Andreas CRAFTSMAN home (472,200)
+      never in play: Nikos CRAFTSMAN home (470,200)
+      never in play: Kallias CRAFTSMAN home (472,205)
+      never in play: Isidoros CRAFTSMAN home (476,205)
+      never in play: Orestes WORKER home (228,179)
+      never in play: Myron GUARD home (638,162)
+      never in play: Perikles GUARD home (641,167)
+      never in play: Zenon GUARD home (639,167)
+      never in play: Argyros GUARD home (638,159)
+      never in play: Gorgias GUARD home (643,163)
+      never in play: Kleon GUARD home (643,158)
+      never in play: Kyros THIEF home (470,201)
+      never in play: Mimis BEGGAR home (531,109)
+      never in play: Argus THIEF home (474,200)
+      never in play: Phaedra CARTER home (642,155)
+      never in play: Leandros BEGGAR home (518,82)
+      never in play: Sabeen BEGGAR home (518,84)
+      never in play: King Phillip CIVIC home (207,669)
+      never in play: Duke Edran CIVIC home (204,672)
+      never in play: Sir Vaelor KNIGHT home (177,642)
+      never in play: Father Anselm PRIEST home (177,645)
+      never in play: Tovin CRAFTSMAN home (248,704)
+      never in play: Elric CIVIC home (230,682)
+      never in play: Halwen CRAFTSMAN home (263,701)
+      never in play: Hesta FARMER home (252,654)
+      never in play: Aldis CIVIC home (177,705)
+      never in play: Toben CRAFTSMAN home (177,708)
+      never in play: Varek SCHOLAR home (137,754)
+      never in play: Father Odran PRIEST home (198,772)
+      never in play: Mother Mirel PRIEST home (156,787)
+      never in play: Borin FARMER home (202,836)
+      never in play: Sir Bedivere KNIGHT home (910,435)
+      never in play: Father Cadren PRIEST home (831,422)
+      never in play: Elian PRIEST home (889,395)
+      never in play: Baron Aldren CIVIC home (845,432)
+      never in play: Wystan CRAFTSMAN home (863,464)
+      never in play: Perrin CRAFTSMAN home (862,465)
+      never in play: Rowena MERCHANT home (877,471)
+      never in play: Huw FARMER home (918,433)
+      never in play: Edric GUARD home (918,436)
+      never in play: Vark BANDIT home (879,740)
+      never in play: Dolgrin MINER home (249,482)
+      never in play: Pell WORKER home (913,626)
+      never in play: Ysmay WORKER home (1032,439)
+      never in play: Hask HUNTER home (768,529)
+      never in play: Orrin CRAFTSMAN home (417,702)
+      never in play: Corvane HUNTER home (633,937)
+      never in play: Bogdan GUARD home (148,837)
+      never in play: Milena CIVIC home (212,771)
+      never in play: Lothar GUARD home (211,654)
+      never in play: Hilde UNDERTAKER home (175,628)
+      never in play: Nadim GUARD home (971,1019)
+      never in play: Samir UNDERTAKER home (878,843)
+      never in play: Emrys GUARD home (892,435)
+      never in play: Rhiannon CIVIC home (868,437)
+      never in play: Rask BANDIT home (874,741)
+      never in play: Wenna BANDIT home (880,741)
+      never in play: Hullen BANDIT home (872,740)
+      never in play: Grisel BANDIT home (882,741)
+      never in play: Haskel MINER home (219,583)
+      never in play: Tamsin MINER home (147,611)
+      never in play: Osk MINER home (248,487)
+      never in play: Mabry WORKER home (226,179)
+      never in play: Edvin WORKER home (220,179)
+      never in play: Corra WORKER home (916,625)
+      never in play: Grimbold UNDERTAKER home (233,967)
+      never in play: Odo UNDERTAKER home (148,808)
+      never in play: Kyrillos UNDERTAKER home (478,187)
+      never in play: Elidor UNDERTAKER home (853,442)
+      never in play: Gwenna UNDERTAKER home (839,461)
+      never in play: Nasira SCHOLAR home (916,845)
+      never in play: Merrin SCHOLAR home (892,466)
+    [life] 2 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 61.574 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 6s
+9 actionable tasks: 1 executed, 8 up-to-date

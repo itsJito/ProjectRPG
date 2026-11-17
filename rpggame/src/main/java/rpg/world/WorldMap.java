@@ -81,6 +81,8 @@ public final class WorldMap {
      */
     public static float settleY(float x, float y, float z) {
         if (devmap()) return y;
+        // (0.4.7) a body in a dungeon's level under the map stays there (it is not buried: the rooms are cut out of the rock)
+        if (DungeonLayout.underAt(x, y, z) != null) return y;
         float g = standY(x, z);
         return y < g - 0.5f || y > g + 48 ? g : y;
     }

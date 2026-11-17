@@ -36,6 +36,7 @@ private:
     HandleTable<Slot> joints_{ASTRATTO_KIND_JOINT};
     std::unordered_map<astratto_handle, astratto_handle> proxyOf_;   // mover -> its capsule in the space
     std::vector<astratto_handle> seen_;
+    std::vector<astratto_handle> seenSorted_;
     uint64_t worldEdits_ = 0;
     const VoxelWorld* world_ = nullptr;
     uint32_t proxySerial_ = 0;

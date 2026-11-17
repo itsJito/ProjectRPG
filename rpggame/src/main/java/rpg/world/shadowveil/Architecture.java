@@ -54,11 +54,17 @@ public final class Architecture {
             return switch (facing) { case 'n' -> new int[]{cx, z0 - 2}; case 's' -> new int[]{cx, z1 + 2}; case 'w' -> new int[]{x0 - 2, cz}; default -> new int[]{x1 + 2, cz}; };
         }
         /** Whether its front is meant to be walked to (not a pier, a bell under the water, a weir, a span). */
+        /** (0.4.7) A setting from the structure's data (the guild a hall seats, its rank), or null. */
+        public String opt(String key) { Object o = opts.get(key); return o == null ? null : String.valueOf(o); }
         public boolean reachable() { return !Boolean.TRUE.equals(opts.get("water")) && !template.equals("sunkbell") && !Boolean.FALSE.equals(opts.get("lane")) || template.equals("plaza"); }
         public float cx() { return (x0 + x1 + 1) / 2f; }
         public float cz() { return (z0 + z1 + 1) / 2f; }
     }
     /** A volume kept for what comes later: interiors (0.4.2), cellars, crypts and dungeons. */
+    /** (0.4.8) A stair down's door at its foot (two cells), the floor the feet stand on there, the way on beyond it, its lining. */
+    public record CellarDoor(String owner, String kind, int ax, int az, int bx, int bz, int footY, int dx, int dz, int lining) {}
+    /** (0.4.8) Every stair down's door (Kit.stairDown), for the cellars cut beyond them (Cellars). */
+    public final List<CellarDoor> cellars = new ArrayList<>();
     public record Reserved(String owner, String kind, int x0, int y0, int z0, int x1, int y1, int z1) {
         boolean overlaps(Reserved o) { return x0 <= o.x1 && o.x0 <= x1 && y0 <= o.y1 && o.y0 <= y1 && z0 <= o.z1 && o.z0 <= z1; }
     }
@@ -145,6 +151,11 @@ public final class Architecture {
         double[] size = Atlas.pt(b.get("size"));
         int w = (int) size[0], d = size.length > 1 ? (int) size[1] : (int) size[0];
         double cx = a.x(at[0]), cz = a.z(at[1]);
+        // (0.4.7, gamefixes: an undertaker's bunker outside each graveyard) a building 'beside' another starts its search
+        // from just outside that one's lot, wherever that one came to stand, and keeps within 'besideReach' of it
+        Structure by = b.get("beside") instanceof String bid ? byId(bid) : null;
+        if (b.get("beside") != null && by == null) { failures.add("no " + b.get("beside") + " for " + id + " to stand beside"); return null; }
+        if (by != null) { cx = by.x1 + 2 + w / 2.0; cz = by.cz(); }
         char facing = facing(Atlas.s(b, "facing", "road"), cx, cz, b);
         long seed = a.seed * 31 + id.hashCode();
         Structure s = new Structure(id, Atlas.s(b, "name", id), template, settlement, opts, st.vary(seed), seed);
@@ -603,6 +614,7 @@ public final class Architecture {
             s.doors.addAll(out.doors); s.doorFloors.addAll(out.doorFloors); s.doorOut.addAll(out.doorOut); s.doorLeaf.addAll(out.doorLeaf);
             s.points.putAll(out.points);
             for (int k = 0; k < out.reserved.size(); k++) { int[] r = out.reserved.get(k); reserved.add(new Reserved(s.id, out.reservedKind.get(k), r[0], r[1], r[2], r[3], r[4], r[5])); }
+            for (int k = 0; k < out.cellars.size(); k++) { int[] q = out.cellars.get(k); cellars.add(new CellarDoor(s.id, out.cellarKind.get(k), q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7])); }
             // the doors that hang in the doorways are built shut (their Door objects then find them as they should be)
             for (int k = 0; k < out.doors.size(); k++) if (out.doorLeaf.get(k)) for (int[] cell : out.doors.get(k)) for (int y = 1; y <= 2; y++) c.set(cell[0], out.doorFloors.get(k) + y, cell[1], Blocks.DOOR);
             if (Boolean.TRUE.equals(s.opts.get("water")) && !s.template.equals("pier") && !s.template.equals("weir") && !s.template.equals("sunkbell")) walks(c, s);
@@ -699,6 +711,12 @@ public final class Architecture {
             int base = s.style.b("base");
             for (int k = 0; k < s.doors.size(); k++) {
                 int[] out = s.doorOut.get(k);
+                // (0.4.8, gamefixes: the Unlit Lantern's door hung under no lintel at 627, 52, 552) an opening inside the
+                // building's own footprint (a cellar stair's head in a tower's floor, an undercroft's in a court) opens
+                // onto the building's floor, not the street: no steps are cut out from it (they cut the front door's
+                // lintel away, the cellar head looking out across the tower's floor and through its door)
+                int[] c0 = s.doors.get(k)[0];
+                if (!s.doorLeaf.get(k) && s.contains(c0[0] + out[0], c0[1] + out[1]) && s.contains(c0[0] + out[0] * 2, c0[1] + out[1] * 2)) continue;
                 for (int[] cell : s.doors.get(k)) {
                     int level = s.doorFloors.get(k);   // the threshold's cell: walked on at level + 1
                     for (int step = 1; step <= 8; step++) {

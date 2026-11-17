@@ -90,6 +90,8 @@ public final class Rpg implements GameModule {
     /** (0.3.7) The Shrines of Light: rest, the night passing, the wild's dead back, and where the player wakes. */
     public rpg.world.Shrines shrines;
     public Quests quests;
+    /** (0.4.8) The journal: every quest as the player sees it, the active one, the journal settings. */
+    public rpg.quest.QuestLog questLog;
     public Progression prog;
     public rpg.actor.Traversal traversal;
     public rpg.actor.Ladders ladders;
@@ -120,12 +122,18 @@ public final class Rpg implements GameModule {
     public final astratto.weather.TimeSystem timeSystem = new astratto.weather.TimeSystem();
     /** (0.4.6) Each region's weather, turning over with the hours (rpg.world.WeatherSystem). */
     public rpg.world.WeatherSystem weatherSystem;
+    /** (0.4.7) The world's encounters: the director, those under way, those left over (rpg.encounter.Encounters). */
+    public rpg.encounter.Encounters encounters;
     public Fx fx;
     public Sfx sfx;
     /** The score (set by the window's loop; null in automated runs). */
     public rpg.audio.Music music;
     /** (0.4.2) The place as the ear hears it (the music's mood, the ambience's level). */
     public rpg.audio.Soundscape soundscape;
+    /** (0.4.7) The weather's own beds (null in scripted runs, which are silent). */
+    public rpg.audio.WeatherSounds weatherSounds;
+    /** (0.4.8) The rain's drops round the listener, one by one. */
+    public rpg.audio.RainDrops rainDrops;
     public Hud ui;
     /** The profile being played (null in automated runs): where the game is saved. */
     public Profiles.Profile profile;
@@ -174,6 +182,12 @@ public final class Rpg implements GameModule {
         // (0.4.2, gamefixes: the audio to each region and context) the soundscape reads the place; the bed's level follows it
         soundscape = new rpg.audio.Soundscape(this);
         if (!scripted) sfx.ambience(soundscape.bedFile(), 0.35f);
+        // (0.4.7, gamefixes: every weather polished) the weather heard: rain, wind, hail, a blizzard, a sandstorm
+        if (!scripted && sfx != null) weatherSounds = new rpg.audio.WeatherSounds(this, soundscape.section("weather"));
+        if (!scripted && sfx != null && soundscape.section("weather").get("drops") instanceof java.util.Map<?, ?> dm) {
+            @SuppressWarnings("unchecked") java.util.Map<String, Object> drops = (java.util.Map<String, Object>) dm;
+            rainDrops = new rpg.audio.RainDrops(this, drops);
+        }
         prog = new Progression(this);
         objects = new Objects(this);
         glass = new rpg.objects.Glass(this);
@@ -207,6 +221,7 @@ public final class Rpg implements GameModule {
         econ = new Economy(this);
         bank = new rpg.econ.Bank(this);
         quests = new Quests(this);
+        questLog = new rpg.quest.QuestLog(this);
         traversal = new rpg.actor.Traversal(this);
         ladders = new rpg.actor.Ladders(this);
         swimming = new rpg.actor.Swimming(this);
@@ -220,6 +235,7 @@ public final class Rpg implements GameModule {
         inns = new rpg.econ.Inns(this);
         waterContacts = new rpg.world.WaterContacts(this);
         weatherSystem = new rpg.world.WeatherSystem(this);
+        encounters = new rpg.encounter.Encounters(this);
         if (map.kind == rpg.world.WorldMap.Kind.DEVMAP) {
             timeSystem.regions.add(new astratto.weather.TimeSystem.Region("Devmap",-32,-32,rpg.world.DungeonLayout.WORLD_X+32,DevMap.SZ+32,16,astratto.weather.TimeSystem.Profile.NEUTRAL));
             timeSystem.fogVolumes.add(new astratto.weather.TimeSystem.Fog(60,rpg.world.Ground.at(60, 88)+0.5f,88,5,0.035f,0.38f,0.46f,0.5f));
@@ -272,7 +288,9 @@ public final class Rpg implements GameModule {
         monsters = new rpg.monster.Monsters(this);
         monsters.init();
         dungeons = new rpg.dungeon.Dungeons(this);
-        if (map.kind == rpg.world.WorldMap.Kind.DEVMAP) dungeons.init();     // (0.4.0) ShadowVeil's dungeons come with its buildings
+        if (map.kind == rpg.world.WorldMap.Kind.DEVMAP) dungeons.init();
+        // (0.4.7) ShadowVeil's dungeons: the levels cut under its sites, their chests, traps and residents
+        else dungeons.initShadowveil();
         shrines = new rpg.world.Shrines(this);
         shrines.init();
         for (rpg.objects.Furniture f : objects.furniture) if (f.kind == rpg.objects.Furniture.Kind.BED && f.owner != 0 && f.owner != player.id) f.name = nameOf(f.owner) + "'s bed";
@@ -326,8 +344,6 @@ public final class Rpg implements GameModule {
         give(player, Items.get("stone_pickaxe"), 1);
         give(player, Items.TINDERBOX, 1);
         give(player, Items.FISHING_NET, 1);
-        give(player, Items.POT, 1);
-        give(player, Items.BUCKET, 1);
         give(player, Items.BREAD, 1);
         give(player, Items.SHRIMP, 1);
         give(player, Items.COINS, 25);
@@ -388,7 +404,9 @@ public final class Rpg implements GameModule {
         if (soundscape != null && sfx != null && player != null && (state.tick & 7) == 0) {
             double hr = state.hourOfDay();
             sfx.ambienceLevel(soundscape.bedLevel(hr < 5.5 || hr >= 20.5, dt * 8));
+            if (weatherSounds != null) weatherSounds.update(dt * 8, soundscape.place());
         }
+        if (rainDrops != null && player != null) rainDrops.update(dt, soundscape.place());
         // (0.3.0) the Weekly System's clock: slower by day, quicker by night, paused, scaled, run by the distance the
         // player travels or carried on to an arrival - the calendar says how far it goes this frame
         var calendar = state.cal();
@@ -407,6 +425,7 @@ public final class Rpg implements GameModule {
         if (PROF) mark(0);
         law.update();
         worldEdge();
+        lavaUnderfoot();
         if (PROF) mark(1);
         controller.update(dt);
         if (PROF) mark(2);
@@ -420,7 +439,7 @@ public final class Rpg implements GameModule {
         if (PROF) mark(6);
         magic.update(dt);
         if (PROF) mark(7);
-        if (!aiDisabled()) { repairs.update(); ai.update(dt); if (PROF) mark(8); riding.update(dt); animals.update(dt); riding.landings(); if (PROF) mark(21); monsters.update(dt); if (PROF) mark(22); }
+        if (!aiDisabled()) { repairs.update(); ai.update(dt); if (PROF) mark(8); riding.update(dt); animals.update(dt); riding.landings(); if (PROF) mark(21); monsters.update(dt); if (PROF) mark(22); encounters.update(dt); }
         else if (PROF) mark(8);
         carrying.update();
         if (PROF) mark(9);
@@ -594,6 +613,14 @@ public final class Rpg implements GameModule {
         if(id==0 || name==null || name.isBlank())return;
         rememberedNames.put(id,name);
         while(rememberedNames.size()>2048)rememberedNames.remove(rememberedNames.keySet().iterator().next());
+    }
+    /** (0.4.7) "Mara's" for whoever holds an id now (their first name), else the fallback's: labels follow the live person. */
+    public String possessive(long id, String fallback) {
+        Actor actor = actor(id);
+        String n = actor == null || actor.name == null || actor.name.isBlank() ? fallback : actor.name;
+        String[] w = n.split(" ");
+        n = w.length > 1 && java.util.Set.of("Sir", "Lady", "Father", "Mother", "Brother", "Sister", "King", "Queen", "Duke", "Duchess", "Baron", "Baroness", "Lord", "Dame").contains(w[0]) ? n : w[0];
+        return n + (n.endsWith("s") ? "'" : "'s");
     }
     public String nameOf(long id) {
         if(id==0)return "nobody";
@@ -774,7 +801,7 @@ public final class Rpg implements GameModule {
     }
 
     /** (0.4.6) How far (cells) from the world's edge the open sea starts to tell, the share of health it takes a second there and at the edge, how often (s). */
-    static final float EDGE_START = Tuning.f("world.edgeStart", 40f), EDGE_HURT_MIN = Tuning.f("world.edgeHurtMin", 0.08f), EDGE_HURT_MAX = Tuning.f("world.edgeHurtMax", 0.45f), EDGE_TICK = Tuning.f("world.edgeTick", 1f);
+    static final float EDGE_START = Tuning.f("world.edgeStart", 40f), EDGE_HURT_MIN = Tuning.f("world.edgeHurtMin", 0.08f), EDGE_HURT_MAX = Tuning.f("world.edgeHurtMax", 0.45f), EDGE_TICK = Tuning.f("world.edgeTick", 1f), EDGE_DEPTH = Tuning.f("world.edgeDepth", 0.5f);
     private double edgeNext, edgeWarned = -99;
 
     /**
@@ -783,11 +810,29 @@ public final class Rpg implements GameModule {
      * the cold and the swell batter whoever is out there - lightly at first, then harder the further they go, until it
      * kills - so nobody reaches the edge. On a mount or swimming, the same.
      */
+    /** (0.4.7) Lava underfoot burns: a tenth of max health a second, and it sets the one standing there alight. */
+    private double lavaNext;
+    private void lavaUnderfoot() {
+        if (player == null || !player.alive || time < lavaNext) return;
+        int below = vox.block((int) Math.floor(player.x), (int) Math.floor(player.y - 0.05f), (int) Math.floor(player.z));
+        if (below != rpg.world.Blocks.LAVA) return;
+        lavaNext = time + 0.5;
+        combat.environmentalDamage(player, Math.max(1, Math.round(player.maxHp() * LAVA_HURT * 0.5f)), "lava");
+        if (time - lavaWarned > 5) { lavaWarned = time; chat.add("The lava burns you!", rpg.Chat.Kind.WARN); }
+    }
+    private double lavaWarned = -99;
+    static final float LAVA_HURT = Tuning.f("world.lavaHurt", 0.1f);
+
     private void worldEdge() {
         if (player == null || !player.alive || !rpg.world.WorldMap.shadowveil() || rpg.world.shadowveil.ShadowVeil.terrain() == null) return;
         int S = rpg.world.shadowveil.ShadowVeil.terrain().S;
         float e = Math.min(Math.min(player.x, player.z), Math.min(S - player.x, S - player.z));
         if (e >= EDGE_START || time < edgeNext) return;
+        // (0.4.7, gamefixes: the edge harmed the player whether or not they were in the water) only the open sea harms:
+        // someone on dry ground, a beach or a boat's deck near the edge is left alone
+        var sw = swimming == null ? null : swimming.player;
+        boolean inSea = sw != null && sw.inWater && (sw.swimming || sw.submerged >= EDGE_DEPTH * Math.max(0.3f, sw.height));
+        if (!inSea) return;
         edgeNext = time + EDGE_TICK;
         float depth = Math.max(0, Math.min(1, (EDGE_START - e) / EDGE_START));
         int harm = Math.max(1, Math.round(player.maxHp() * (EDGE_HURT_MIN + (EDGE_HURT_MAX - EDGE_HURT_MIN) * depth * depth)));
@@ -826,6 +871,9 @@ public final class Rpg implements GameModule {
             n.nextThink = 0;
         }
         animals.catchUp(minutes);
+        // (0.4.7, gamefixes: resting at a shrine did not change the weather) the hours passed turn the weather over as
+        // they would have, and the sky woken to is the new one at once - not the old fading out over a minute
+        if (weatherSystem != null && minutes >= 30) { weatherSystem.turnOver(); timeSystem.weather.snap(); }
         // a shipment on the road arrives if the skipped time covers its trip
         var s = econ.active();
         if (s != null && s.status == Economy.Status.IN_TRANSIT && minutes >= 20) {

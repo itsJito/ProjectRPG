@@ -1,0 +1,91 @@
+﻿> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :theastrattoengine:buildNative
+.\gradlew.bat : 'vswhere.exe' is not recognized as an internal or external command,
+At line:1 char:672
++ ... 45,600,30'; .\gradlew.bat gallery -PgalleryDir=build/review-p33/fog2  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ('vswhere.exe' i...ternal command,:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+operable program or batch file.
+ai_service.cpp
+c_api.cpp
+audio_device.cpp
+audio_service.cpp
+chemistry_service.cpp
+engine.cpp
+collide.cpp
+impulsis_service.cpp
+space.cpp
+module_host.cpp
+pathfinder.cpp
+walkability.cpp
+sight.cpp
+bodies.cpp
+physics_service.cpp
+ragdoll.cpp
+sydney.cpp
+chunk_mesher.cpp
+layers.cpp
+renderer.cpp
+voxel_world.cpp
+   Creating library C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\obj\astratto.lib and object C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\obj\astratto.exp
+
+> Task :theastrattoengine:engineResources
+> Task :theastrattoengine:processResources
+> Task :theastrattoengine:classes
+> Task :theastrattoengine:jar
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle
+/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+
+> Task :gallery
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 14 2026 16:57:28 (MSVC)
+[Load] native services 0.31s
+[Load] ShadowVeil grown in 19.57s ({regions=802, overlays=583, variants=372, scarp=62, coast=454, erosion=361, peaks=55, lakes=74, isles=5, rivers=821, wadis=14, ground=34, roads=530, causeways=3, architecture=853, pitsFilled=1307, pits=578, banks=75, clamp=14, cliffs=61, columns=1118, falls=21, raise=11082, trees=333, outcrops=0, ways=587, postsSunk=30, floatingRemoved=59, floating=633}), made and lit in 2.25s
+[Load] ShadowVeil 21.89s
+[Load] renderer and UI 4.63s
+[water] flow field grown in 1413 ms: 39016 columns moving
+[gathering] 765 wild herb patches, flax and berry bushes
+[monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 783 settled points)
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 42 chunks made, 36 meshes, 0.34s
+[Load] 234 furniture models made in 0.11s
+[Load] first rendered frame 6.69s
+[Load] the world about the spawn made ready in 12.79s
+[Load] game frame 1: scene 8 ms, interface 852 ms, render 22 ms
+[Load] game frame 2: scene 6 ms, interface 4 ms, render 7 ms
+[Load] game frame 3: scene 5 ms, interface 3 ms, render 7 ms
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\fog2\at-300-1120-n.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\fog2\at-300-1120-e.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\fog2\at-300-1120-s.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\fog2\at-300-1120-w.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\fog2\at-300-1120-top.png
+[Load] growth about the spawn: 49 chunks made, 85 meshes, 0.72s
+[Load] 0 furniture models made in 0.00s
+[Load] the world about the spawn made ready in 1.26s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\fog2\at-75-600-n.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\fog2\at-75-600-e.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\fog2\at-75-600-s.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\fog2\at-75-600-w.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\fog2\at-75-600-top.png
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 28s
+8 actionable tasks: 5 executed, 3 up-to-date

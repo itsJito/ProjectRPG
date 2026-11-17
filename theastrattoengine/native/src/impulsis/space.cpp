@@ -231,7 +231,11 @@ bool Space::touches(const Body& a, const Body& b) const {
 
 void Space::broadphase() {
     pairs_.clear();
-    std::vector<int> order(bodies_.size());
+    // (2.14, rpg: aggressive optimization) the order along x is kept from step to step and only mended: nearly all of a
+    // world's bodies are still (furniture, doors, the sleeping), so a fresh sort of thousands every step was most of it
+    std::vector<int>& order = order_;
+    const bool rebuild = order.size() != bodies_.size();
+    if (rebuild) order.resize(bodies_.size());
     for (size_t i = 0; i < bodies_.size(); i++) {
         Body& b = bodies_[i];
         const V3 r(b.shape.boundRadius, b.shape.boundRadius, b.shape.boundRadius);
@@ -242,9 +246,15 @@ void Space::broadphase() {
             for (int k = 0; k < 3; k++) e[k] = std::fabs(b.R.r[k].x) * b.shape.half.x + std::fabs(b.R.r[k].y) * b.shape.half.y + std::fabs(b.R.r[k].z) * b.shape.half.z;
             b.box = Aabb{b.p - e - sweep, b.p + e + sweep};
         } else b.box = Aabb{b.p - r - sweep, b.p + r + sweep};
-        order[i] = static_cast<int>(i);
+        if (rebuild) order[i] = static_cast<int>(i);
     }
-    std::sort(order.begin(), order.end(), [&](int x, int y) { return bodies_[static_cast<size_t>(x)].box.lo.x < bodies_[static_cast<size_t>(y)].box.lo.x; });
+    auto loX = [&](int x) { return bodies_[static_cast<size_t>(x)].box.lo.x; };
+    if (rebuild) std::sort(order.begin(), order.end(), [&](int x, int y) { return loX(x) < loX(y); });
+    else for (size_t i = 1; i < order.size(); i++) {
+        const int v = order[i]; const float key = loX(v); size_t j = i;
+        while (j > 0 && loX(order[j - 1]) > key) { order[j] = order[j - 1]; j--; }
+        order[j] = v;
+    }
     for (size_t i = 0; i < order.size(); i++) {
         const Body& a = bodies_[static_cast<size_t>(order[i])];
         for (size_t k = i + 1; k < order.size(); k++) {
@@ -288,7 +298,11 @@ void Space::narrowphase(const VoxelWorld* w) {
     const size_t workers = pool_ ? std::max<size_t>(1, pool_->workers()) : 1;
     if (scratch_.size() < workers) scratch_.resize(workers);
     for (auto& s : scratch_) s.clear();
-    const size_t nPairs = pairs_.size(), nBodies = bodies_.size();
+    // (2.14, rpg: aggressive optimization) only the bodies the world can touch (awake, moving, not a mover's proxy) are
+    // handed out for contacts with it: every body in the world was a job for the pool each step, nearly all of them none
+    worldBodies_.clear();
+    for (size_t i = 0; i < bodies_.size(); i++) { const Body& b = bodies_[i]; if (!(b.flags & ASTRATTO_RIGID_NO_WORLD) && !b.proxy && b.dynamic() && b.awake) worldBodies_.push_back(static_cast<int>(i)); }
+    const size_t nPairs = pairs_.size(), nBodies = worldBodies_.size();
     auto job = [&](size_t k, unsigned worker) {
         std::vector<Manifold>& out = scratch_[std::min<size_t>(worker, scratch_.size() - 1)];
         if (k < nPairs) {
@@ -304,7 +318,7 @@ void Space::narrowphase(const VoxelWorld* w) {
             m.restitution = std::max(a.restitution, b.restitution);
             m.rolling = std::max(a.rolling(), b.rolling());
             out.push_back(m);
-        } else worldContacts(w, static_cast<int>(k - nPairs), out);
+        } else worldContacts(w, worldBodies_[k - nPairs], out);
     };
     if (pool_ && nPairs + nBodies > 32) pool_->parallelFor(nPairs + nBodies, job);
     else for (size_t k = 0; k < nPairs + nBodies; k++) job(k, 0);

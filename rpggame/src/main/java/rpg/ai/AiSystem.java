@@ -131,7 +131,8 @@ public final class AiSystem {
             return n;
         });
         if (rpg.world.WorldMap.shadowveil()) scatterStart();
-        for (Npc n : g.npcs) { n.restore(); n.social = (n.id % 7) / 10f; n.hunger = (n.id % 5) / 10f; spawnBody(n); }
+        // (0.4.7) everyone able to wear and wield what they were given (the devmap's roster and ShadowVeil's alike)
+        for (Npc n : g.npcs) { n.meetGear(); n.restore(); n.social = (n.id % 7) / 10f; n.hunger = (n.id % 5) / 10f; spawnBody(n); }
     }
 
     /** (0.4.6) How far apart (m) no two people begin the world, and the farthest (cells) one is moved to keep it. */
@@ -159,6 +160,15 @@ public final class AiSystem {
                     var site = rpg.world.shadowveil.Rooms.site(working && a.workId() != null ? a.workId() : a.homeId() != null ? a.homeId() : a.workId());
                     List<rpg.interact.WorldObject> pieces = new ArrayList<>();
                     if (site != null) { pieces.addAll(site.stations); pieces.addAll(site.chests); pieces.addAll(site.furniture); }
+                    // (0.4.8) never the dungeon under a lot (a graveyard's undertakers began the day down in its crypt, by
+                    // the old chest there, the dark under the ground taken for the building's roof)
+                    pieces.removeIf(o -> rpg.world.DungeonLayout.underAt(o.x, o.y, o.z) != null);
+                    // (0.4.8, gamefixes: NPCs could not complete their daily tasks - a scholar began the day out in the lane
+                    // against her church's back wall, beside a bench the building's dressing set outside) only what stands
+                    // under the building's own roof, where there is any
+                    List<rpg.interact.WorldObject> inside = new ArrayList<>();
+                    for (var o : pieces) if (g.vox.skyLight((int) Math.floor(o.x), (int) Math.floor(o.y) + 1, (int) Math.floor(o.z)) < 0.5f) inside.add(o);
+                    if (!inside.isEmpty()) pieces = inside;
                     if (!pieces.isEmpty()) {
                         var o = pieces.get((int) Math.floorMod(n.id * 31 + 7, pieces.size()));
                         float[] at = apart(o.x, (float) Math.floor(o.y), o.z, placed);
@@ -167,11 +177,14 @@ public final class AiSystem {
                             List<float[]> self = new ArrayList<>(placed); self.add(new float[]{o.x, (float) Math.floor(o.y), o.z});
                             at = apart(o.x, (float) Math.floor(o.y), o.z, self);
                         }
-                        if (openCell((int) Math.floor(at[0]), (int) Math.floor(at[1] + 0.1f), (int) Math.floor(at[2]))) { n.x = at[0]; n.y = at[1]; n.z = at[2]; }
+                        if (openCell((int) Math.floor(at[0]), (int) Math.floor(at[1] + 0.1f), (int) Math.floor(at[2])) && !sealed(at[0], at[1], at[2])) { n.x = at[0]; n.y = at[1]; n.z = at[2]; }
                     }
                 }
             }
             float[] at = apart(n.x, n.y, n.z, placed);
+            // (0.4.8, gamefixes: NPCs could not complete their daily tasks - a scholar began the day shut in the hollow of a
+            // manor's turret and stood there all day) a start shut off from everywhere is given up for their bed
+            if (sealed(at[0], at[1], at[2]) && Float.isFinite(n.homeY) && !sealed(n.homeX, n.homeY, n.homeZ)) at = apart(n.homeX, n.homeY, n.homeZ, placed);
             n.x = at[0]; n.y = at[1]; n.z = at[2];
             n.spawnX = n.x; n.spawnZ = n.z;
             placed.add(at);
@@ -188,7 +201,9 @@ public final class AiSystem {
                 int cx = bx + dx, cy = by + dy, cz = bz + dz;
                 if (!openCell(cx, cy, cz) || !clearOf(cx + 0.5f, cy, cz + 0.5f, placed)) continue;
                 // the same room: a straight line through open cells from the point (never through a wall into the next house)
-                if (!g.vox.navigation.validPoint(cx + 0.5f, cy, cz + 0.5f, d -> true) || g.vox.solid((bx + cx) / 2, cy + 1, (bz + cz) / 2)) continue;
+                // (0.4.7: the cell midway was all that was looked at - a wall nearer either end let a priest begin the day
+                // outside her dormitory, pressed against its wall) the whole line, at the chest
+                if (!g.vox.navigation.validPoint(cx + 0.5f, cy, cz + 0.5f, d -> true) || !g.vox.sight(x, by + 1.2f, z, cx + 0.5f, cy + 1.2f, cz + 0.5f)) continue;
                 return new float[]{cx + 0.5f, cy, cz + 0.5f};
             }
         }
@@ -627,6 +642,36 @@ public final class AiSystem {
         }
     }
     /** A cell a body can stand in: room for feet and head, and a floor under it that is not furniture or a fence. */
+    /** (0.4.8) How many cells a start's open floor must run to before it counts as a way out and not a sealed pocket. */
+    static final int SEALED_CELLS = rpg.Tuning.i("ai.sealedCells", 48);
+    /**
+     * (0.4.8) Whether a spot is shut off: its open floor (stepping a block up or down, through doors) runs out before
+     * {@link #SEALED_CELLS} cells - the hollow of a turret, a void left inside a wall.
+     */
+    boolean sealed(float fx, float fy, float fz) {
+        int x0 = (int) Math.floor(fx), y0 = (int) Math.floor(fy + 0.1f), z0 = (int) Math.floor(fz);
+        java.util.ArrayDeque<int[]> open = new java.util.ArrayDeque<>();
+        java.util.Set<Long> seen = new java.util.HashSet<>();
+        open.add(new int[]{x0, y0, z0}); seen.add(cellKey(x0, y0, z0));
+        while (!open.isEmpty()) {
+            if (seen.size() >= SEALED_CELLS) return false;
+            int[] c = open.poll();
+            for (int[] d : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) for (int dy : new int[]{0, 1, -1}) {
+                int x = c[0] + d[0], y = c[1] + dy, z = c[2] + d[1];
+                int b = g.vox.block(x, y, z);
+                boolean door = b == rpg.world.Blocks.DOOR || b == rpg.world.Blocks.LOCKED_DOOR;
+                // furniture is walked round, not a wall: a bed boxed in by a table still opens on its room
+                boolean floor = !g.vox.solid(x, y, z) && !g.vox.solid(x, y + 1, z) && b != rpg.world.Blocks.WATER
+                        && (g.vox.solid(x, y - 1, z) || rpg.world.Blocks.objectCell(g.vox.block(x, y - 1, z)) || rpg.world.Blocks.objectCell(b));
+                if (!door && !floor || !seen.add(cellKey(x, y, z))) continue;
+                open.add(new int[]{x, y, z});
+                break;
+            }
+        }
+        return true;
+    }
+    private static long cellKey(int x, int y, int z) { return ((long) x << 40) ^ ((long) (y & 0xFFFF) << 20) ^ (z & 0xFFFFF); }
+
     private boolean openCell(int x, int y, int z) {
         if (g.vox.solid(x, y, z) || g.vox.solid(x, y + 1, z) || !g.vox.solid(x, y - 1, z)) return false;
         int under = g.vox.block(x, y - 1, z);
@@ -778,6 +823,7 @@ public final class AiSystem {
     private Offstage offstageSim;
 
     public void update(float dt) {
+        brain.seating.chairs(dt);   // (0.4.7) chairs drawn out and pushed in
         if (offstageSim == null) offstageSim = new Offstage(g, this);
         offstageSim.update();
         brain.household.update();
@@ -804,7 +850,7 @@ public final class AiSystem {
             float legs = g.gore == null ? 1 : Math.max(0.35f, g.gore.legs(n));
             // (0.3.6, gamefixes: the society only worked near the player) a resident far off is thought for less often, but
             // walks at its own pace: its agent used to be slowed to half, so every errand away from the player took twice as long
-            g.game.commands().agentRate(n.agent, n.cs.frozenT > 0 ? 0.001f : n.actionRate() * (n.cs.slowT > 0 ? 0.6f : 1) * legs * waterPace(n));
+            g.game.commands().agentRate(n.agent, n.cs.frozenT > 0 || n.cs.heldT > 0 ? 0.001f : n.actionRate() * (n.cs.slowT > 0 ? 0.6f : 1) * legs * waterPace(n));
             if (n.morphT > 0) {
                 n.cs.cancel(); n.cs.blocking = false; n.sneaking = true;
                 g.game.commands().moverInput(n.body, 0, 0, 0, 0, NPC_ACCEL, MOVER_CROUCH | MOVER_STANCE_ONLY);
@@ -1170,6 +1216,13 @@ public final class AiSystem {
 
     public Actor threatFor(Npc n) {
         if (n.companionOf != 0) return brain.companions.foe(n);
+        // (0.4.8, gamefixes: encounter people never did anything) an encounter's fight is the encounter's: a party set on
+        // another (the watch on outlaws, hunters on their quarry) keeps that foe while it lives, whatever the law's rules
+        // about who may fight whom would otherwise clear
+        if (n.encounter != null && !n.encounter.drifter && n.fightTarget != 0 && g.encounters != null && g.encounters.fights(n)) {
+            Actor t = g.actor(n.fightTarget);
+            if (t != null && t.alive && !g.law.inCustody(t)) return t;
+        }
         if (n.summonOwner != 0) {
             Actor owner = g.actor(n.summonOwner);
             if (owner == null || !owner.alive || g.law.inCustody(owner)) return null;

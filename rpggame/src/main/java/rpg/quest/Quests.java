@@ -34,8 +34,8 @@ public final class Quests {
     private void onEvent(DomainEvent e) {
         if (e.type().equals("ActorKilled") && e.subject() == Ids.CONTACT && courier != State.COMPLETED && courier != State.FAILED) {
             courier = State.FAILED;
-            failReason = "Kit, the courier contact, is dead (" + e.payload() + ").";
-            journal.add(stamp() + "Courier: I learned that Kit is dead. The delivery can never be made.");
+            failReason = g.nameOf(Ids.CONTACT) + ", the courier contact, is dead (" + e.payload() + ").";
+            journal.add(stamp() + "Courier: I learned that " + g.nameOf(Ids.CONTACT) + " is dead. The delivery can never be made.");
             g.state.commit("QuestFailed", 0, Ids.CONTACT, null, e.id(), "QT-COURIER: " + failReason);
             g.chat.add("Quest failed: Courier - " + failReason, Chat.Kind.WARN);
         }
@@ -43,13 +43,22 @@ public final class Quests {
 
     private String stamp() { return "[" + g.state.clockText() + "] "; }
 
+    /** (0.4.7) Where Kit lives, in words: "east of Store B, in DevTown" on the devmap; the town and building on ShadowVeil. */
+    public String kitWhere() {
+        if (!rpg.world.WorldMap.shadowveil()) return "east of Store B, in DevTown";
+        if (!(g.actor(rpg.Ids.CONTACT) instanceof rpg.ai.Npc kit)) return "in " + rpg.world.DevMap.BETA;
+        var t = rpg.world.shadowveil.ShadowVeil.terrain();
+        var s = t == null || t.arch == null ? null : t.arch.at((int) kit.postX, (int) kit.postZ);
+        return (s != null && s.name != null && !s.name.isBlank() ? "at " + s.name + ", " : "") + (rpg.world.DevMap.WILDS.equals(kit.homeJurisdiction) ? "out in the wilds" : "in " + kit.homeJurisdiction);
+    }
+
     public void start() {
         if (courier != State.NOT_STARTED) return;
         if (!g.player.canStore(new ItemStack(Items.SEALED_LETTER, 1))) { g.chat.warn("You need a free inventory slot for the letter."); return; }
         g.player.store(new ItemStack(Items.SEALED_LETTER, 1));
         g.state.mint(Items.SEALED_LETTER, 1);
         courier = State.ACTIVE;
-        journal.add(stamp() + "Courier: Jun gave me a sealed letter for Kit, who lives east of Store B in DevTown.");
+        journal.add(stamp() + "Courier: " + g.nameOf(Ids.QUEST_GIVER) + " gave me a sealed letter for " + g.nameOf(Ids.CONTACT) + ", who lives " + kitWhere() + ".");
         g.state.commit("QuestStarted", g.player.id, Ids.QUEST_GIVER, null, 0, "QT-COURIER stage 1: deliver the letter");
         g.chat.add("Quest started: Courier.", Chat.Kind.LEVEL);
     }
@@ -64,8 +73,8 @@ public final class Quests {
         g.grant(g.player, new ItemStack(Items.COINS, 150));
         courier = State.COMPLETED;
         g.honor.choreDone("the courier's errand");
-        g.ai.rumors.deed("carried Jun's letter to Kit, sealed and safe", Ids.CONTACT);
-        journal.add(stamp() + "Courier: I delivered the letter to Kit. Reward: an experience lamp and 150 coins.");
+        g.ai.rumors.deed("carried " + g.nameOf(Ids.QUEST_GIVER) + "'s letter to " + g.nameOf(Ids.CONTACT) + ", sealed and safe", Ids.CONTACT);
+        journal.add(stamp() + "Courier: I delivered the letter to " + g.nameOf(Ids.CONTACT) + ". Reward: an experience lamp and 150 coins.");
         g.state.commit("QuestCompleted", g.player.id, Ids.CONTACT, null, 0, "QT-COURIER");
         g.chat.add("Quest complete: Courier!", Chat.Kind.LEVEL);
         g.sfx.ui("ui.LevelUp", 0.85f);

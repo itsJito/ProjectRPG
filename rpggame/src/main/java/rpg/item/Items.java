@@ -540,7 +540,7 @@ public final class Items {
                 case MACE -> { d.gw = 2; d.gh = 3; d.weight = 2.2f * metal; }
                 case DAGGER -> { d.gw = 1; d.gh = 2; d.weight = 0.5f * metal; }
                 case PICKAXE -> { d.gw = 3; d.gh = 2; d.weight = 2.4f * metal; }
-                case SHIELD -> { d.gw = 2; d.gh = 3; d.weight = 5f * metal; }
+                case SHIELD -> { d.gw = 2; d.gh = 2; d.weight = 5f * metal; }
                 case ARMOR -> {
                     if (d.slot == null) break;
                     switch (d.slot) {

@@ -15,7 +15,8 @@ import rpg.world.shadowveil.ShadowVeil;
 /**
  * (0.4.3) What is at a point of ShadowVeil, for a bug report's coordinates: the structure there and those near, the
  * world objects, nodes and fields about it, the people, and the cells round it layer by layer (a letter per block, the
- * legend under each). {@code gradlew probe -PprobeClass=*WorldInspect* -Prpg.probeWho="276,40,848;246,55,607"}.
+ * legend under each). {@code gradlew probe -PprobeClass=*WorldInspect* -Prpg.probeWho="276,40,848;246,55,607"}; a structure's id (and
+ * optionally storeys of cells up, "severia_homes_17,4") looks at its middle.
  */
 @Tag("probe")
 class WorldInspectProbeTest {
@@ -28,13 +29,26 @@ class WorldInspectProbeTest {
             game.activate(ShadowVeil.build(game.engine()));
             Rpg g = game.add(new Rpg(game, "inspect", new Appearance(), true));
             game.tick(0);
+            for (String n : rpg.world.shadowveil.Cellars.NOTES) System.out.println("[cellars] " + n);
             for (String p : at.split(";")) {
                 String[] v = p.trim().split("[, ]+");
+                // (0.4.7) a structure's id in place of a point: its middle, on its floor
+                if (!Character.isDigit(v[0].charAt(0)) && v[0].charAt(0) != '-') {
+                    var st = ShadowVeil.terrain().arch.byId(v[0]);
+                    if (st == null) { System.out.println("no structure " + v[0]); continue; }
+                    v = new String[]{String.valueOf((int) st.cx()), String.valueOf(st.floor + 1 + (v.length > 1 ? Integer.parseInt(v[1]) : 0)), String.valueOf((int) st.cz())};
+                }
                 int x = Integer.parseInt(v[0]), y = Integer.parseInt(v[1]), z = Integer.parseInt(v[2]);
                 System.out.println("\n================ " + x + ", " + y + ", " + z + "  law " + rpg.world.DevMap.jurisdiction(x, z) + "  stand Y " + WorldMap.standY(x + 0.5f, z + 0.5f));
                 var arch = ShadowVeil.terrain().arch;
                 var s = arch.at(x, z);
                 System.out.println("structure here: " + (s == null ? "-" : s.id + " " + s.name + " (" + s.template + ") lot " + s.x0 + "," + s.z0 + " - " + s.x1 + "," + s.z1 + " floor " + s.floor));
+                // (0.4.8) its doorways: cells, the floor under the sill, the way out, whether a door hangs there
+                if (s != null) for (int k = 0; k < s.doors.size(); k++) {
+                    StringBuilder dc = new StringBuilder();
+                    for (int[] c : s.doors.get(k)) dc.append(c[0]).append(',').append(c[1]).append(' ');
+                    System.out.println("  doorway " + k + ": " + dc + "floor " + s.doorFloors.get(k) + " out " + java.util.Arrays.toString(s.doorOut.get(k)) + (s.doorLeaf.get(k) ? " door" : " open"));
+                }
                 for (var o : arch.structures) {
                     double d = Math.hypot(o.cx() - x, o.cz() - z);
                     if (d < 40 && o != s) System.out.printf("  near %-26s %-40s %-14s %.0f m lot %d,%d-%d,%d floor %d%n", o.id, o.name, o.template, d, o.x0, o.z0, o.x1, o.z1, o.floor);
@@ -46,7 +60,7 @@ class WorldInspectProbeTest {
                 Map<Integer, Character> legend = new LinkedHashMap<>();
                 String letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
                 for (int yy = y - 2; yy <= y + 4; yy++) {
-                    System.out.println("  layer Y" + yy + " (x " + (x - radius) + ".." + (x + radius) + " across, z down; * the point)");
+                    System.out.println("  layer Y" + yy + " (x " + (x - radius) + ".." + (x + radius) + " across, z down; * the point, which is " + name(g.vox.block(x, yy, z)) + ")");
                     for (int zz = z - radius; zz <= z + radius; zz++) {
                         StringBuilder row = new StringBuilder("   ");
                         for (int xx = x - radius; xx <= x + radius; xx++) {

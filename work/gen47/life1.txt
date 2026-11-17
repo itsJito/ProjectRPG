@@ -1,0 +1,94 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 19.72s ({regions=845, overlays=508, variants=613, scarp=50, coast=522, erosion=367, peaks=78, lakes=59, isles=1, rivers=762, wadis=13, ground=22, roads=613, causeways=3, architecture=1340, pitsFilled=1396, pits=437, banks=72, clamp=13, cliffs=43, columns=772, falls=16, raise=10685, trees=274, outcrops=0, ways=569, lava=0, dungeons=147, postsSunk=28, floatingRemoved=59, floating=816}), made and lit in 2.20s
+    [water] flow field grown in 1197 ms: 39016 columns moving
+    [gathering] 757 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+    [life] start: 236 people, 0 stand with 3+ others within 2 m
+
+          [stuck] Sir Andrew WORK at (265.50, 41.19, 963.50) -> (265.5, 964.5), go to goal, v (0.00, 0.00) ground false route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    [spin] Dunstan: [-0.46 351.3,957.9 SLEEP/go to goal ] [-0.59 351.5,957.7 SLEEP/go to goal ] [-1.00 351.7,957.7 SLEEP/go to goal ] [-0.89 351.7,957.6 SLEEP/go to goal ] [-0.64 351.7,957.6 SLEEP/go to goal ] [-0.40 351.7,957.5 SLEEP/go to goal ] [-0.37 351.7,957.5 SLEEP/go to goal ] [-0.37 351.7,957.5 SLEEP/go to goal ] [-0.37 351.7,957.5 SLEEP/go to goal ] [-0.37 351.7,957.5 SLEEP/go to goal ] [-0.37 351.7,957.5 SLEEP/go to goal ] [-0.37 351.7,957.5 SLEEP/go to goal ] [-0.37 351.7,957.5 SLEEP/go to goal ] [-0.37 351.7,957.5 SLEEP/go to goal ] [-0.37 351.7,957.5 SLEEP/go to goal ] [-0.37 351.8,957.5 SLEEP/go to goal ] [-1.02 351.9,957.5 SLEEP/go to goal ] [-1.45 352.5,958.5 SLEEP/go to goal ] [-1.45 352.5,958.5 SLEEP/go to goal ] [-1.24 352.5,958.4 SLEEP/go to goal ] [-0.59 352.5,958.2 SLEEP/go to goal ] [0.01 352.5,958.0 SLEEP/go to goal ] [0.01 352.5,958.0 SLEEP/go to goal ] [0.01 352.5,958.1 SLEEP/go to goal ] [0.66 352.5,958.4 SLEEP/go to goal ] [1.31 352.5,958.6 SLEEP/go to goal ] [1.96 352.5,958.9 SLEEP/go to goal ] [2.61 352.5,959.1 SLEEP/go to goal ] [3.14 352.5,959.3 SLEEP/go to goal ] [3.14 352.5,959.6 SLEEP/go to goal ] [3.14 352.5,959.8 SLEEP/go to goal ] [3.14 352.5,960.0 SLEEP/go to goal ] [3.04 352.5,960.2 SLEEP/go to goal ] [2.55 352.3,960.3 SLEEP/go to goal ] [1.99 352.1,960.3 SLEEP/go to goal ] [1.81 351.8,960.4 SLEEP/go to goal ] [1.74 351.6,960.4 SLEEP/go to goal ] [1.70 351.3,960.4 SLEEP/go to goal ] [1.70 351.1,960.4 SLEEP/go to goal ] [1.67 350.9,960.5 SLEEP/go to goal ] [1.40 350.7,960.4 SLEEP/go to goal ] [0.81 350.7,960.2 SLEEP/go to goal ] [0.27 350.7,960.0 SLEEP/go to goal ] [0.11 350.7,959.7 SLEEP/go to goal ] [0.08 350.7,959.5 SLEEP/go to goal ] [0.05 350.6,959.2 SLEEP/go to goal ] [0.05 350.6,959.0 SLEEP/go to goal ] [0.05 350.6,958.7 SLEEP/go to goal ] [0.05 350.6,958.5 SLEEP/go to goal ] [0.05 350.6,958.3 SLEEP/go to goal ]
+    [spin] Alaric: [-3.00 265.4,945.8 SLEEP/go to goal ] [-2.83 265.4,945.7 SLEEP/go to goal ] [-2.18 265.4,945.4 SLEEP/go to goal ] [-1.53 265.4,945.2 SLEEP/go to goal ] [-0.88 265.3,945.0 SLEEP/go to goal ] [-0.23 265.3,944.8 SLEEP/go to goal ] [0.06 265.3,944.6 SLEEP/go to goal ] [0.39 265.2,944.5 SLEEP/go to goal ] [0.57 265.0,944.3 SLEEP/go to goal ] [0.64 264.9,944.1 SLEEP/go to goal ] [0.68 264.7,943.9 SLEEP/go to goal ] [0.68 264.5,943.7 SLEEP/go to goal ] [0.84 264.3,943.6 SLEEP/go to goal ] [0.96 264.1,943.4 SLEEP/go to goal ] [1.00 263.9,943.3 SLEEP/go to goal ] [1.00 263.7,943.2 SLEEP/go to goal ] [1.03 263.5,943.1 SOCIALIZE/idle ] [1.03 263.4,943.0 SOCIALIZE/go to goal ] [1.11 263.5,943.1 SOCIALIZE/go to goal ] [1.44 263.6,943.2 SOCIALIZE/go to goal ] [2.09 263.8,943.3 SOCIALIZE/go to goal ] [2.74 264.0,943.5 SOCIALIZE/go to goal ] [-2.90 264.2,943.6 SOCIALIZE/go to goal ] [-2.25 264.4,943.8 SOCIALIZE/go to goal ] [-2.29 264.6,943.9 SOCIALIZE/go to goal ] [-2.46 264.7,944.1 SOCIALIZE/go to goal ] [-2.56 264.8,944.3 SOCIALIZE/go to goal ] [-2.56 265.0,944.6 SOCIALIZE/go to goal ] [-2.50 265.1,944.7 SOCIALIZE/go to goal ] [-2.17 265.2,944.7 SOCIALIZE/go to goal ] [-1.92 265.3,944.7 SOCIALIZE/go to goal ] [-1.87 265.3,944.7 SOCIALIZE/go to goal ] [-2.50 265.3,944.8 SOCIALIZE/go to goal ] [-2.92 265.4,945.1 SOCIALIZE/go to goal ] [-3.00 265.4,945.3 SOCIALIZE/go to goal ] [-3.03 265.4,945.6 SOCIALIZE/go to goal ] [-3.03 265.4,945.8 SOCIALIZE/go to goal ] [-2.88 265.5,945.9 SOCIALIZE/go to goal ] [-3.01 265.5,945.9 SOCIALIZE/go to goal ] [2.67 265.4,946.0 SOCIALIZE/go to goal ] [2.02 265.3,945.9 SOCIALIZE/go to goal ] [1.66 265.3,945.9 SOCIALIZE/go to goal ] [1.66 265.3,945.9 SOCIALIZE/go to goal ] [1.66 265.3,945.9 SOCIALIZE/go to goal ] [1.44 265.4,945.9 SOCIALIZE/go to goal ] [0.79 265.5,945.9 SOCIALIZE/go to goal ] [0.14 265.5,946.0 SOCIALIZE/go to goal ] [-0.07 265.5,946.0 SOCIALIZE/go to goal ] [-0.07 265.4,946.0 SOCIALIZE/go to goal ] [0.47 265.3,945.9 SOCIALIZE/go to goal ]
+          [stuck] Eadmund WANDER at (352.27, 40.00, 944.55) -> (309.5, 976.5), wander, v (0.00, 0.00) ground true route 0 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Eadmund WANDER at (352.27, 40.00, 944.55) -> (309.5, 976.5), wander, v (0.00, 0.00) ground true route 0 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Eadmund WANDER at (349.74, 40.00, 943.55) -> (309.5, 976.5), wander, v (0.00, 0.00) ground true route 0 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Eadmund WANDER at (352.19, 40.00, 946.44) -> (309.5, 976.5), wander, v (1.27, 0.26) ground true route 1 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Eadmund WANDER at (352.27, 40.00, 946.45) -> (309.5, 976.5), wander, v (0.00, 0.00) ground true route 0 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    [life] stop 293,977 done (32 people seen so far)
+    [life] stop 638,932 done (36 people seen so far)
+    [life] stop 166,798 done (56 people seen so far)
+    [life] stop 639,1071 done (58 people seen so far)
+    [life] stop 942,911 done (95 people seen so far)
+    [life] stop 405,820 done (100 people seen so far)
+    [life] stop 207,651 done (120 people seen so far)
+    [life] stop 619,641 done (121 people seen so far)
+    [life] stop 246,484 done (125 people seen so far)
+    [life] stop 599,160 done (155 people seen so far)
+    [life] stop 430,458 done (172 people seen so far)
+    [life] stop 871,436 done (192 people seen so far)
+    [life] stop 925,139 done (194 people seen so far)
+    [life] stop 912,602 done (197 people seen so far)
+    [life] stop 263,334 done (199 people seen so far)
+    [life] stop 480,216 done (211 people seen so far)
+          [crime] ASSAULT by Hurk against world life at (877.5, 741.0), t 961.8
+          [crime] ASSAULT by Garmund against world life at (876.5, 739.8), t 962.0
+          [crime] ASSAULT by Vark against world life at (876.2, 738.8), t 962.3
+          [crime] ASSAULT by Rask against world life at (875.3, 740.4), t 962.7
+          [crime] ASSAULT by Grisel against world life at (877.6, 740.5), t 963.1
+          [crime] ASSAULT by Wenna against world life at (878.0, 740.4), t 963.6
+          [crime] ASSAULT by Hullen against world life at (875.4, 739.3), t 964.0
+          [crime] ASSAULT by Sigrun against world life at (871.2, 738.9), t 971.7
+          [crime] ASSAULT by Hurk against world life at (877.8, 739.5), t 973.3
+          [crime] ASSAULT by Hullen against world life at (875.3, 739.4), t 974.0
+          [crime] ASSAULT by Wenna against world life at (877.6, 741.6), t 974.1
+          [crime] ASSAULT by Vark against world life at (876.1, 739.2), t 974.2
+          [crime] ASSAULT by Grisel against world life at (877.6, 739.4), t 975.0
+          [crime] ASSAULT by Rask against world life at (876.0, 739.2), t 975.3
+          [crime] ASSAULT by Garmund against world life at (876.4, 739.1), t 976.7
+          [crime] ASSAULT by Sigrun against world life at (870.0, 740.1), t 982.5
+          [crime] ASSAULT by Hurk against world life at (876.7, 739.2), t 983.3
+          [crime] ASSAULT by Vark against world life at (875.3, 739.3), t 985.0
+          [crime] ASSAULT by Wenna against world life at (878.0, 740.8), t 985.2
+Requesting stop of task ':probe' as it has exceeded its configured timeout of 15m.
+  slow: rpg.probe.WorldLifeProbeTest.life() 897.053 s
+
+WorldLifeProbeTest > life() SKIPPED
+
+> Task :probe FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':probe'.
+> Timeout has been exceeded
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 15m 1s
+9 actionable tasks: 1 executed, 8 up-to-date

@@ -48,6 +48,7 @@ public final class ShadowVeil {
         b.free();
         terrain = t;
         realms(a);
+        rpg.world.DungeonLayout.useUnderground(t.dungeonLevels);
         Map<String, Object> names = a.map("realms");
         double[] spawn = Atlas.pt(a.root.get("spawn"));
         float sx = (float) a.x(spawn[0]), sz = (float) a.z(spawn[1]), yaw = (float) Math.PI;
@@ -64,7 +65,7 @@ public final class ShadowVeil {
     }
 
     /** Takes a grown terrain as the map's without an engine (surveys and tests of the ground alone). */
-    public static void prime(Terrain t) { terrain = t; realms(t.atlas); }
+    public static void prime(Terrain t) { terrain = t; realms(t.atlas); rpg.world.DungeonLayout.useUnderground(t.dungeonLevels); }
 
     private static void realms(Atlas a) {
         REALMS.clear();
@@ -306,14 +307,19 @@ public final class ShadowVeil {
         Terrain t = terrain;
         Map<String, Object> realms = a.map("realms");
         Map<String, Object> biomeFog = Atlas.map(Atlas.map(realms, "wilds"), "fogBiomes");
-        float r = 0, g = 0, b = 0; int n = 0;
+        Map<String, Object> biomeDensity = Atlas.map(Atlas.map(realms, "wilds"), "fogDensity");
+        float r = 0, g = 0, b = 0, dn = 0; int n = 0;
         if (t != null) for (int dx = -24; dx <= 24; dx += 12) for (int dz = -24; dz <= 24; dz += 12) {
             int sx = (int) Math.max(0, Math.min(t.S - 1, x + dx)), sz = (int) Math.max(0, Math.min(t.S - 1, z + dz));
-            double[] c = Atlas.pt(biomeFog.get(t.biomeAt(sx, sz)));
+            String biome = t.biomeAt(sx, sz);
+            double[] c = Atlas.pt(biomeFog.get(biome));
             if (c.length < 3) c = new double[]{1, 1, 1};
-            r += c[0]; g += c[1]; b += c[2]; n++;
+            r += c[0]; g += c[1]; b += c[2]; dn += (float) Atlas.d(biomeDensity, biome, 1); n++;
         }
-        float[] out = n == 0 ? new float[]{1, 1, 1} : new float[]{r / n, g / n, b / n};
+        // (0.4.7, gamefixes: fog did not change by region) [3] is how thick the air is here (x1 the default), and the
+        // tint is drawn out further from white (fogTintBoost) so a region's air reads as its own
+        float boost = (float) Atlas.d(Atlas.map(realms, "wilds"), "fogTintBoost", 1);
+        float[] out = n == 0 ? new float[]{1, 1, 1, 1} : new float[]{1 + (r / n - 1) * boost, 1 + (g / n - 1) * boost, 1 + (b / n - 1) * boost, dn / n};
         float blend = (float) Atlas.d(realms, "blend", 48);
         for (Map<String, Object> rl : Atlas.list(realms, "list")) {
             double[] c = Atlas.pt(rl.get("fog"));
@@ -325,7 +331,8 @@ public final class ShadowVeil {
                 w = Math.max(w, blend <= 0 ? (in >= 0 ? 1 : 0) : Math.max(0, Math.min(1, (in + blend * 0.5f) / blend)));
             }
             if (w <= 0) continue;
-            for (int k = 0; k < 3; k++) out[k] += ((float) c[k] - out[k]) * w;
+            for (int k = 0; k < 3; k++) out[k] += ((float) (1 + (c[k] - 1) * boost) - out[k]) * w;
+            out[3] += ((float) Atlas.d(rl, "fogDensity", 1) - out[3]) * w;
         }
         return out;
     }

@@ -1,0 +1,56 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :gallery
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 14 2026 17:37:31 (MSVC)
+[Load] native services 0.05s
+[Load] ShadowVeil grown in 19.09s ({regions=689, overlays=577, variants=368, scarp=59, coast=348, erosion=332, peaks=89, lakes=89, isles=2, rivers=520, wadis=15, ground=41, roads=574, causeways=3, architecture=1106, pitsFilled=1396, pits=446, banks=69, clamp=14, cliffs=66, columns=1097, falls=19, raise=10709, trees=285, outcrops=0, ways=686, lava=0, dungeons=99, postsSunk=28, floatingRemoved=59, floating=747}), made and lit in 2.20s
+[Load] ShadowVeil 21.36s
+[Load] renderer and UI 2.28s
+[water] flow field grown in 1218 ms: 39016 columns moving
+[gathering] 757 wild herb patches, flax and berry bushes
+[monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 798 settled points)
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 49 chunks made, 39 meshes, 1.22s
+[Load] 245 furniture models made in 0.10s
+[Load] first rendered frame 6.05s
+[Load] the world about the spawn made ready in 13.98s
+[Load] growth about the spawn: 14 chunks made, 51 meshes, 0.35s
+[Load] game frame 1: scene 11 ms, interface 839 ms, render 29 ms
+[Load] game frame 2: scene 8 ms, interface 4 ms, render 8 ms
+[Load] game frame 3: scene 11 ms, interface 3 ms, render 12 ms
+[chairs] t=0 King Phillip at 203.50,53.00,671.90 sat false pull 0.00 a meal at home
+[chairs] t=60 King Phillip at 201.43,53.00,671.49 sat false pull 0.00 a meal at home
+[chairs] t=120 King Phillip at 199.80,53.00,670.30 sat false pull 0.00 a meal at home
+[chairs] t=180 King Phillip at 199.78,53.00,668.40 sat false pull 0.00 a meal at home
+[chairs] t=240 King Phillip at 200.72,53.00,666.69 sat false pull 0.00 a meal at home
+[chairs] t=300 King Phillip at 203.07,53.00,666.60 sat false pull 0.00 a meal at home
+[chairs] t=360 King Phillip at 205.30,53.00,666.70 sat false pull 0.00 a meal at home
+[chairs] t=420 King Phillip at 206.15,53.00,668.64 sat false pull 0.00 a meal at home
+[chairs] King Phillip at CHAIR 1099512728501 pull 0.0 shots 4
+[sheet] chairs (4 frames)
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 55s
+8 actionable tasks: 1 executed, 7 up-to-date

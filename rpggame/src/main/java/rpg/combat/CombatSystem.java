@@ -369,6 +369,15 @@ public final class CombatSystem {
             if (g.sfx != null) g.sfx.play("fire", a.x, a.chestY(), a.z, 0.5f, 1.2f, 12);
         }
         if (a.torchLit && g.chemistry != null && g.chemistry.onWater(a.x, a.chestY() + 0.6f, a.z)) { a.torchLit = false; g.state.commit("TorchDoused", a.id, 0, null, 0, "water"); }
+        // (0.4.8, gamefixes: a torch did not light foliage on fire) the flame touches what it is carried through: a torch
+        // held low (crouched) or among tall growth catches the plant its head is in, a few times a second
+        if (a.torchLit && g.foliage != null && g.time >= a.torchBrushAt) {
+            a.torchBrushAt = g.time + 0.35;
+            float fx = (float) -Math.sin(a.yaw), fz = (float) -Math.cos(a.yaw), reach = a.radius + 0.35f;
+            float hx = a.x + fx * reach, hz = a.z + fz * reach, hy = a.crouched ? a.y + 0.45f : a.chestY() - 0.1f;
+            var plant = g.foliage.reaching(hx, hy, hz, 0.25f);
+            if (plant != null) g.foliage.kindle(a, plant, false);
+        }
     }
 
     /** Looses a bolt from a loaded crossbow along an aim; the crossbow is loaded again over a second or so (Agility quickens it). */
@@ -418,6 +427,8 @@ public final class CombatSystem {
         p.impact = bow.impact * draw;
         shots++;
         if (g.sfx != null) g.sfx.play("bow", a.x, a.eyeY(), a.z, 0.7f);
+        // (0.4.8, gamefixes: shot arrows made no sound to draw anyone) the string's snap is heard close by
+        g.noise(a, a.x, a.eyeY(), a.z, rpg.Tuning.f("combat.bowNoise", 6), 0.3f);
         g.state.commit("ArrowLoosed", a.id, 0, null, 0, String.format("%s draw=%.2f potential=%.1f", ammo.def.name, draw, p.potential));
         g.ai.arms.shown(a, rpg.ai.Arms.Kind.SHOT);
         return true;
@@ -592,6 +603,14 @@ public final class CombatSystem {
         }
         c.slowT = Math.max(0, c.slowT - dt);
         c.frozenT = Math.max(0, c.frozenT - dt);
+        c.heldT = Math.max(0, c.heldT - dt);
+        // (0.4.8) the venom works while it lasts, a little at a time
+        if (c.poisonT > 0) {
+            c.poisonT = Math.max(0, c.poisonT - dt);
+            c.poisonAcc += c.poisonDps * dt;
+            if (c.poisonAcc >= 1) { int n = (int) c.poisonAcc; c.poisonAcc -= n; environmentalDamage(a, n, "poison"); }
+            if (c.poisonT == 0) { c.poisonDps = 0; c.poisonAcc = 0; c.poisonBy = 0; }
+        }
         c.stabilityBonus = Math.max(0, c.stabilityBonus - dt * 8f);
         if (c.staggered > 0) { c.staggered -= dt; c.blocking = false; }
         // Resources: stamina recovers outside guard/recovery; mana regenerates, while Faith requires restoration.
@@ -622,6 +641,11 @@ public final class CombatSystem {
                     // comes down through the plants at the end of its arc; crouched, the torch is swept along the ground
                     if (c.move == Move.HEAVY || a.crouched)
                         g.chemistry.emit(a, astratto.bridge.AstrattoNative.CHEM_FIRE, a.x + fx * (reach + 0.2f), a.y + 0.3f, a.z + fz * (reach + 0.2f), 0.6f, 2, 0.35f);
+                    // (0.4.8) and any plant the arc sweeps through catches outright, at its own height
+                    if (g.foliage != null) for (float k : new float[]{0.6f, 1.0f, 1.4f}) {
+                        var plant = g.foliage.reaching(a.x + fx * reach * k, c.move == Move.HEAVY || a.crouched ? a.y + 0.4f : a.chestY() - 0.3f, a.z + fz * reach * k, 0.35f);
+                        if (plant != null) g.foliage.kindle(a, plant, false);
+                    }
                 }
                 if (g.sfx != null) g.sfx.play(rpg.audio.Sfx.swingOf(c.move == Move.BASH ? a.off() : a.main()), a.x, a.y + 1.3f, a.z, c.move == Move.HEAVY ? 0.65f : 0.5f, c.move == Move.HEAVY ? 0.88f : 0.95f + (float) g.roll(a.id, (long) (g.time * 10)) * 0.12f, 20);
                 g.noise(a, a.x, a.y, a.z, 6, 0.3f);
@@ -1590,15 +1614,27 @@ public final class CombatSystem {
                     p.vx = (p.vx - 2 * dn * h.nx) * 0.3f; p.vy = (p.vy - 2 * dn * h.ny) * 0.3f; p.vz = (p.vz - 2 * dn * h.nz) * 0.3f;
                     p.spin *= 0.5f; p.bounces++; p.done = false;
                     if (g.sfx != null) g.sfx.play(rpg.audio.Sfx.arrowOn(h.block), p.x, p.y, p.z, 0.4f);
+                    impactNoise(p);
                     return;
                 }
             }
             if (h.block == Blocks.TARGET) { archeryTarget(p, h); lodgeInWorld(p, h, sx / len, sy / len, sz / len, true); return; }
             if (g.sfx != null) g.sfx.play(rpg.audio.Sfx.arrowOn(h.block), p.x, p.y, p.z, 0.5f);
+            impactNoise(p);
             lodgeInWorld(p, h, sx / len, sy / len, sz / len, false);
             return;
         }
         p.x = nx; p.y = ny; p.z = nz;
+    }
+
+    /**
+     * (0.4.8, gamefixes: shot arrows made no sound to attract NPCs) an arrow, bolt or thrown thing striking the world is
+     * heard where it struck: whoever is in earshot turns to look and goes to see what it was (Stealth.hear places the
+     * noise at the impact, not at the archer - an arrow loosed past a guard draws him off the way it flew).
+     */
+    private void impactNoise(Projectile p) {
+        if (p.owner == null || p.spell != null) return;
+        g.noise(p.owner, p.x, p.y, p.z, rpg.Tuning.f("combat.arrowNoise", 11), 0.45f);
     }
 
     private void wave(Projectile p, float dx, float dy, float dz, float wall) {

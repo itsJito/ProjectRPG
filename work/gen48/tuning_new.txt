@@ -1,0 +1,2 @@
+combat.bowNoise 6
+combat.arrowNoise 11

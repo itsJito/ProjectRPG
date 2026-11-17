@@ -6,7 +6,8 @@ uniform mat4 uPV;
 uniform vec3 uOrigin;
 uniform float uTime;
 uniform vec4 uWind;                    // 2.4: x, z in m/s; the wind's clock; gust (the foliage layer's)
-uniform vec4 uLod;                     // 2.11: the eye (xyz) and the distance past which leaf cards are not drawn (w; 0: always drawn)
+uniform vec4 uLod;
+uniform vec2 uRainFall;                // 0.4.7: the rain falling now, how wet the leaves are                     // 2.11: the eye (xyz) and the distance past which leaf cards are not drawn (w; 0: always drawn)
 out vec3 vWorld;
 out vec2 vST;
 out vec3 vLight;
@@ -37,6 +38,9 @@ void main() {
         float flutter = (0.012 + strength * 0.006) * sin(uTime * (7.0 + ph) + dot(p, vec3(3.1, 1.7, 2.3)));
         p.xz += dir * (sway + strength * 0.006) + vec2(-dir.y, dir.x) * flutter;
         p.y += flutter * 0.6;
+        // 0.4.7 (gamefixes: tree leaves did not react to rain) a wet crown hangs a little lower, and the drops jog each card
+        float rainHit = pow(max(0.0, sin(uTime * (11.0 + ph * 1.3) + ph * 7.0)), 10.0);
+        p.y -= 0.05 * uRainFall.y + rainHit * 0.03 * uRainFall.x;
     } else if ((vFlags & 2) != 0 && aPos.y > 0.5) {
         p.x += sin(uTime * 1.7 + p.z * 0.7 + p.y) * 0.05;
         p.z += cos(uTime * 1.3 + p.x * 0.5) * 0.05;

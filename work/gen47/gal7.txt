@@ -1,0 +1,61 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava
+> Task :classes
+
+> Task :gallery
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 14 2026 17:11:32 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 19.84s ({regions=716, overlays=510, variants=283, scarp=49, coast=425, erosion=318, peaks=44, lakes=65, isles=4, rivers=798, wadis=13, ground=49, roads=471, causeways=3, architecture=939, pitsFilled=1307, pits=488, banks=86, clamp=14, cliffs=64, columns=1423, falls=19, raise=11328, trees=282, outcrops=0, ways=572, postsSunk=30, floatingRemoved=59, floating=834}), made and lit in 2.42s
+[Load] ShadowVeil 22.34s
+[Load] renderer and UI 4.55s
+[water] flow field grown in 1004 ms: 39016 columns moving
+[gathering] 765 wild herb patches, flax and berry bushes
+[monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 783 settled points)
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 49 chunks made, 37 meshes, 1.28s
+[Load] 234 furniture models made in 0.09s
+[Load] first rendered frame 6.41s
+[Load] the world about the spawn made ready in 13.60s
+[Load] game frame 1: scene 8 ms, interface 867 ms, render 24 ms
+[Load] game frame 2: scene 7 ms, interface 3 ms, render 6 ms
+[Load] game frame 3: scene 6 ms, interface 4 ms, render 9 ms
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\w3\at-776-392-n.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\w3\at-776-392-e.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\w3\at-776-392-s.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\w3\at-776-392-w.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\w3\at-776-392-top.png
+[Load] growth about the spawn: 49 chunks made, 86 meshes, 1.20s
+[Load] 0 furniture models made in 0.00s
+[Load] the world about the spawn made ready in 1.81s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\w3\weather-dense_fog-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\w3\weather-dense_fog-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\w3\weather-rain-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\w3\weather-rain-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\w3\weather-thunderstorm-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\w3\weather-thunderstorm-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\w3\weather-sunny-street.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p33\w3\weather-sunny-high.png
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 2m 21s
+8 actionable tasks: 2 executed, 6 up-to-date

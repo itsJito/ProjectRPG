@@ -971,7 +971,9 @@ typedef struct astratto_sound_desc {
 ASTRATTO_API int32_t astratto_sound_create(astratto_engine* engine, const astratto_sound_desc* desc, astratto_handle* out);
 
 typedef struct astratto_cmd_listener { astratto_record head; float x, y, z, yaw; } astratto_cmd_listener;   /* yaw 0 faces -z */
-enum { ASTRATTO_VOICE_LOOP = 1u << 0, ASTRATTO_VOICE_POSITIONAL = 1u << 1, ASTRATTO_VOICE_OCCLUDE = 1u << 2, ASTRATTO_VOICE_REVERB = 1u << 3 };
+/* ASTRATTO_VOICE_OUTDOOR (2.16): a non-positional bed of the open air (wind, rain, birdsong) heard through walls when the
+ * listener is indoors: low-passed and lowered by how enclosed the listener is, eased as they go in and out. */
+enum { ASTRATTO_VOICE_LOOP = 1u << 0, ASTRATTO_VOICE_POSITIONAL = 1u << 1, ASTRATTO_VOICE_OCCLUDE = 1u << 2, ASTRATTO_VOICE_REVERB = 1u << 3, ASTRATTO_VOICE_OUTDOOR = 1u << 4 };
 typedef struct astratto_cmd_voice_play {
     astratto_record head;
     astratto_handle voice;             /* reserved beforehand (ASTRATTO_KIND_VOICE) */
@@ -1419,6 +1421,7 @@ typedef struct astratto_rcmd_env {
     float fog[3], fog_density, fog_wall_start, fog_wall_end, fog_sky_horizon, fog_sky_zenith;
     float tint[3], ambient_floor;
     float fog_origin[3], bloom;          /* fog_origin[0] NaN = the camera */
+    float edge[4], edge_band, edge_pad;  /* 0.4.7: the world's edge {x0, z0, x1, z1}; the fog bank closes over the last edge_band metres to it and over the sky past it (0 = off) */
 } astratto_rcmd_env;
 enum { ASTRATTO_LIGHT_SHADOW = 1, ASTRATTO_LIGHT_SPOT = 2, ASTRATTO_LIGHT_STATIC = 4 };
 typedef struct astratto_rcmd_light {

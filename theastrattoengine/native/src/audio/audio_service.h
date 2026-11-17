@@ -164,7 +164,7 @@ private:
     uint64_t nextId_ = 1;
     float lx_ = 0, ly_ = 0, lz_ = 0, lyaw_ = 0;
     float roomTimer_ = 0;
-    float roomDecay_ = 1.1f, roomWet_ = 0.22f, listenerIndoor_ = 0.3f;
+    float roomDecay_ = 1.1f, roomWet_ = 0.22f, listenerIndoor_ = 0.3f, muffle_ = 0.0f;
     std::vector<uint64_t> ended_;
     std::vector<astratto_handle> order_;
     std::vector<float> hear_;

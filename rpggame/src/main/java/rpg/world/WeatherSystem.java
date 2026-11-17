@@ -149,6 +149,9 @@ public final class WeatherSystem {
         g.state.commit("WeatherChanged", 0, 0, null, 0, c.climate + ": " + c.now + " until " + Math.round(c.until));
     }
 
+    /** (0.4.7) After time is skipped (a rest, a sleep): every climate caught up and the weather over the player applied anew. */
+    public void turnOver() { lastPreset = ""; asked = ""; update(); }
+
     /** Brings a weather at once over the climate a point is in, for some game hours (the console's; natural or not). */
     public boolean force(String name, float x, float z, int hours) {
         Preset p = byName(name);

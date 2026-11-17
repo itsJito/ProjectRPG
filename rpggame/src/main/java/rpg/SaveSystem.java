@@ -107,6 +107,7 @@ public final class SaveSystem {
                 m.put("playerSighting", Map.of("witness", sight.witness(), "x", sight.x(), "z", sight.z(), "vx", sight.vx(), "vz", sight.vz(), "age", g.time - sight.at()));
             }
             if (n.posse) { m.put("posse", true); m.put("posseJur", n.homeJurisdiction); }
+            if (n.encounter != null && g.encounters != null) { var part = g.encounters.savePart(n); if (part != null) m.put("encounter", part); }
             if (n.standing != Npc.Standing.COMMON) m.put("standing", n.standing.name());
             List<Object> mem = new ArrayList<>(); for (Memory x : n.memories) mem.add(x.save());
             m.put("memories", mem);
@@ -146,7 +147,9 @@ public final class SaveSystem {
         root.put("chemistry", g.chemistry.save());root.put("foliage",g.foliage.save());root.put("farming",g.farming.save());root.put("inns",g.inns.save());if(g.fishery!=null)root.put("fishery",g.fishery.save());if(g.guilds!=null)root.put("guilds",g.guilds.save());
         root.put("timeSystem",g.timeSystem.save());
         if (g.weatherSystem != null) root.put("weatherCycle", g.weatherSystem.save());
+        if (g.encounters != null) root.put("encounters", g.encounters.save());
         root.put("quests", g.quests.save());
+        root.put("questLog", g.questLog.save());
         root.put("invariants", g.invariants.save());
         // (0.4.1) the character apart from the world, readable by any later version (CharacterRecord)
         Map<String, Object> character = CharacterRecord.capture(g);
@@ -288,6 +291,11 @@ public final class SaveSystem {
                 hunter.posse=true; hunter.homeJurisdiction=Json.str(m,"posseJur",DevMap.ALPHA);
                 hunter.loaded=false; g.npcs.add(hunter); a=hunter;
             }
+            if(a==null && Json.obj(m,"encounter")!=null && g.encounters!=null) {
+                // (0.4.7) someone of an encounter: made again with their part (a drifter at their camp, a traveller on their way)
+                Npc wayfarer=g.encounters.restorePart(Json.lng(m,"id",-1),Json.str(m,"name","Traveller"),Json.obj(m,"encounter"),(float)Json.num(m,"x",0),(float)Json.num(m,"z",0));
+                wayfarer.loaded=false; g.npcs.add(wayfarer); a=wayfarer;
+            }
             if(a instanceof Npc ranked) try { ranked.standing=Npc.Standing.valueOf(Json.str(m,"standing","COMMON")); } catch(IllegalArgumentException invalid) { ranked.standing=Npc.Standing.COMMON; }
             if (!(a instanceof Npc n)) continue;
             boolean alive = Json.bool(m, "alive", true), loaded = Json.bool(m, "loaded", true);
@@ -383,8 +391,10 @@ public final class SaveSystem {
         g.chemistry.load(Json.list(root, "chemistry"));g.foliage.load(Json.obj(root,"foliage"));g.farming.load(Json.obj(root,"farming"));g.inns.load(Json.obj(root,"inns"));if(g.fishery!=null)g.fishery.load(Json.obj(root,"fishery"));if(g.guilds!=null)g.guilds.load(Json.obj(root,"guilds"));g.traps.afterLoad();
         g.timeSystem.load(Json.obj(root,"timeSystem"));
         if (g.weatherSystem == null) g.weatherSystem = new rpg.world.WeatherSystem(g);
+        if (g.encounters != null) g.encounters.load(Json.obj(root, "encounters"));
         g.weatherSystem.load(Json.obj(root, "weatherCycle"));
         g.quests.load(Json.obj(root, "quests"));
+        g.questLog.load(Json.obj(root, "questLog"));
         g.invariants.load(Json.obj(root, "invariants"));
         for(Npc resident:addedResidents)g.invariants.rebase(resident);
         g.objects.supportBeds();
